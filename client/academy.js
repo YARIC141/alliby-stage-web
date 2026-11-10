@@ -1,9 +1,10 @@
 /* Academy uses the application's catalogue/forms, with private server-side
- * learning records. No educational mutation reaches an ordinary payment API. */
+ * records for accounts and device-only progress for guests. No educational
+ * mutation reaches an ordinary payment API. */
 let _academy = null, _academySnapshot = null, _academyRows = [], _academyRowsOwner = '', _academyLoad = null;
 let _academyTickTimer = null, _academyBusy = false, _academyTargetKey = '', _academyDetails = null, _academyWatch = null;
 let _academyGlobals = null;
-const academyActive = () => !!_academy && _academy.user === S.session?.user?.id;
+const academyActive = () => !!_academy && _academy.user === academyUser();
 const academyStoreId = id => ACADEMY_DATA.stores.some(s => s.id === id)||/^aca10000-0000-4000-8000-00000000000[78]$/.test(id||'');
 const academyNamespace = dir => academyActive() ? `academy:${_academy.row.run_id}:${dir}` : dir;
 const academyCompareKey = dir => academyActive() ? `alliby_academy_compare_${_academy.user}_${_academy.row.run_id}_${dir}` : 'alliby_compare_v1_' + dir;
@@ -31,12 +32,12 @@ function academyMergeStores(rows) {
   return [...rows,...academyStores().filter(s=>s.direction===S.direction&&!ids.has(s.id))];
 }
 function academyTile() {
-  const count=_academyRowsOwner===S.session?.user?.id ? _academyRows.filter(r=>r.completed_at).length : 0;
+  const count=_academyRowsOwner===academyUser() ? _academyRows.filter(r=>r.completed_at).length : 0;
   const el=document.getElementById('academy-home-progress');if(el)el.textContent=`Пройдено ${count} из ${ACADEMY_DATA.lessons.length} заданий`;
 }
 async function loadAcademyProgress() {
   const uid=S.session?.user?.id;
-  if(!uid){_academyRows=[];_academyRowsOwner='';academyTile();return;}
+  if(!uid){_academyRows=academyGuestRows();_academyRowsOwner=ACADEMY_GUEST_ID;academyTile();if(_contentScreen()==='academy')renderAcademy();return;}
   if(_academyRowsOwner!==uid){
     try{_academyRows=JSON.parse(localStorage.getItem('alliby_academy_progress_'+uid)||'[]');}catch{_academyRows=[];}
     _academyRowsOwner=uid;academyTile();
@@ -57,12 +58,12 @@ async function loadAcademyProgress() {
 function renderAcademy() {
   const root=document.getElementById('academy-content');if(!root)return;
   academyTile();
-  const uid=S.session?.user?.id;
+  const uid=academyUser();
   root.innerHTML=`<p class="academy-intro">Попробуйте покупки, аренду и запись в заведениях Академии. Деньги не списываются, заказы не отправляются продавцам. Действия сотрудников демонстрируются по шагам.</p>
     <p id="academy-connection" class="academy-note"></p><div class="academy-tasks">${ACADEMY_DATA.lessons.map((lesson,i)=>{
       const progress=_academyRowsOwner===uid&&_academyRows.find(r=>r.lesson_id===lesson.id),done=!!progress?.completed_at;
       return `<button class="academy-task" data-lesson="${lesson.id}" onclick="academyStart(this.dataset.lesson)" aria-label="${esc(lesson.title)}${done?' — выполнено':''}"><span class="academy-task-number${done?' done':''}">${done?'✓':i+1}</span><span><strong>${esc(lesson.title)}</strong><small>${esc(_compareDirections[lesson.direction])} · ${done?'Выполнено · можно повторить':progress?'Продолжить':'Начать задание'}</small></span><span aria-hidden="true">→</span></button>`;
-    }).join('')}</div><p class="academy-note">Ваш прогресс сохраняется в аккаунте. Заведения Академии также доступны в обычном списке.</p>`;
+    }).join('')}</div><p class="academy-note">${S.session?.user?.id?'Ваш прогресс сохраняется в аккаунте.':'Регистрация не нужна. Ваш прогресс сохраняется на этом устройстве.'} Заведения Академии также доступны в обычном списке.</p>`;
 }
 function loadAcademy(){renderAcademy();loadAcademyProgress();}
 function academyCommand(action,payload={},session=_academy) {
@@ -71,27 +72,26 @@ function academyCommand(action,payload={},session=_academy) {
   session.commands=task;return task;
 }
 async function _academyCommand(action,payload={},session=_academy) {
-  if(!session||session.user!==S.session?.user?.id)throw new Error('Прохождение закрыто');
+  if(!session||session.user!==academyUser())throw new Error('Прохождение закрыто');
   const run=session.row.run_id,revision=_accountRevision;
-  let result=await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:session.lesson.id,p_action:action,p_payload:payload,p_run:run})});
+  let result=session.user===ACADEMY_GUEST_ID?academyGuestCommand(session.lesson.id,action,payload,run):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:session.lesson.id,p_action:action,p_payload:payload,p_run:run})});
   if(Array.isArray(result))result=result[0];
-  if(_academy!==session||session.user!==S.session?.user?.id||revision!==_accountRevision)throw {accountChanged:true};
+  if(_academy!==session||session.user!==academyUser()||revision!==_accountRevision)throw {accountChanged:true};
   session.row=result;_academyRows=_academyRows.filter(r=>r.lesson_id!==result.lesson_id).concat(result);_academyRowsOwner=session.user;
   academyTile();return result;
 }
 const _academyStateKeys=['store','direction','allStores','cart','cartStoreId','_carts','rentCart','subCart','giftSubCart','menuUserSubs','menuStoreSubs','appliedSub','storeSubActive','menuCatId','_lastMenuStoreId','userAddr','userAddrLat','userAddrLng','deliveryMode','deliveryFee','pickupIso','pickupLabel','directions','profile','distOrigin','mapCat','nearbyMeters','onlinePayFilter','deliveryFilter','deliveryProbe','_selId','_selAuto','_selSt','_mapFiltered','_vpKey','mapFitted'];
 async function academyStart(id,directStore=false) {
   if(_academyBusy)return;
-  if(!S.session?.user?.id){showGeoToast('Войдите в аккаунт, чтобы сохранять прогресс Академии');_pendingNavAfterAuth='academy';goTo('auth');return;}
-  if(navigator.onLine===false){showGeoToast('Для прохождения задания подключитесь к интернету');return;}
+  if(S.session?.user?.id&&navigator.onLine===false){showGeoToast('Для прохождения задания подключитесь к интернету');return;}
   const lesson=ACADEMY_DATA.lessons.find(l=>l.id===id);if(!lesson)return;
   _academyBusy=true;
   try{
     if(_academy)academyStop();
-    const user=S.session.user.id,revision=_accountRevision;
-    let row=await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:id,p_action:'start',p_payload:{}})});
+    const user=academyUser(),revision=_accountRevision;
+    let row=user===ACADEMY_GUEST_ID?academyGuestCommand(id,'start'):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:id,p_action:'start',p_payload:{}})});
     if(Array.isArray(row))row=row[0];
-    if(user!==S.session?.user?.id||revision!==_accountRevision)return;
+    if(user!==academyUser()||revision!==_accountRevision)return;
     if(_tourSession)closeTour();
     _academySnapshot=Object.fromEntries(_academyStateKeys.map(key=>[key,S[key]]));
     _academyGlobals={mapSearch:document.querySelector('#screen-map .sl-search input')?.value||'',mapHidden:document.querySelector('.map-layout').classList.contains('no-map'),orders:_homeOrders,bookingCount:_bkNotifCount,orderCount:_orderNotifCount,cartUseSub:_cartUseSub};
@@ -132,7 +132,7 @@ function academyWorkspaceKey(){return 'alliby_academy_workspace_'+_academy.user+
 function academySaveWorkspace(){if(academyActive())try{sessionStorage.setItem(academyWorkspaceKey(),JSON.stringify({cart:S.cart,rentCart:S.rentCart,deliveryMode:S.deliveryMode}));}catch{}}
 function academyStop(){
   if(!_academy)return;
-  const sameUser=_academy.user===S.session?.user?.id;
+  const sameUser=_academy.user===academyUser();
   academySaveWorkspace();document.documentElement.style.removeProperty('--academy-guide-space');clearInterval(_academyTickTimer);_academyWatch?.disconnect();_academyWatch=null;
   if(document.getElementById('m-dz-viewer')?.classList.contains('open'))closeDzViewer();
   _academy=null;_academyDetails=null;_academyTargetKey='';_accountRevision++;_rcInflight.clear();
@@ -255,7 +255,7 @@ function academyOperation(){
 function academyPeople(){
   const op=academyOperation();if(!op||!op.menu_items?.is_training)return [];
   const base={menu_item_id:op.menu_item_id,master_id:op.master_id,slot_date:op.slot_date,slot_start:op.slot_start,slot_end:op.slot_end,preferred_start:op.preferred_start,preferred_end:op.preferred_end,status:op.status,avatar_url:null,bio:'Участник'};
-  return [{...base,user_id:S.session.user.id,full_name:'Вы',is_me:true},...['Саша','Михаил'].map((name,i)=>({...base,user_id:`aca50000-0000-4000-8000-00000000000${i+1}`,full_name:name+' · участник',is_me:false}))];
+  return [{...base,user_id:_academy.user,full_name:'Вы',is_me:true},...['Саша','Михаил'].map((name,i)=>({...base,user_id:`aca50000-0000-4000-8000-00000000000${i+1}`,full_name:name+' · участник',is_me:false}))];
 }
 function renderAcademyAlibi(){
   const op=academyOperation(),screen=document.getElementById('screen-calenabs');

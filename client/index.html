@@ -3910,6 +3910,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 <script src="favorites.js"></script>
 <script src="store-stars.js"></script>
 <script src="academy-data.js"></script>
+<script src="academy-guest.js"></script>
 <script src="academy.js"></script>
 <div id="academy-guide" hidden><div id="academy-guide-spot"></div><section id="academy-guide-card" aria-label="Подсказка Академии"><header><span id="academy-guide-count"></span><button id="academy-guide-exit" onclick="academyExit()">Выйти</button></header><h3 id="academy-guide-title"></h3><p id="academy-guide-text" aria-live="polite"></p><button class="btn btn-p" id="academy-guide-next" hidden onclick="academyGuideAction()">Следующее действие</button></section></div>
 <script>
@@ -6003,7 +6004,7 @@ async function rentPayNow() {
   if (academyActive() && _academy.lesson.id==='vr_session' && _rentQty!==2) { rentBackToQty();showGeoToast('Для сеанса вдвоём выберите два игровых места');return; }
   const item = _rentItem;
   if (!item?._pendingStart || !item?._pendingEnd) return;
-  const uid = S.session?.user?.id;
+  const uid = academyActive() ? _academy.user : S.session?.user?.id;
   if (!uid) { showGeoToast('Войдите в аккаунт'); return; }
 
   const appliedSubId = (_rentFullSub && _rentUseSub) ? _rentFullSub.us.id : null;
@@ -7145,8 +7146,8 @@ function goTo(id, opts = {}) {
   if (id === 'orders')       { _calenabsTab = 'ord'; id = 'calenabs'; }
   syncStoreNavBtn();
   syncCartNavBtn();
-  const _GUEST_OK = ['home', 'map', 'store', 'cart', 'auth', 'sporttrainings'];
-  if (!_GUEST_OK.includes(id) && !S.session && !_initQuickRestore) { _pendingNavAfterAuth = id; goTo('auth'); return; }
+  const _GUEST_OK = ['home', 'map', 'store', 'cart', 'auth', 'sporttrainings', 'academy'];
+  if (!_GUEST_OK.includes(id) && !academyActive() && !S.session && !_initQuickRestore) { _pendingNavAfterAuth = id; goTo('auth'); return; }
   document.querySelectorAll('.screen-tip.open').forEach(t => t.classList.remove('open'));
   if (id !== 'auth') localStorage.setItem('alliby_nav', id);
   if ((id === 'home' || id === 'map') && typeof _tourSchedule === 'function') _tourSchedule(); // скрипт тура грузится ниже основного
@@ -12830,9 +12831,9 @@ function removeFromRentCart(i) {
 async function checkoutRent() {
   if (!S.rentCart?.length) return;
   const checkoutDirection = S.direction;
-  if (!S.session) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
+  if (!S.session && !academyActive()) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
   if (!_vpnPayGuard()) return;
-  const uid = S.session.user.id;
+  const uid = academyActive() ? _academy.user : S.session.user.id;
   const btn = document.getElementById('rent-cart-pay-btn');
   const restore = btn ? btnLoad(btn) : () => {};
   let createdIds = [];
@@ -13640,6 +13641,8 @@ async function _prefetchClient() {
 
 async function restoreNav() {
   hideSplash();
+  // Late account initialization must not overwrite an already opened lesson.
+  if (academyActive()) return;
   // First-install detection
   if (!localStorage.getItem('alliby_launched')) {
     try { localStorage.setItem('alliby_launched', '1'); } catch {}
@@ -14417,7 +14420,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '4940757202382';
+  const APP_VER = '245209027086118';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
@@ -14613,7 +14616,7 @@ async function signContract(type) {
 // ─── CHECKOUT ───
 
 function startCheckout() {
-  if (!S.session) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
+  if (!S.session && !academyActive()) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
   if (!S.cart.length) return;
   window.AllibyBridge?.haptic('medium');
   const alloc = getCartSubAllocation();
@@ -14626,7 +14629,7 @@ function startCheckout() {
 }
 
 async function doCheckout(useSubscription = false) {
-  if (!S.session) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
+  if (!S.session && !academyActive()) { _pendingNavAfterAuth = 'cart'; goTo('auth'); return; }
   if (!S.cart.length) return;
   const checkoutDirection = S.direction;
   const storeId = S.cartStoreId || S.store?.id;
@@ -15095,7 +15098,7 @@ async function storeBookable(storeId) {
 const BOOKING_OFF_MSG = 'Онлайн-запись в этом заведении сейчас недоступна';
 
 async function openBookingSlotModal(item, rescheduleId = null, preselectedMasterId = null, preselectedSlot = null) {
-  if (!S.session) { _pendingNavAfterAuth = 'store'; goTo('auth'); return; }
+  if (!S.session && !academyActive()) { _pendingNavAfterAuth = 'store'; goTo('auth'); return; }
   if (!item) return;
   const bookingDirection = S.direction, bookingStoreId = item.store_id || S.store?.id;
   if (!rescheduleId) {
@@ -15581,6 +15584,7 @@ function _renderPersonalPendingTotal() {
 }
 
 async function confirmPersonalTrainingRequest() {
+  if (!S.session && !academyActive()) return;
   if (academyActive() && Object.keys(_booking.personalDays||{}).length!==1) { showGeoToast('В этом задании выберите один день'); return; }
   if (!_booking.selectedMasterId) { showGeoToast('Выберите ' + _MW(S.store?.direction).gen); return; }
   const dsList = Object.keys(_booking.personalDays);
@@ -15596,7 +15600,7 @@ async function confirmPersonalTrainingRequest() {
       return req('/rest/v1/bookings', {
         method: 'POST', headers: { Prefer: 'return=minimal' },
         body: JSON.stringify({
-          user_id: S.session.user.id, store_id: storeId,
+          user_id: academyActive() ? _academy.user : S.session.user.id, store_id: storeId,
           menu_item_id: _booking.item.id, slot_date: ds,
           master_id: _booking.selectedMasterId,
           preferred_start: day.start + ':00',
@@ -15656,7 +15660,7 @@ function bookingToggleSub(checked) {
 }
 
 async function confirmBooking(payNow) {
-  if (!S.session || !_booking.item) return;
+  if ((!S.session && !academyActive()) || !_booking.item) return;
   if (_booking.trainingMode === 'personal') return confirmPersonalTrainingRequest();
   if (!_booking.currentDate || !_booking.selectedSlot) return;
   {
@@ -15669,7 +15673,7 @@ async function confirmBooking(payNow) {
   const storeId = S.store?.id || _booking.item.store_id;
   const masterPrice = _booking.autoMasterId != null ? _booking.masterPrices[_booking.autoMasterId] : null;
   const bookingData = {
-    user_id: S.session.user.id, store_id: storeId,
+    user_id: academyActive() ? _academy.user : S.session.user.id, store_id: storeId,
     menu_item_id: _booking.item.id, slot_date: _booking.currentDate,
     slot_start: _booking.selectedSlot.start + ':00',
     slot_end:   _booking.selectedSlot.end   + ':00',
@@ -16145,7 +16149,7 @@ async function _storeBusy(storeId, from, to, excludeId = null) {
 
 // Кто уже записался или подал заявку на слоты тренировки — только для вошедших; ошибка не мешает записи.
 async function _slotPeopleLoad(itemIds, from, to, masterId = null, excludeId = null) {
-  if (!S.session || !itemIds.length) return [];
+  if ((!S.session && !academyActive()) || !itemIds.length) return [];
   try {
     return (await req('/rest/v1/rpc/training_slot_people', {
       method: 'POST',

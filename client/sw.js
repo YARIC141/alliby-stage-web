@@ -1,6 +1,6 @@
 importScripts('map-cache.js');
-// v4940757202382
-const APP_CACHE  = 'alliby-app-v4940757202382';
+// v245209027086118
+const APP_CACHE  = 'alliby-app-v245209027086118';
 const API_CACHE  = 'alliby-api-v1';
 const IMG_CACHE  = 'alliby-img-v1';
 const VID_CACHE  = 'alliby-vid-v1';
@@ -99,9 +99,10 @@ async function findShell() {
 // Отдельный кэш, не пересоздаётся при каждом деплое. Если файл в списке изменился —
 // увеличьте номер версии в имени STATIC_CACHE. Любые сбои тихо игнорируются:
 // приложение просто берёт файл из сети, как раньше.
-const STATIC_CACHE = 'alliby-static-v4940757202382';
+const STATIC_CACHE = 'alliby-static-v245209027086118';
 const STATIC_FILES = [
   'academy-data.js',
+  'academy-guest.js',
   'academy.js',
   'academy.css',
   'comparison.js',
