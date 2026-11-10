@@ -1,0 +1,15 @@
+{
+  "regions": {
+    "samara": { "name": "Самара и область", "in": "Самаре", "match": ["samara", "tolyatti", "togliatti", "syzran", "novokuybyshevsk", "chapayevsk"] }
+  },
+  "stories": [
+    {
+      "url": "/site/articles/ambassador-samara-studiya-liniya",
+      "region": "samara",
+      "city": "Самара",
+      "title": "Студия растяжки «Линия»: запись и абонементы без переписки",
+      "excerpt": "Как студия перевела учеников из мессенджера в своё приложение за неделю и перестала терять оплаты.",
+      "demo": true
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+/* Эффекты главной: живой фон первого экрана, заголовок по словам, появление блоков
+   при прокрутке, подсветка карточек за курсором, блик на кнопках.
+   Всё включается классом html.fx (ставит скрипт в <head>, если не «уменьшить движение»). */
+
+/* ── Живой фон первого экрана ── */
+#page-hero{isolation:isolate}
+.fx-aurora{position:absolute;inset:-10% -5% 0;z-index:-1;pointer-events:none;overflow:hidden}
+.fx-aurora i{
+  position:absolute;width:46vmax;height:46vmax;border-radius:50%;
+  filter:blur(70px);opacity:.30;will-change:transform;
+}
+.fx-aurora i:nth-child(1){background:radial-gradient(circle,var(--brand) 0%,transparent 65%);left:-8%;top:-18%}
+.fx-aurora i:nth-child(2){background:radial-gradient(circle,var(--blue) 0%,transparent 65%);right:-10%;top:-6%}
+.fx-aurora i:nth-child(3){background:radial-gradient(circle,var(--teal) 0%,transparent 65%);left:30%;top:28%;opacity:.20}
+.fx-aurora::after{
+  /* Точечная сетка поверх пятен — «технологичная» фактура, тает к низу экрана */
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.10) 1px,transparent 1.2px);background-size:26px 26px;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 75%);mask-image:linear-gradient(to bottom,#000 0%,transparent 75%);
+}
+html[data-theme="light"] .fx-aurora i{opacity:.18}
+html[data-theme="light"] .fx-aurora i:nth-child(3){opacity:.12}
+html[data-theme="light"] .fx-aurora::after{background-image:radial-gradient(rgba(0,0,0,.09) 1px,transparent 1.2px)}
+
+html.fx .fx-aurora i:nth-child(1){animation:fx-drift1 22s ease-in-out infinite alternate}
+html.fx .fx-aurora i:nth-child(2){animation:fx-drift2 26s ease-in-out infinite alternate}
+html.fx .fx-aurora i:nth-child(3){animation:fx-drift3 30s ease-in-out infinite alternate}
+html.fx .fx-aurora.fx-paused i{animation-play-state:paused}
+@keyframes fx-drift1{to{transform:translate(18vw,12vh) scale(1.15)}}
+@keyframes fx-drift2{to{transform:translate(-16vw,16vh) scale(.9)}}
+@keyframes fx-drift3{to{transform:translate(-12vw,-14vh) scale(1.2)}}
+
+/* ── Заголовок по словам ── */
+html.fx .ph-h1 .fx-w{display:inline-block;animation:fx-word .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 70ms + 100ms)}
+html.fx .ph-h1 .fx-w.em-orange,html.fx .ph-h1 .fx-w.em-blue{
+  animation:fx-word .8s cubic-bezier(.2,.7,.2,1) both,fx-glow 2.4s ease-out both;
+  animation-delay:calc(var(--i) * 70ms + 100ms),calc(var(--i) * 70ms + 500ms);
+}
+@keyframes fx-word{from{opacity:0;transform:translateY(.45em);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@keyframes fx-glow{0%{text-shadow:0 0 0 transparent}35%{text-shadow:0 0 28px currentColor}100%{text-shadow:0 0 14px color-mix(in srgb,currentColor 35%,transparent)}}
+html[data-theme="light"] .ph-h1 .fx-w{text-shadow:none!important}
+html.fx .ph-sub,html.fx .audience-gate{animation:fx-up .9s cubic-bezier(.2,.7,.2,1) both}
+html.fx .ph-sub{animation-delay:.7s}
+html.fx .audience-gate{animation-delay:.9s}
+@keyframes fx-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ── Появление блоков при прокрутке ── */
+html.fx .fx-rv{opacity:0;translate:0 28px;transition:opacity .7s ease,translate .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--fx-d,0ms)}
+html.fx .fx-rv.fx-in{opacity:1;translate:0 0}
+
+/* ── Подсветка карточек за курсором ── */
+@media (hover:hover) and (pointer:fine){
+  html.fx .fx-spot{position:relative}
+  html.fx .fx-spot::after{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    opacity:0;transition:opacity .3s;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(var(--accent-rgb,255,255,255),.13),transparent 45%);
+  }
+  html.fx .fx-spot:hover::after{opacity:1}
+  html.fx .fx-spot:hover{border-color:rgba(var(--accent-rgb,255,255,255),.38)}
+}
+
+/* ── Блик на главных кнопках ── */
+html.fx .ag-main{position:relative;overflow:hidden}
+html.fx .ag-main::after{
+  content:'';position:absolute;top:0;bottom:0;left:0;width:40%;pointer-events:none;
+  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);
+  transform:translateX(-150%) skewX(-18deg);
+  animation:fx-shine 6s ease-in-out infinite;animation-delay:calc(2s + var(--sh,0s));
+}
+.ag-business .ag-main{--sh:.25s}
+.ag-courier .ag-main{--sh:.5s}
+@keyframes fx-shine{0%{transform:translateX(-150%) skewX(-18deg)}18%,100%{transform:translateX(350%) skewX(-18deg)}}
+
+/* ── Курсор-капля (fx.js): системный курсор скрыт везде, чтобы не менялся над ссылками и полями ── */
+html.fx-cursor,html.fx-cursor *{cursor:none!important}
+.fx-drop{
+  position:fixed;left:-10px;top:-10px;width:20px;height:20px;z-index:2147483647;pointer-events:none;
+  border-radius:50%;opacity:0;transition:opacity .2s;will-change:transform;
+  /* Заливка симметричная: капля поворачивается по направлению движения, блик не должен крутиться */
+  background:radial-gradient(circle,#f6a678 0%,var(--brand) 55%,var(--brand-deep,#c4541e) 100%);
+  box-shadow:0 0 14px rgba(232,116,59,.55);
+}
+.fx-drop.fx-on{opacity:1}
+
+/* ── Слабые устройства: без движения фона и тяжёлого размытия ── */
+html.fx-lite .fx-aurora i{animation:none!important;filter:blur(50px)}
+html.fx-lite .ph-h1 .fx-w{animation-name:fx-word-lite!important}
+@keyframes fx-word-lite{from{opacity:0;transform:translateY(.3em)}to{opacity:1;transform:none}}
+
+/* ── «Уменьшить движение» в системе: никаких анимаций на странице ── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ── Заголовки «из дыма» (fx.js smokeTitle): текст рисует canvas, DOM-текст прозрачный, но остаётся для поиска и выделения.
+   Прозрачность — через text-fill-color: color остаётся настоящим, из него canvas берёт цвет слова. На canvas только цветные слова (.fx-c) ── */
+.fx-smoke-cv{position:absolute;left:0;top:-90px;pointer-events:none;display:none}
+.fx-smoke{position:relative}
+.fx-smoke>.fx-smoke-cv{display:block}
+html.fx .fx-smoke .fx-w.fx-c{-webkit-text-fill-color:transparent;text-shadow:none!important}
+html.fx .fx-calm .fx-w{animation:none!important}
+/* Курсор — классическая стрелка, одна и та же над любыми элементами (не превращается в I-образный над текстом).
+   Там, где fx.js включает курсор-«каплю» (html.fx-cursor), это правило не действует. */
+html:not(.fx-cursor),html:not(.fx-cursor) *{
+  cursor:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='24' viewBox='0 0 20 24'%3E%3Cpath d='M2 1.5v16l4.2-3.9L9 20l2.6-1.1-2.7-6.3h5.7z' fill='%23fff' stroke='%23111' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") 2 1,default!important;
+}

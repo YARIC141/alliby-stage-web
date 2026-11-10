@@ -1,5 +1,5 @@
-// v217476898334513
-const APP_CACHE = 'alliby-carry-app-v217476898334513';
+// v44353682048754
+const APP_CACHE = 'alliby-carry-app-v44353682048754';
 
 // Plain fetch() never rejects on its own when a connection is blackholed
 // (packets silently dropped instead of cleanly refused) — without this,
@@ -50,7 +50,7 @@ async function findShell() {
 // Отдельный кэш, не пересоздаётся при каждом деплое. Если файл в списке изменился —
 // увеличьте номер версии в имени STATIC_CACHE. Любые сбои тихо игнорируются:
 // приложение просто берёт файл из сети, как раньше.
-const STATIC_CACHE = 'alliby-carry-static-v217476898334513';
+const STATIC_CACHE = 'alliby-carry-static-v44353682048754';
 const STATIC_FILES = [
   'fonts/fonts.css',
   'fonts/01-cyrillic.woff2',
