@@ -2,21 +2,34 @@
 const ACADEMY_GUEST_ID = 'aca00000-0000-4000-8000-000000000000';
 const ACADEMY_GUEST_KEY = 'alliby_academy_guest_v1';
 const academyUser = () => S.session?.user?.id || ACADEMY_GUEST_ID;
-function academyGuestRows() {
+const academyDeviceKey = user => user===ACADEMY_GUEST_ID?ACADEMY_GUEST_KEY:'alliby_academy_device_v1_'+user;
+function academyDeviceRows(user=academyUser()) {
   try {
-    const rows=JSON.parse(localStorage.getItem(ACADEMY_GUEST_KEY)||'[]');
+    const rows=JSON.parse(localStorage.getItem(academyDeviceKey(user))||(user!==ACADEMY_GUEST_ID&&localStorage.getItem('alliby_academy_progress_'+user))||'[]');
     return Array.isArray(rows)?rows.filter(r=>ACADEMY_DATA.lessons.some(l=>l.id===r.lesson_id)):[];
   } catch { return []; }
 }
+function academyGuestRows(){return academyDeviceRows(ACADEMY_GUEST_ID);}
+function academyCacheServerRows(rows,user) {
+  const existing=academyDeviceRows(user),incoming=new Map(rows.map(r=>[r.lesson_id,r]));
+  for(const row of existing)if(row.device_only||!incoming.has(row.lesson_id))incoming.set(row.lesson_id,row);
+  const merged=[...incoming.values()];
+  try{localStorage.setItem(academyDeviceKey(user),JSON.stringify(merged));}catch{}
+  return merged;
+}
 function academyGuestCommand(lessonId,action,payload={},run=null) {
   if(S.session?.user?.id)throw new Error('Гостевое прохождение закрыто');
+  return academyDeviceCommand(lessonId,action,payload,run,ACADEMY_GUEST_ID);
+}
+function academyDeviceCommand(lessonId,action,payload={},run=null,user=academyUser()) {
+  if(user!==academyUser())throw new Error('Прохождение закрыто');
   const lesson=ACADEMY_DATA.lessons.find(l=>l.id===lessonId);
   if(!lesson)throw new Error('Задание не найдено');
-  const rows=academyGuestRows(),now=new Date().toISOString();
+  const rows=academyDeviceRows(user),now=new Date().toISOString();
   let row=rows.find(r=>r.lesson_id===lessonId);
   const check=(ok,message)=>{if(!ok)throw new Error(message);};
   if(action==='start') {
-    if(!row||payload.restart||row.operation?.academy_finished_at)row={user_id:ACADEMY_GUEST_ID,lesson_id:lessonId,run_id:crypto.randomUUID(),steps:{},visited:false,compared:false,location:null,operation:null,actor_index:0,observed_index:-1,completed_at:row?.completed_at||null};
+    if(!row?.steps||payload.restart||row.operation?.academy_finished_at)row={user_id:user,lesson_id:lessonId,run_id:crypto.randomUUID(),steps:{},visited:false,compared:false,location:null,operation:null,actor_index:0,observed_index:-1,completed_at:row?.completed_at||null};
   } else {
     check(row&&row.run_id===run,'Откройте актуальное прохождение задания');
     if(action==='step') {
@@ -33,7 +46,7 @@ function academyGuestCommand(lessonId,action,payload={},run=null) {
       if(row.operation)return structuredClone(row);
       check(row.visited&&lesson.required_steps.every(s=>row.steps[s])&&(lessonId!=='compare_purchase'||row.compared),'Сначала выполните шаги задания');
       check(payload.store_id===lesson.store_id,'Откройте нужное заведение');
-      const op={id:crypto.randomUUID(),user_id:ACADEMY_GUEST_ID,store_id:lesson.store_id,kind:lesson.kind,is_academy:true,order_time:now,created_at:now,payment_status:'paid',payment_method:'card'};
+      const op={id:crypto.randomUUID(),user_id:user,store_id:lesson.store_id,kind:lesson.kind,is_academy:true,order_time:now,created_at:now,payment_status:'paid',payment_method:'card'};
       if(lesson.kind==='order') {
         check(Array.isArray(payload.items)&&payload.items.length>=1&&payload.items.length<=2,'Выберите товар задания');
         op.order_items=payload.items.map(i=>{
@@ -76,6 +89,7 @@ function academyGuestCommand(lessonId,action,payload={},run=null) {
     } else throw new Error('Неизвестное действие Академии');
   }
   row.updated_at=now;
-  localStorage.setItem(ACADEMY_GUEST_KEY,JSON.stringify(rows.filter(r=>r.lesson_id!==lessonId).concat(row)));
+  row.device_only=true;
+  localStorage.setItem(academyDeviceKey(user),JSON.stringify(rows.filter(r=>r.lesson_id!==lessonId).concat(row)));
   return structuredClone(row);
 }

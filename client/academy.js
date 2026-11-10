@@ -1,9 +1,10 @@
 /* Academy uses the application's catalogue/forms, with private server-side
- * records for accounts and device-only progress for guests. No educational
+ * records for accounts and device progress for guests or an unavailable server. No educational
  * mutation reaches an ordinary payment API. */
 let _academy = null, _academySnapshot = null, _academyRows = [], _academyRowsOwner = '', _academyLoad = null;
 let _academyTickTimer = null, _academyBusy = false, _academyTargetKey = '', _academyDetails = null, _academyWatch = null;
 let _academyGlobals = null;
+let _academyServerOwner = '';
 const academyActive = () => !!_academy && _academy.user === academyUser();
 const academyStoreId = id => ACADEMY_DATA.stores.some(s => s.id === id)||/^aca10000-0000-4000-8000-00000000000[78]$/.test(id||'');
 const academyNamespace = dir => academyActive() ? `academy:${_academy.row.run_id}:${dir}` : dir;
@@ -39,7 +40,8 @@ async function loadAcademyProgress() {
   const uid=S.session?.user?.id;
   if(!uid){_academyRows=academyGuestRows();_academyRowsOwner=ACADEMY_GUEST_ID;academyTile();if(_contentScreen()==='academy')renderAcademy();return;}
   if(_academyRowsOwner!==uid){
-    try{_academyRows=JSON.parse(localStorage.getItem('alliby_academy_progress_'+uid)||'[]');}catch{_academyRows=[];}
+    _academyRows=academyDeviceRows(uid);
+    if(!_academyRows.length)try{_academyRows=JSON.parse(localStorage.getItem('alliby_academy_progress_'+uid)||'[]');}catch{_academyRows=[];}
     _academyRowsOwner=uid;academyTile();
   }
   if(_academyLoad)return _academyLoad;
@@ -48,10 +50,11 @@ async function loadAcademyProgress() {
     try{
       const rows=await _reqNet('/rest/v1/rpc/get_academy_progress',{method:'POST',body:'{}'});
       if(uid!==S.session?.user?.id||revision!==_accountRevision)return;
-      _academyRows=rows;_academyRowsOwner=uid;
+      _academyServerOwner=uid;
+      _academyRows=academyCacheServerRows(rows,uid);_academyRowsOwner=uid;
       localStorage.setItem('alliby_academy_progress_'+uid,JSON.stringify(rows.map(r=>({lesson_id:r.lesson_id,completed_at:r.completed_at,run_id:r.run_id,has_operation:!!r.operation,visited:r.visited}))));
       academyTile();if(_contentScreen()==='academy')renderAcademy();
-    }catch{if(_contentScreen()==='academy')document.getElementById('academy-connection').textContent='Сохранённый прогресс. Для прохождения заданий нужно соединение с сервером.';}
+    }catch(e){if(e.accountChanged)return;if(uid===academyUser())_academyServerOwner='';if(_contentScreen()==='academy')document.getElementById('academy-connection').textContent='Сервер недоступен. Задания можно проходить, прогресс сохранится на этом устройстве.';}
     finally{_academyLoad=null;}
   })();return _academyLoad;
 }
@@ -59,11 +62,25 @@ function renderAcademy() {
   const root=document.getElementById('academy-content');if(!root)return;
   academyTile();
   const uid=academyUser();
+  const storageNote=S.session?.user?.id?'Прогресс сохраняется в аккаунте при доступном сервере, а без соединения — на этом устройстве.':'Регистрация не нужна. Ваш прогресс сохраняется на этом устройстве.';
+  // A background progress response must not remove a button between touchstart
+  // and click: mobile browsers cancel the tap when its target is replaced.
+  if(root.querySelectorAll('.academy-task').length===ACADEMY_DATA.lessons.length){
+    ACADEMY_DATA.lessons.forEach((lesson,i)=>{
+      const button=root.querySelector(`[data-lesson="${lesson.id}"]`),progress=_academyRowsOwner===uid&&_academyRows.find(r=>r.lesson_id===lesson.id),done=!!progress?.completed_at;
+      const badge=button.querySelector('.academy-task-number');
+      badge.textContent=done?'✓':i+1;badge.classList.toggle('done',done);
+      button.setAttribute('aria-label',lesson.title+(done?' — выполнено':''));
+      button.querySelector('small').textContent=_compareDirections[lesson.direction]+' · '+(done?'Выполнено · можно повторить':progress?'Продолжить':'Начать задание');
+    });
+    document.getElementById('academy-storage-note').textContent=storageNote+' Заведения Академии также доступны в обычном списке.';
+    return;
+  }
   root.innerHTML=`<p class="academy-intro">Попробуйте покупки, аренду и запись в заведениях Академии. Деньги не списываются, заказы не отправляются продавцам. Действия сотрудников демонстрируются по шагам.</p>
     <p id="academy-connection" class="academy-note"></p><div class="academy-tasks">${ACADEMY_DATA.lessons.map((lesson,i)=>{
       const progress=_academyRowsOwner===uid&&_academyRows.find(r=>r.lesson_id===lesson.id),done=!!progress?.completed_at;
       return `<button class="academy-task" data-lesson="${lesson.id}" onclick="academyStart(this.dataset.lesson)" aria-label="${esc(lesson.title)}${done?' — выполнено':''}"><span class="academy-task-number${done?' done':''}">${done?'✓':i+1}</span><span><strong>${esc(lesson.title)}</strong><small>${esc(_compareDirections[lesson.direction])} · ${done?'Выполнено · можно повторить':progress?'Продолжить':'Начать задание'}</small></span><span aria-hidden="true">→</span></button>`;
-    }).join('')}</div><p class="academy-note">${S.session?.user?.id?'Ваш прогресс сохраняется в аккаунте.':'Регистрация не нужна. Ваш прогресс сохраняется на этом устройстве.'} Заведения Академии также доступны в обычном списке.</p>`;
+    }).join('')}</div><p class="academy-note" id="academy-storage-note">${storageNote} Заведения Академии также доступны в обычном списке.</p>`;
 }
 function loadAcademy(){renderAcademy();loadAcademyProgress();}
 function academyCommand(action,payload={},session=_academy) {
@@ -74,28 +91,38 @@ function academyCommand(action,payload={},session=_academy) {
 async function _academyCommand(action,payload={},session=_academy) {
   if(!session||session.user!==academyUser())throw new Error('Прохождение закрыто');
   const run=session.row.run_id,revision=_accountRevision;
-  let result=session.user===ACADEMY_GUEST_ID?academyGuestCommand(session.lesson.id,action,payload,run):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:session.lesson.id,p_action:action,p_payload:payload,p_run:run})});
+  let result;
+  try{result=session.device?academyDeviceCommand(session.lesson.id,action,payload,run,session.user):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:session.lesson.id,p_action:action,p_payload:payload,p_run:run})});}
+  catch(e){
+    if(e.accountChanged||_academy!==session||session.user!==academyUser()||!(e.network||e.status>=500))throw e;
+    _academyServerOwner='';session.device=true;
+    result=academyDeviceCommand(session.lesson.id,action,payload,run,session.user);
+  }
   if(Array.isArray(result))result=result[0];
   if(_academy!==session||session.user!==academyUser()||revision!==_accountRevision)throw {accountChanged:true};
-  session.row=result;_academyRows=_academyRows.filter(r=>r.lesson_id!==result.lesson_id).concat(result);_academyRowsOwner=session.user;
+  _academyRows=session.device?academyDeviceRows(session.user):academyCacheServerRows([result],session.user);
+  session.row=result;_academyRowsOwner=session.user;
   academyTile();return result;
 }
 const _academyStateKeys=['store','direction','allStores','cart','cartStoreId','_carts','rentCart','subCart','giftSubCart','menuUserSubs','menuStoreSubs','appliedSub','storeSubActive','menuCatId','_lastMenuStoreId','userAddr','userAddrLat','userAddrLng','deliveryMode','deliveryFee','pickupIso','pickupLabel','directions','profile','distOrigin','mapCat','nearbyMeters','onlinePayFilter','deliveryFilter','deliveryProbe','_selId','_selAuto','_selSt','_mapFiltered','_vpKey','mapFitted'];
 async function academyStart(id,directStore=false) {
   if(_academyBusy)return;
-  if(S.session?.user?.id&&navigator.onLine===false){showGeoToast('Для прохождения задания подключитесь к интернету');return;}
   const lesson=ACADEMY_DATA.lessons.find(l=>l.id===id);if(!lesson)return;
   _academyBusy=true;
   try{
     if(_academy)academyStop();
     const user=academyUser(),revision=_accountRevision;
-    let row=user===ACADEMY_GUEST_ID?academyGuestCommand(id,'start'):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:id,p_action:'start',p_payload:{}})});
+    let device=user===ACADEMY_GUEST_ID||_academyServerOwner!==user||navigator.onLine===false||academyDeviceRows(user).some(r=>r.lesson_id===id&&r.device_only);
+    let row;
+    try{row=device?academyDeviceCommand(id,'start',{},null,user):await _reqNet('/rest/v1/rpc/academy_command',{method:'POST',body:JSON.stringify({p_lesson:id,p_action:'start',p_payload:{}})});}
+    catch(e){if(e.accountChanged||!(e.network||e.status>=500))throw e;_academyServerOwner='';device=true;row=academyDeviceCommand(id,'start',{},null,user);}
     if(Array.isArray(row))row=row[0];
     if(user!==academyUser()||revision!==_accountRevision)return;
     if(_tourSession)closeTour();
     _academySnapshot=Object.fromEntries(_academyStateKeys.map(key=>[key,S[key]]));
     _academyGlobals={mapSearch:document.querySelector('#screen-map .sl-search input')?.value||'',mapHidden:document.querySelector('.map-layout').classList.contains('no-map'),orders:_homeOrders,bookingCount:_bkNotifCount,orderCount:_orderNotifCount,cartUseSub:_cartUseSub};
-    _academy={lesson,row,user};_accountRevision++;_rcInflight.clear();
+    if(!device)academyCacheServerRows([row],user);
+    _academy={lesson,row,user,device};_accountRevision++;_rcInflight.clear();
     S.cart=[];S.cartStoreId=null;S._carts={};S.rentCart=[];S.subCart=[];S.giftSubCart=[];S.menuUserSubs=[];S.menuStoreSubs=[];
     S.appliedSub=null;S.storeSubActive=true;S.menuCatId='';S._lastMenuStoreId=null;S.deliveryMode='pickup';S.deliveryFee=0;S.pickupIso=null;S.pickupLabel=null;
     S.profile=S.profile?{...S.profile}:null;S.directions={...S.directions,education:true};
@@ -149,7 +176,7 @@ function academyStop(){
   updateCartCount();syncStoreNavBtn();
 }
 function academyExit(){academyStop();goTo('academy');loadAcademyProgress();}
-function academyResetAccount(){academyStop();_academyRows=[];_academyRowsOwner='';_academyLoad=null;academyTile();}
+function academyResetAccount(){academyStop();_academyRows=[];_academyRowsOwner='';_academyLoad=null;_academyServerOwner='';academyTile();}
 
 function academyRows(table) {
   const stores=academyStores(),items=academyItems(),masters=ACADEMY_DATA.masters;
