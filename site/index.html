@@ -435,6 +435,7 @@ html[data-theme="light"] .dv-road{background:rgba(0,0,0,.08)}
 .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
 .team-card{background:var(--glass-card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:var(--r-4);padding:32px 26px;display:flex;flex-direction:column;align-items:center;text-align:center}
 .team-photo{width:108px;height:108px;margin-bottom:18px;box-shadow:0 0 0 1px var(--line),0 10px 30px rgba(0,0,0,.3)}
+.team-photo-initials{display:grid;place-items:center;border-radius:50%;background:rgba(var(--accent-rgb),.12);color:var(--accent);font:600 32px/1 var(--font-sans)}
 .team-name{font:400 21px/1.22 var(--font-display);color:var(--fg)}
 .team-role{margin-top:9px;font:700 10.5px/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.3);border-radius:var(--r-pill);padding:6px 13px}
 .team-bio{margin-top:15px;font:400 14px/1.62 var(--font-sans);color:var(--fg-3);text-wrap:pretty}
@@ -1725,6 +1726,12 @@ html.fx .ph-h1:not(.fx-split){opacity:0;animation:fx-unhide 0s 2s forwards}
         <div class="team-name">Шевченко Олеся</div>
         <div class="team-role">Маркетинг и исследование клиентов</div>
         <p class="team-bio">Изучает потребности заведений и клиентов, выстраивает позиционирование и проверяет продуктовые гипотезы на реальной аудитории.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-photo team-photo-initials" role="img" aria-label="Иса Шахбулатов">ИШ</div>
+        <div class="team-name">Иса Шахбулатов</div>
+        <div class="team-role">Solution-архитектор · Разработчик</div>
+        <p class="team-bio">Проектирует архитектуру Alliby и разрабатывает ключевые компоненты платформы. Отвечает за взаимодействие сервисов, надёжность и подготовку приложения к росту нагрузки.</p>
       </div>
       <div class="team-card">
         <image-slot id="team-uxui" class="team-photo" shape="circle" placeholder="Фото" src="assets/team/ekaterina.jpg"></image-slot>

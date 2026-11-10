@@ -386,7 +386,7 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .auth-box h1{font:400 34px/1 var(--font-display);letter-spacing:-0.01em;margin-bottom:22px;color:var(--brand-ember)}
 
 /* ── MAP ── */
-.map-layout{display:flex;flex:1;min-height:0;overflow:hidden;position:relative}
+.map-layout{--sl-row-height:184px;display:flex;flex:1;min-height:0;overflow:hidden;position:relative}
 .map-addr-wrap{padding:8px 10px;border-bottom:1px solid var(--line-soft);flex-shrink:0;display:flex;gap:6px}
 .map-addr-bar{display:flex;align-items:center;gap:7px;padding:7px 10px;text-align:left;font-size:14px;font-family:var(--font-sans);background:var(--glass-sm);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r-2);cursor:pointer;color:var(--fg);transition:border-color var(--t-fast),box-shadow var(--t-fast);box-sizing:border-box;white-space:nowrap}
 .map-addr-bar:hover,.map-addr-bar:focus{border-color:var(--accent);box-shadow:0 0 0 3px oklch(from var(--accent) l c h / .18)}
@@ -400,6 +400,20 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .sl-fb.flash .sl-fb-lbl{display:inline}
 .sl-fbtns input{flex:1;min-width:0}
 @media(min-width:601px){.sl-fbtns input{min-width:110px}}
+#sl-filters .sl-fbtns{flex-wrap:nowrap}
+.sl-store-search{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.sl-store-search input{width:0;height:36px;min-height:36px;flex:1;min-width:0}
+.sl-store-search .sl-search-toggle,.sl-search-close{display:none}
+.sl-store-search .sl-search-toggle.active{color:var(--accent);border-color:var(--accent)}
+.map-layout:not(.no-map) .sl-store-search{flex:none}
+.map-layout:not(.no-map) .sl-store-search input{display:none}
+.map-layout:not(.no-map) .sl-store-search .sl-search-toggle{display:inline-flex}
+.map-layout:not(.no-map) #sl-filters .sl-fb-lbl{display:none}
+.map-layout:not(.no-map) .sl-fbtns.search-open>.sl-fb{display:none}
+.map-layout:not(.no-map) .sl-fbtns.search-open .sl-store-search{flex:1}
+.map-layout:not(.no-map) .sl-fbtns.search-open .sl-store-search input{display:block}
+.sl-fbtns.search-open .sl-search-icon{display:none}
+.sl-fbtns.search-open .sl-search-close{display:block}
 .map-tog-btn{position:absolute;bottom:16px;right:16px;z-index:20;width:72px;height:72px;border-radius:50%;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2);padding:0;transition:background var(--t-fast);color:var(--fg)}
 .map-tog-btn{flex-direction:column;gap:1px}
 .map-tog-lbl{font:600 11px/1 var(--font-sans);color:var(--fg-2)}
@@ -423,7 +437,7 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .sl-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:none;touch-action:pan-y}
 .sl-sbar{display:none}
 .sl-item{padding:12px 14px;border-bottom:1px solid var(--line-soft);cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;transition:background var(--t-fast)}
-@media(min-width:601px){.sl-item{content-visibility:auto;contain-intrinsic-size:auto 92px}}
+@media(min-width:601px){.sl-item{content-visibility:auto;contain-intrinsic-size:auto var(--sl-row-height)}}
 .sl-item:hover{background:oklch(from var(--bg-2) l c h / .55)}
 .sl-item.sel{background:oklch(from var(--bg-2) l c h / .65)}
 .sl-item .sli-name{font:600 16px/1.3 var(--font-sans);color:var(--fg);margin-bottom:3px}
@@ -458,10 +472,8 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .map-layout:not(.no-map) .sl-list .sl-item .sli-more .sm-label{display:none}
 .map-layout:not(.no-map) .sl-list .sl-item .sli-more .sm-pill,.map-layout:not(.no-map) .sl-list .sl-item .sli-more .sm-dzb{width:24px;height:24px;padding:0;justify-content:center;flex:none}
 @media(max-width:600px){
-  .map-layout:not(.no-map) .sl-list .sl-item:not(.exp){height:150px}
   .map-layout:not(.no-map) .sl-list .sl-item:not(.exp)>.sli-more{display:block;position:absolute;left:14px;bottom:7px;right:auto;z-index:3;margin:0;flex:none}
   .map-layout:not(.no-map) .sl-list .sl-item:not(.exp) .sm-chips{margin:0;gap:4px}
-  .map-layout.no-map .sl-list .sl-item.det{height:auto;min-height:124px}
 }
 #stl-filters{flex-shrink:0}
 .stl-dist-row{display:flex;align-items:center;gap:8px;padding:0 16px 10px;flex-shrink:0}
@@ -569,9 +581,9 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
      iOS Safari тогда не начинает его прокрутку с полоски ::before; карта и так лежит над списком (z-index 2),
      поэтому касания вне полосок достаются ей. */
   .sl-panel>.sl-list{position:relative;z-index:auto}
-  /* Высота строки одна и та же при открытой и свёрнутой карте (124px = рамка 1 + отступы 24 + содержимое 99):
+  /* Высота строки одна и та же при открытой и свёрнутой карте:
      меняется только содержимое внутри. Название и адрес в одну строку, чтобы перенос не менял высоту. */
-  .sl-list .sl-item{position:relative;background:transparent;height:124px}
+  .sl-list .sl-item{position:relative;background:transparent;height:var(--sl-row-height)}
   .sl-list .sl-item .sli-name,.sl-list .sl-item .sli-addr{white-space:nowrap}
   .sl-list .sl-item *{pointer-events:none}
   .sl-list .sl-item .sli-name,.sl-list .sl-item .sli-addr,.sl-list .sl-item .sli-row{position:relative;z-index:3}
@@ -590,7 +602,7 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
   .sl-list .sl-item .sli-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0,rgba(0,0,0,.35) 45%,rgba(0,0,0,0) 80%)}
   /* Карточка рисуется внутри той же строки: фон-подложка (::before) и фото (.sli-bg) вдвинуты на 4px сверху/снизу
      и на 12px по бокам, поэтому габариты строки не меняются, а между карточками остаётся просвет */
-  .map-layout.no-map .sl-list .sl-item{content-visibility:auto;contain-intrinsic-size:auto 124px;padding:12px 26px;border-bottom-color:transparent;background:transparent}
+  .map-layout.no-map .sl-list .sl-item{content-visibility:auto;contain-intrinsic-size:auto var(--sl-row-height);padding:12px 26px;border-bottom-color:transparent;background:transparent}
   .map-layout.no-map .sl-list .sl-item .sli-name,.map-layout.no-map .sl-list .sl-item .sli-addr{overflow:hidden;text-overflow:ellipsis}
   .map-layout.no-map .sl-list .sl-item .sli-bg{opacity:1;inset:4px 12px;border-radius:var(--r-2)}
   .map-layout.no-map .sl-list .sl-item .sli-bg img{transform:scale(1)}
@@ -608,7 +620,7 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
      при скрытой карте — информация в обоих состояниях одна и та же. Высота как у обычной строки (124px), фото занимает
      всю карточку, название, адрес с расстоянием, график, телефон, средний чек и плашки лежат прямо на нём.
      Нажатие на карточку открывает заведение. Ползунок списка (z-index 4) остаётся под раскрытой карточкой. */
-  .sl-list .sl-item.det{height:124px;padding:12px 26px;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-end;align-items:stretch;background:transparent}
+  .sl-list .sl-item.det{height:var(--sl-row-height);padding:12px 26px;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-end;align-items:stretch;background:transparent}
   .sl-list .sl-item.exp{z-index:5}
   .sl-list .sl-item.exp::before{left:12px;right:12px;top:4px;bottom:4px;width:auto;z-index:0;pointer-events:none;border-radius:var(--r-2);background:var(--bg-2);box-shadow:0 6px 18px rgba(0,0,0,.28)}
   .sl-list .sl-item.det>.sli-main{flex:none!important;min-height:0;display:block}
@@ -659,8 +671,11 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
 }
 
 /* Photo cards are shared by the full list and the selected map entry at every width. */
-.map-layout .sl-list .sl-item.det{position:relative;overflow:hidden;background:transparent;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-end;align-items:stretch;padding:12px 26px}
-.map-layout.no-map .sl-list .sl-item.det,.map-layout .sl-list .sl-item.exp.det{height:auto;min-height:168px}
+.map-layout .sl-list .sl-item.det{position:relative;overflow:hidden;background:transparent;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:stretch;padding:12px 26px}
+.map-layout .sl-list .sl-item,.map-layout.no-map .sl-list .sl-item.det,.map-layout .sl-list .sl-item.exp.det{height:var(--sl-row-height);min-height:var(--sl-row-height);max-height:var(--sl-row-height);box-sizing:border-box;padding:12px 26px;overflow-anchor:none}
+.map-layout .sl-list .sl-item .sli-name{font-size:16px;line-height:1.3;margin-bottom:3px;white-space:nowrap}
+.map-layout .sl-list .sl-item .sli-addr{font-size:13px;line-height:1.3;white-space:nowrap}
+.map-layout .sl-list .sl-item.det .sm-row span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .map-layout .sl-list .sl-item.exp.det{z-index:5}
 .map-layout .sl-list .sl-item.det::before{content:'';position:absolute;inset:4px 12px;width:auto;z-index:0;pointer-events:none;border-radius:var(--r-2);background:var(--bg-2)}
 .map-layout .sl-list .sl-item.det .sli-bg{display:block;position:absolute;inset:4px 12px;z-index:0;overflow:hidden;border-radius:var(--r-2);opacity:1;pointer-events:none}
@@ -675,7 +690,6 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
 .map-layout .sl-list .sl-item.det .sli-badge{display:flex}
 .map-layout .sl-list .sl-item.det .sli-dist{display:inline}
 .map-layout .sl-list .sl-item.det.has-img .sm-dzb{border-color:rgba(255,255,255,.6);background:rgba(0,0,0,.2)}
-.map-layout .sl-list .sl-item.exp.det>.sli-more{padding-right:88px}
 .map-layout .sl-list .sl-item.det>.sli-open{position:absolute;right:26px;top:auto;bottom:16px;z-index:3}
 .map-layout.no-map .sl-list .sl-item.det>.sli-open{display:none}
 .map-layout:not(.no-map) .sl-list .sl-item .sm-chips{flex-wrap:nowrap;gap:3px}
@@ -2020,7 +2034,13 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
             <button id="nearby-btn" class="btn sl-fb" onclick="openNearbyModal();flashFb(this)" title="Рядом со мной"><svg class="ico" width="20" height="20"><use href="#i-locate"/></svg><span class="sl-fb-lbl">Рядом</span></button>
             <button id="delivery-filter-btn" class="btn sl-fb" onclick="toggleDeliveryFilter();flashFb(this)" title="Доставка до меня"><svg class="ico" width="20" height="20"><use href="#i-bicycle"/></svg><span class="sl-fb-lbl">Доставка</span></button>
             <button id="online-pay-btn" class="btn sl-fb" onclick="toggleOnlinePayFilter();flashFb(this)" title="Онлайн"><svg class="ico" width="20" height="20"><use href="#i-card"/></svg><span class="sl-fb-lbl">Онлайн</span></button>
-            <input lang="ru" type="search" placeholder="Поиск заведения…" oninput="filterStores(this.value)" style="box-sizing:border-box">
+            <div class="sl-store-search">
+              <button type="button" class="btn sl-fb sl-search-toggle" id="store-search-toggle" onclick="toggleStoreSearch()" title="Поиск заведений" aria-label="Поиск заведений" aria-expanded="false" aria-controls="store-search-input">
+                <svg class="sl-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+                <svg class="sl-search-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+              <input id="store-search-input" aria-label="Поиск заведений" lang="ru" type="search" placeholder="Поиск заведения…" oninput="filterStores(this.value)" onkeydown="if(event.key==='Escape'){event.stopPropagation();toggleStoreSearch(false)}" style="box-sizing:border-box">
+            </div>
           </div>
         </div>
         <div class="sl-cats" id="sl-cats"></div>
@@ -8556,7 +8576,7 @@ function _hoverSet(st) {
 }
 function _hoverEval() {
   S._hoverRaf = 0;
-  if (!S._pickUser || S._progMove || !S.map) return;
+  if (!S._pickUser || S._progMove || !S.map || S._mapPanelChanging || document.querySelector('.map-layout')?.classList.contains('no-map')) return;
   _hoverSet(_pickHit());
 }
 // через кадр: метки двигает собственный обработчик 'move' у MapLibre, он срабатывает позже нашего
@@ -8673,7 +8693,7 @@ async function loadMapData() {
   if (S.allStores?.length) { applyMapFilter(); fitMapToAllStores(); }
   S.map.on('load', () => applyMapFilter());
   // секунда после последнего движения/нажатия на карту → список по видимой области
-  S.map.on('moveend', () => { _saveMapView(S.map, 'alliby_map_view_' + (S.city || 'Самара')); S._progMove = false; _sortDot(true); scheduleViewportList(); _hoverSoon(); });
+  S.map.on('moveend', () => { _saveMapView(S.map, 'alliby_map_view_' + (S.city || 'Самара')); S._progMove = false; if(S._mapPanelChanging)return; _sortDot(true); scheduleViewportList(); _hoverSoon(); });
   S.map.on('click', e => {
     scheduleViewportList();
     if (e.originalEvent?.target?.closest?.('.store-pin')) return;
@@ -8695,21 +8715,42 @@ async function loadMapData() {
 
 function toggleMapPanel() {
   const layout = document.querySelector('.map-layout');
+  const list = document.getElementById('sl-list'), scrollTop = list?.scrollTop || 0;
+  S._mapPanelChanging = true;
+  clearTimeout(S._mapPanelTimer);
+  clearTimeout(S._vpTimer);
+  clearTimeout(S._pickTimer); S._pickTimer = null;
+  _sortDot(false);
   const hidden = layout.classList.toggle('no-map');
-  if (hidden) { deselectStore(); _hoverSet(null); } else _applyExpanded();
+  _applyExpanded(false, true);
+  if(list)list.scrollTop = scrollTop;
   const ico = document.getElementById('map-tog-ico');
   const mapSvg = (st) => `<svg width="33" height="33" viewBox="0 0 24 24" aria-hidden="true" style="${st}"><path d="M1 6l7-4v16l-7 4z" fill="#4caf50"/><path d="M8 2l8 4v16l-8-4z" fill="#64b5f6"/><path d="M16 6l7-4v16l-7 4z" fill="#ffca28"/><path d="M12 6.2a3.2 3.2 0 0 1 3.2 3.2c0 2.3-3.2 5.4-3.2 5.4s-3.2-3.1-3.2-5.4A3.2 3.2 0 0 1 12 6.2z" fill="#e53935" stroke="#fff" stroke-width=".8"/><circle cx="12" cy="9.4" r="1.1" fill="#fff"/></svg>`;
   if (ico) ico.innerHTML = hidden
     ? mapSvg('')
     : `<span style="position:relative;display:inline-flex;align-items:center;justify-content:center"><svg width="33" height="33" viewBox="0 0 24 24" aria-hidden="true" style="opacity:.5"><path d="M1 6l7-4v16l-7 4z" fill="#4caf50"/><path d="M8 2l8 4v16l-8-4z" fill="#64b5f6"/><path d="M16 6l7-4v16l-7 4z" fill="#ffca28"/><path d="M12 6.2a3.2 3.2 0 0 1 3.2 3.2c0 2.3-3.2 5.4-3.2 5.4s-3.2-3.1-3.2-5.4A3.2 3.2 0 0 1 12 6.2z" fill="#e53935" stroke="#fff" stroke-width=".8"/><circle cx="12" cy="9.4" r="1.1" fill="#fff"/></svg><svg width="33" height="33" style="position:absolute;inset:0" viewBox="0 0 33 33"><line x1="7" y1="7" x2="26" y2="26" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="7" x2="7" y2="26" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg></span>`;
-  if (!hidden && S.map) setTimeout(() => {S.map.resize();if(academyActive()){S.mapFitted=false;fitMapToAllStores();}},400);
-  updateViewportList();
+  S._mapPanelTimer = setTimeout(() => {
+    if (!hidden && S.map) S.map.resize();
+    S._mapPanelChanging = false;
+  },400);
   updateListFade();
   updateListSbar();
   setTimeout(updateListFade, 380);
 }
 
-function filterStores(q) { applyMapFilter(q); }
+function toggleStoreSearch(force) {
+  const button=document.getElementById('store-search-toggle'), input=document.getElementById('store-search-input');
+  const bar=button.closest('.sl-fbtns');
+  const open=typeof force==='boolean'?force:!bar.classList.contains('search-open');
+  bar.classList.toggle('search-open',open);
+  button.setAttribute('aria-expanded',String(open));
+  button.setAttribute('aria-label',open?'Закрыть поиск':'Поиск заведений');
+  if(open)input.focus();else if(document.activeElement===input)button.focus();
+}
+function filterStores(q) {
+  document.getElementById('store-search-toggle')?.classList.toggle('active',!!q.trim());
+  applyMapFilter(q);
+}
 
 // Строка списка при открытой карте: выбор заведения (строка раскрывается) и перелёт к нему. Иконку ставим в центр карты, под точку
 // сортировки: координата метки приходится на середину всего элемента (иконка + подпись), поэтому
@@ -8752,7 +8793,7 @@ function deselectStore() {
 // Привести список в соответствие с выбором: строка выбранного заведения раскрывается (.exp) и встаёт наверх.
 // Подробный вид (.det: график, телефон, плашки) — у раскрытой строки и, на телефоне, у всех строк при скрытой
 // карте, чтобы информация в обоих состояниях была одинаковой
-function _applyExpanded(fromRender) {
+function _applyExpanded(fromRender, keepPosition = false) {
   const list = document.getElementById('sl-list');
   if (!list) return;
   if (fromRender) S._expMoved = false; // список только что собран в порядке сортировки
@@ -8773,12 +8814,12 @@ function _applyExpanded(fromRender) {
   if (target) {
     list.querySelectorAll('.sl-item.sel').forEach(el => { if (el !== target) el.classList.remove('sel'); });
     target.classList.add('sel');
-    if (list.firstElementChild !== target) {
+    if (!keepPosition && list.firstElementChild !== target) {
       list.insertBefore(target, list.firstElementChild);
       S._expMoved = true; // порядок в списке нарушен — при снятии выбора пересортируем
     }
-    list.scrollTop = 0;
-  } else if (S._expMoved && !fromRender) {
+    if (!keepPosition) list.scrollTop = 0;
+  } else if (S._expMoved && !fromRender && !keepPosition) {
     S._expMoved = false;
     S._vpKey = null;
     scheduleViewportList();
@@ -8837,7 +8878,7 @@ document.addEventListener('click', e => {
   if (S._selId == null) return;
   const t = e.target;
   if (!t?.closest || !t.closest('#screen-map')) return;
-  if (t.closest('.sl-item,.store-pin,.map-area .maplibregl-ctrl-top-right,.map-tog-btn')) return;
+  if (t.closest('.sl-item,.store-pin,.map-area .maplibregl-ctrl-top-right,.map-tog-btn,.sl-store-search')) return;
   deselectStore();
 });
 
@@ -14367,7 +14408,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '35316585242483';
+  const APP_VER = '187674696399602';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
