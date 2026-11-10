@@ -3910,9 +3910,9 @@ window.addEventListener('unhandledrejection', e => _showFatalError(e.reason));
 
 // ─── CONFIG ───
 const _LOCAL = location.hostname === '127.0.0.1' || location.hostname === 'localhost' || location.protocol === 'file:';
-// Local testing must not depend on the production tile proxy.
-const OSM_TILE_URL = _LOCAL ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://alliby.ru/osm-tiles/{z}/{x}/{y}.png';
+// Local and staging maps must not depend on the production tile proxy.
 const _TEST_TUNNEL = location.hostname === 'test.alliby.ru' || location.hostname === 'app-test.alliby.ru';
+const OSM_TILE_URL = (_LOCAL || _TEST_TUNNEL) ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://alliby.ru/osm-tiles/{z}/{x}/{y}.png';
 const _APP_ORIGIN = _TEST_TUNNEL ? 'https://app-test.alliby.ru/client/' : 'https://app.alliby.ru/';
 const SB_URL  = _TEST_TUNNEL ? 'https://test.alliby.ru' : (_LOCAL ? 'http://127.0.0.1:54321' : 'https://alliby.ru');
 const SB_ANON = _TEST_TUNNEL ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkxMTIyNTc0LCJleHAiOjIxMDY0ODI1NzR9.X1S7SEEcXmvbiveUycmSJSvwx9JDkrZh379f1vdO-jo' : (_LOCAL ? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' : 'sb_publishable_HILQWfLrBvlWcUPz6Atam__5M5vw3nq');
@@ -4269,10 +4269,28 @@ const SK = {
 
 const subCache = new Map();
 
+let _osmProtocolReady = false;
+function osmTileTemplate() {
+  if (!_osmProtocolReady) {
+    // Blob workers bypass the page's service worker. Load raster bytes on the
+    // main thread so the existing provider-independent tile cache handles them.
+    maplibregl.addProtocol('alliby-map', async (params, abortController) => {
+      const tile = params.url.match(/^alliby-map:\/\/(\d{1,2})\/(\d+)\/(\d+)\.png$/);
+      if (!tile) throw new Error('Invalid map tile');
+      const url = OSM_TILE_URL.replace('{z}', tile[1]).replace('{x}', tile[2]).replace('{y}', tile[3]);
+      const response = await fetch(url, { signal: abortController.signal, credentials: 'omit', referrerPolicy: 'strict-origin-when-cross-origin' });
+      if (!response.ok) throw new Error('Map tile: ' + response.status);
+      return { data: await response.arrayBuffer() };
+    });
+    _osmProtocolReady = true;
+  }
+  return 'alliby-map://{z}/{x}/{y}.png';
+}
+
 function buildOsmStyle() {
   return {
     version: 8,
-    sources: { osm: { type: 'raster', tiles: [OSM_TILE_URL], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors' } },
+    sources: { osm: { type: 'raster', tiles: [osmTileTemplate()], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors' } },
     layers: [{ id: 'osm-tiles', type: 'raster', source: 'osm', minzoom: 0, maxzoom: 19 }],
   };
 }
@@ -4503,7 +4521,7 @@ async function _contentRefreshNow() {
   _menuFetchKey = null; _menuFetchTs = 0;
   // Re-request the current viewport; tile HTTP freshness is respected and old tiles are retained.
   const map = S.map;
-  try { map?.getSource('osm')?.setTiles([OSM_TILE_URL]); } catch {}
+  try { map?.getSource('osm')?.setTiles([osmTileTemplate()]); } catch {}
   await _contentRefreshView(true);
 }
 setInterval(_contentAutoRefresh, 60000);
@@ -11785,7 +11803,7 @@ async function openDzViewer(store) {
       if (!_dzvMap) {
         _dzvMap = new maplibregl.Map({
           container: 'dz-viewer-map',
-          style: { version:8, sources:{ osm:{ type:'raster', tiles:[OSM_TILE_URL], tileSize:256, attribution:'© OpenStreetMap' } }, layers:[{ id:'osm', type:'raster', source:'osm' }] },
+          style: { version:8, sources:{ osm:{ type:'raster', tiles:[osmTileTemplate()], tileSize:256, attribution:'© OpenStreetMap' } }, layers:[{ id:'osm', type:'raster', source:'osm' }] },
           center: [sLng, sLat], zoom: 13, attributionControl: false,
         });
         _dzvMap.on('load', () => _dzvRenderZones(zones, store));
@@ -13320,7 +13338,7 @@ function openAddressPicker(cb) {
       if (_addrPickMap) { _addrPickMap.resize(); _addrPickMap.setCenter([lng, lat]); return; }
       _addrPickMap = new maplibregl.Map({
         container: 'addr-pick-gl',
-        style: { version: 8, sources: { osm: { type: 'raster', tiles: [OSM_TILE_URL], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap' } }, layers: [{ id: 'osm', type: 'raster', source: 'osm' }] },
+        style: { version: 8, sources: { osm: { type: 'raster', tiles: [osmTileTemplate()], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap' } }, layers: [{ id: 'osm', type: 'raster', source: 'osm' }] },
         center: [lng, lat], zoom: 15, attributionControl: false,
       });
       _addrPickMap.on('moveend', _addrPickGeocode);
@@ -14349,7 +14367,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '55519961678887';
+  const APP_VER = '35316585242483';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
