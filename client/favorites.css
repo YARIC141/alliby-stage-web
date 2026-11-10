@@ -1,0 +1,29 @@
+.favorite-toggle.selected{outline:2px solid #ef4444;outline-offset:2px}
+.favorite-toggle.selected svg{fill:#ef4444;stroke:#ef4444}
+.favorite-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#home-favorites{grid-column:1/-1;min-width:0;padding-top:6px}
+.favorites-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.favorites-heading h3{margin:0;font:600 20px/1.3 var(--font-sans);color:var(--fg)}
+.favorites-heading h3 span{font-size:13px;color:var(--fg-3);margin-left:5px}
+.favorites-heading .btn{font-size:13px;min-height:36px}
+.favorites-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.favorites-toolbar>span,.favorites-empty{font:400 13px/1.5 var(--font-sans);color:var(--fg-3)}
+.favorites-tabs{overflow-x:auto;margin-bottom:12px;max-width:100%;padding-bottom:1px}
+.favorites-tabs .cart-tab{flex:1 0 auto;white-space:nowrap;padding:10px 14px}
+.favorites-grid{padding:0;min-width:0}
+.favorite-card{min-width:0}
+.favorite-card .item-name{overflow-wrap:anywhere}
+.favorite-store{font:400 13px/1.4 var(--font-sans);color:var(--fg-2);overflow-wrap:anywhere}
+.favorite-direction{font:400 12px/1.4 var(--font-sans);color:var(--fg-3);margin:3px 0 8px}
+.favorite-price{font:600 16px/1.3 var(--font-sans);color:var(--fg);margin-bottom:5px}
+.favorite-price small{font:400 12px/1.3 var(--font-sans);color:var(--fg-3)}
+.favorite-unavailable{font:500 12px/1.4 var(--font-sans);color:var(--fg-3);margin-bottom:5px}
+.favorite-card-actions{justify-content:flex-end}
+#mi-favorite-btn{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;white-space:normal}
+@media(max-width:600px){
+  .item-card .item-actions{flex-wrap:wrap;gap:5px;justify-content:flex-end}
+  .item-card .item-actions>.ia-info{flex:0 0 100%}
+  .item-card .item-actions .ia-add{width:34px;height:34px}
+  #m-item .mi-bar-act>.btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;padding:8px 6px}
+  #m-item .mi-bar-act>.btn span{min-width:0;overflow-wrap:anywhere}
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Alliby Carry",
+  "short_name": "Carry",
+  "description": "Приложение для курьеров Alliby",
+  "start_url": "/carry/",
+  "scope": "/carry/",
+  "display": "standalone",
+  "background_color": "#14b8a6",
+  "theme_color": "#14b8a6",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/carry/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/carry/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "/"
+}

@@ -1,0 +1,3833 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тамагочи</title>
+<meta name="theme-color" content="#101418">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Тамагочи">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root{
+    --font-sans:'Nunito Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --bg:#101418; --card:#1b2128; --text:#f0f0f0; --text2:#9aa4ad; --accent:#2dd4bf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+    min-height:100vh;display:flex;align-items:flex-start;justify-content:center}
+button,input,select,textarea,code,pre,kbd,samp{font-family:var(--font-sans)}
+.maplibregl-map,.maplibregl-popup,.maplibregl-ctrl-attrib{font-family:var(--font-sans)}
+  .wrap{width:100%;max-width:420px;padding:28px 20px;padding-top:max(28px,env(safe-area-inset-top))}
+  h1{font-size:22px;margin:0 0 8px}
+  p.hint{color:var(--text2);font-size:14px;line-height:1.4;margin:0 0 22px}
+  input[type=text],input[type=email],input[type=password]{width:100%;padding:14px;border-radius:10px;border:1px solid #2a323b;background:#151a1f;
+    color:var(--text);font-size:16px;margin-bottom:18px}
+  input[type=text]::placeholder,input[type=email]::placeholder,input[type=password]::placeholder{color:var(--text2)}
+  button{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#04201c;
+    font-size:16px;font-weight:600;margin-bottom:12px;cursor:pointer}
+  button.secondary{background:#232b33;color:var(--text)}
+  button.ghost{background:transparent;color:var(--text2);font-size:13px;font-weight:400;padding:8px}
+  .hidden{display:none !important}
+  .name{font-size:26px;font-weight:700;margin:0 0 2px}
+  .mood{color:var(--accent);font-size:15px;margin:0 0 20px}
+  .rings-row{display:flex;justify-content:space-between;gap:4px;margin:16px 0 20px}
+  .ring-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0}
+  .ring-wrap{position:relative;width:52px;height:52px;flex-shrink:0}
+  .ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring-track{fill:none;stroke:#232b33;stroke-width:5}
+  .ring-fill{fill:none;stroke-width:5;stroke-linecap:round;stroke-dasharray:175.9;stroke-dashoffset:175.9;
+    transition:stroke-dashoffset .3s ease, stroke .3s ease}
+  .ring-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text)}
+  .ring-icon svg{width:20px;height:20px}
+  .ring-label{font-size:10px;color:var(--text2);text-align:center;line-height:1.2}
+  .ring-value{font-size:11px;font-weight:600;color:var(--text)}
+  .bio-card{margin:14px 0}
+  .bio-label{display:block;font-size:14px;color:var(--text2);margin-bottom:6px}
+  .weight-row{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  .weight-row label{flex:1;font-size:13px;color:var(--text2)}
+  .weight-row input[type=number]{width:76px;padding:10px;border-radius:10px;border:1px solid #2a323b;
+    background:#151a1f;color:var(--text);font-size:14px;font-family:inherit;text-align:right}
+  .weight-row select{flex:0 0 auto;padding:10px;border-radius:10px;border:1px solid #2a323b;
+    background:#151a1f;color:var(--text);font-size:14px;font-family:inherit}
+  .weight-hint{font-size:11px;color:var(--text2);line-height:1.4;margin:-8px 0 14px}
+  .stat-card{margin:0 0 16px;padding:14px;border-radius:12px;background:var(--card);text-align:center}
+  .stat-card-label{font-size:12px;color:var(--text2);margin-bottom:4px}
+  .stat-card-value{font-size:22px;font-weight:700}
+  .stat-card-hint{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4}
+  .workouts-card{margin:0 0 16px}
+  .workouts-title{font-size:13px;color:var(--text2);margin-bottom:8px}
+  .workout-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text);
+    padding:9px 11px;background:var(--card);border-radius:9px;margin-bottom:6px}
+  .workout-row .workout-type{font-weight:600}
+  .workout-row .workout-meta{color:var(--text2);text-align:right}
+  .bodycomp-card{margin:0 0 16px;padding:14px 16px;border-radius:12px;background:var(--card)}
+  .bodycomp-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
+  .bodycomp-title{font-size:13px;color:var(--text2)}
+  .bc-info-btn{flex:0 0 auto;width:20px;height:20px;line-height:18px;padding:0;border-radius:50%;
+    border:1px solid var(--text2);background:transparent;color:var(--text2);font-size:12px;
+    text-align:center;cursor:pointer}
+  .bodycomp-norm{font-size:11px;color:var(--text2);margin-bottom:10px}
+  .bodycomp-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--text);
+    padding:6px 0;border-bottom:1px solid #232b33}
+  .bodycomp-row:last-of-type{border-bottom:none;padding-bottom:0}
+  .bodycomp-row span:first-child{color:var(--text2)}
+  .bodycomp-row span:last-child{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bodycomp-hint{font-size:11px;color:var(--text2);line-height:1.4;margin-top:10px}
+  .meals-card{margin:0 0 16px;padding:14px 16px;border-radius:12px;background:var(--card)}
+  .meals-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .meals-title{font-size:13px;color:var(--text2)}
+  .meals-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .meal-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:8px 10px;background:#151a1f;border-radius:9px}
+  .meal-row .meal-name{font-weight:600;flex-shrink:0;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meal-row .meal-meta{flex:1;color:var(--text2);text-align:right}
+  .meal-row .meal-del{width:auto;margin:0;padding:2px 8px;background:transparent;color:var(--text2);font-size:14px;flex-shrink:0}
+  .meals-empty{font-size:12px;color:var(--text2);line-height:1.4;margin-bottom:10px}
+  .meals-total{font-size:12px;font-weight:600;margin-bottom:10px;font-variant-numeric:tabular-nums}
+  #btn-meal-add{margin-bottom:0}
+  .meal-tabs{display:flex;gap:6px;margin-bottom:14px}
+  .meal-tab{flex:1;padding:9px 4px;border-radius:9px;background:#151a1f;color:var(--text2);font-size:13px;
+    font-weight:600;border:none;cursor:pointer;margin:0}
+  .meal-tab.active{background:var(--accent);color:#04201c}
+  .meal-tab-panel{margin-bottom:6px}
+  .meal-search-row{display:flex;gap:8px}
+  .meal-search-row input{flex:1;margin:0}
+  .meal-search-row button{width:auto;margin:0;padding:12px 14px}
+  .meal-search-results{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:38vh;overflow-y:auto}
+  .meal-result-item{display:flex;flex-direction:column;gap:2px;text-align:left;background:#151a1f;
+    border-radius:10px;padding:10px 12px;border:none;color:var(--text);cursor:pointer;width:100%;margin:0}
+  .meal-result-item .mr-name{font-size:13px;font-weight:600}
+  .meal-result-item .mr-desc{font-size:11px;color:var(--text2)}
+  .meal-search-status{font-size:12px;color:var(--text2);text-align:center;padding:10px 0}
+  .meal-barcode-video{width:100%;border-radius:10px;margin-bottom:10px;background:#000}
+  .meal-barcode-manual{display:flex;gap:8px;margin-top:10px}
+  .meal-barcode-manual input{flex:1;margin:0}
+  .meal-barcode-manual button{width:auto;margin:0;padding:12px 14px}
+  .meal-barcode-status{font-size:12px;color:var(--text2);margin-top:8px;text-align:center}
+  .meal-portion-name{font-size:14px;font-weight:600;margin-bottom:12px}
+  .meal-portion-preview{font-size:12px;color:var(--text2);margin:-6px 0 14px}
+  textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #2a323b;background:#151a1f;
+    color:var(--text);font-size:14px;font-family:inherit;line-height:1.4;resize:vertical}
+  textarea::placeholder{color:var(--text2)}
+  .actions{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .actions button{margin-bottom:0;padding:11px 8px;font-size:13px;border-radius:9px}
+  .footer-hint{font-size:12px;color:var(--text2);line-height:1.5;margin-top:18px}
+  .sensor-status{font-size:12px;text-align:center;margin:2px 0 14px}
+  .sensor-status.on{color:var(--accent)}
+  .sensor-status.off{color:var(--text2)}
+  #hc-metrics{margin-top:-8px}
+  .ring-icon.emoji{font-size:20px;line-height:1}
+  .pet-topbar{display:flex;margin-bottom:8px}
+  .pet-exit-btn{width:auto;margin:0;padding:8px 14px;background:#232b33;color:var(--text)}
+  /* ── Обучающий тур питомца ── */
+  #ptour{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center}
+  #ptour.open{display:flex}
+  #ptour.pos-top{align-items:flex-start}
+  #ptour-spot{position:fixed;left:50%;top:50%;width:0;height:0;border-radius:14px;box-shadow:0 0 0 100vmax rgba(0,0,0,.66);outline:2px solid var(--accent);pointer-events:none;transition:left .28s,top .28s,width .28s,height .28s}
+  #ptour-spot.none{outline-color:transparent}
+  .ptour-card{position:relative;width:100%;max-width:480px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 20px calc(env(safe-area-inset-bottom,0px) + 16px);box-shadow:0 -8px 32px rgba(0,0,0,.45);text-align:center}
+  #ptour.pos-top .ptour-card{border-radius:0 0 22px 22px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);box-shadow:0 8px 32px rgba(0,0,0,.45)}
+  .ptour-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .ptour-kicker{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);font-weight:600}
+  #ptour .ptour-skip{width:auto;background:transparent;color:var(--text2);font-size:14px;font-weight:500;padding:8px 0 8px 12px}
+  .ptour-title{font-size:20px;font-weight:700;margin-bottom:6px}
+  .ptour-text{font-size:15px;line-height:1.5;color:var(--text2);min-height:66px}
+  .ptour-dots{display:flex;justify-content:center;gap:6px;margin:12px 0}
+  .ptour-dot{width:7px;height:7px;border-radius:50%;background:#3a444d}
+  .ptour-dot.on{width:20px;border-radius:4px;background:var(--accent)}
+  .ptour-nav{display:flex;gap:10px}
+  .ptour-nav button{flex:1}
+  @media (prefers-reduced-motion:reduce){#ptour-spot{transition:none}}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#232b33;color:var(--text);
+    padding:12px 18px;border-radius:10px;font-size:14px;max-width:360px;text-align:center;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:10}
+  .sprite-card{position:relative;background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:18px;
+    aspect-ratio:1/1;display:flex;align-items:center;justify-content:center}
+  .sprite-card img{width:100%;height:100%;object-fit:contain;display:block}
+  .sprite-placeholder{font-size:72px}
+  .bio-toggle-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+    background:rgba(16,20,24,.55);backdrop-filter:blur(2px);border:none;display:flex;align-items:center;
+    justify-content:center;color:#fff;cursor:pointer;padding:0}
+  .bio-toggle-btn svg{width:18px;height:18px}
+  .gold-badge{position:absolute;top:10px;left:10px;background:rgba(16,20,24,.55);backdrop-filter:blur(2px);
+    border-radius:14px;padding:6px 12px 6px 8px;display:flex;align-items:center;gap:5px;color:#f5c94a;
+    font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+  .gold-badge .g-icon{font-size:15px}
+  .shop-list,.inventory-list{display:flex;flex-direction:column;gap:10px}
+  .shop-item,.inventory-item{display:flex;align-items:center;gap:12px;background:var(--card);
+    border-radius:14px;padding:12px 14px}
+  .shop-item .s-icon,.inventory-item .s-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center}
+  .shop-item .s-info,.inventory-item .s-info{flex:1;min-width:0}
+  .shop-item .s-name,.inventory-item .s-name{font-size:14px;font-weight:600}
+  .shop-item .s-desc{font-size:12px;color:var(--text2);margin-top:2px}
+  .inventory-item .s-count{font-size:12px;color:var(--text2);margin-top:2px}
+  .shop-item button{width:auto;margin:0;padding:9px 14px;font-size:13px;flex-shrink:0}
+  .shop-item button:disabled{opacity:.4;cursor:default}
+  .inventory-empty,.shop-empty{color:var(--text2);font-size:14px;text-align:center;padding:30px 0}
+  .chat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .chat-header button{width:auto;margin:0;padding:8px 12px;background:#232b33;color:var(--text)}
+  .chat-header h1{font-size:18px;margin:0}
+  .chat-log{display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:52vh;overflow-y:auto;
+    background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px}
+  .msg{max-width:80%;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.4}
+  .msg.pet{align-self:flex-start;background:#232b33;color:var(--text)}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#04201c}
+  .msg.pending{opacity:.6}
+  .chat-input-row{display:flex;gap:8px}
+  .chat-input-row input{flex:1;margin:0}
+  .chat-input-row button{width:auto;margin:0;padding:14px 18px}
+
+  .game-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .game-header button{width:auto;margin:0;padding:8px 12px;background:#232b33;color:var(--text)}
+  .game-header h1{font-size:18px;margin:0;flex:1}
+  .game-hub-grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .game-hub-grid button{display:flex;align-items:center;gap:12px;padding:16px;text-align:left;
+    background:var(--card);color:var(--text);font-size:15px}
+  .game-hub-grid button .g-icon{font-size:26px;flex-shrink:0}
+  .setup-block{margin-bottom:22px}
+  .setup-block h2{font-size:14px;color:var(--text2);margin:0 0 10px;font-weight:600}
+  .chip-row{display:flex;gap:8px}
+  .chip{flex:1;padding:12px 6px;border-radius:10px;background:var(--card);color:var(--text2);
+    font-size:13px;text-align:center;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+  .chip.selected{border-color:var(--accent);color:var(--text)}
+  .game-status-line{text-align:center;font-size:14px;color:var(--text2);margin-bottom:12px;min-height:20px}
+  .board-wrap{width:100%;aspect-ratio:1/1;margin-bottom:16px;border-radius:10px;overflow:hidden;
+    background:var(--card);display:grid}
+  .sq{display:flex;align-items:center;justify-content:center;position:relative;font-size:min(7vw,28px);
+    user-select:none;cursor:pointer}
+  .sq.light{background:#2a323b}
+  .sq.dark{background:#1b2128}
+  .sq.chess-white{color:#f0f0f0}
+  .sq.chess-black{color:#f0f0f0;text-shadow:0 0 0 currentColor}
+  .sq .dot{position:absolute;width:22%;height:22%;border-radius:50%;background:var(--accent);opacity:.55}
+  .sq.dot-capture{box-shadow:inset 0 0 0 3px var(--accent)}
+  .sq.sel{box-shadow:inset 0 0 0 3px #fff}
+  .piece-lt{color:#f0f0f0}
+  .piece-dk{color:#0a0e12}
+  .cp{width:70%;height:70%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .cp.pl{background:#e8e8e8;color:#1b2128}
+  .cp.pd{background:#3a4552;color:#f0f0f0;box-shadow:inset 0 0 0 2px #1b2128}
+  .cp.king::after{content:'♛';font-size:16px}
+  .gp{position:relative;width:78%;height:78%;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;font-size:min(6vw,22px)}
+  .gp.side-w{background:#e8e8e8;color:#1b2128}
+  .gp.side-b{background:#3a4552;color:#f0f0f0;box-shadow:inset 0 0 0 2px #1b2128}
+  .gp-hp{position:absolute;bottom:2px;left:10%;right:10%;height:3px;background:rgba(0,0,0,.35);
+    border-radius:2px;overflow:hidden}
+  .gp-hp-fill{height:100%;background:#22c55e}
+  .gp-lvl{position:absolute;top:0;right:1px;font-size:9px;font-weight:700;color:var(--accent);
+    text-shadow:0 0 2px rgba(0,0,0,.8)}
+  .shield-hint{position:absolute;top:4px;left:4px;width:7px;height:7px;border-radius:50%;
+    background:#9aa3ad;opacity:.75;z-index:1}
+  .go-wrap{width:100%;aspect-ratio:1/1;margin-bottom:16px;background:#b98a4e14;border-radius:10px;
+    padding:4%;box-sizing:border-box}
+  .go-grid{width:100%;height:100%;display:grid;position:relative}
+  .go-pt{position:relative;cursor:pointer}
+  .go-pt::before,.go-pt::after{content:'';position:absolute;background:#5b6672}
+  .go-pt::before{left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px)}
+  .go-pt::after{top:50%;left:0;right:0;height:1px;transform:translateY(-.5px)}
+  .go-pt.edge-t::before{top:50%}
+  .go-pt.edge-b::before{bottom:50%}
+  .go-pt.edge-l::after{left:50%}
+  .go-pt.edge-r::after{right:50%}
+  .go-pt .stone{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:82%;height:82%;
+    border-radius:50%;z-index:2}
+  .go-pt .stone.black{background:radial-gradient(circle at 35% 32%,#4a4a4a,#0a0a0a)}
+  .go-pt .stone.white{background:radial-gradient(circle at 35% 32%,#fff,#c9c9c9)}
+  .game-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .game-controls button{margin-bottom:0}
+  .btn-rules{margin-left:auto;flex-shrink:0}
+  .rules-overlay{position:fixed;inset:0;background:rgba(8,10,12,.72);z-index:20;display:flex;
+    align-items:flex-end;justify-content:center}
+  .rules-sheet{width:100%;max-width:420px;max-height:82vh;overflow-y:auto;background:var(--bg);
+    border-radius:16px 16px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom))}
+  .rules-sheet h2{font-size:18px;margin:0 0 12px}
+  .rules-sheet p,.rules-sheet li{font-size:14px;color:var(--text2);line-height:1.5}
+  .rules-sheet ul{margin:0 0 12px;padding-left:20px}
+  .rules-sheet p{margin:0 0 12px}
+  .rules-sheet button{margin-top:4px}
+  .game-result{text-align:center;font-size:16px;font-weight:700;margin:0 0 14px;color:var(--accent)}
+  .assess-shape-fill{fill:var(--accent);transition:rx .3s ease}
+
+  .pdd-ticket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .pdd-ticket-grid button{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:12px 4px;background:var(--card);color:var(--text);font-size:13px;aspect-ratio:1/1}
+  .pdd-ticket-grid button .pdd-badge{font-size:11px;color:var(--text2)}
+  .pdd-ticket-grid button.pdd-done .pdd-badge{color:var(--accent)}
+  .pdd-progress-line{text-align:center;font-size:14px;color:var(--text2);margin-bottom:12px}
+  .pdd-image{width:100%;border-radius:10px;margin-bottom:14px;display:block;background:var(--card)}
+  .pdd-question{font-size:16px;line-height:1.4;margin:0 0 16px}
+  .pdd-answers{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .pdd-answer{background:var(--card);color:var(--text);text-align:left;font-size:14px;font-weight:400;
+    border:2px solid transparent}
+  .pdd-answer.correct{border-color:#22c55e;background:#16321f}
+  .pdd-answer.wrong{border-color:#ef4444;background:#331a1a}
+  .pdd-tip{background:var(--card);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);
+    line-height:1.4;margin-bottom:14px}
+  .pdd-result{text-align:center;padding:30px 0}
+  .pdd-result .pdd-score{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:8px}
+</style>
+<style id="pwd-reveal-css">
+.pwd-wrap{position:relative;display:block}
+.pwd-wrap>input{padding-right:46px!important}
+.pwd-eye{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:42px;height:42px;max-height:100%;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;margin:0;cursor:pointer;color:var(--fg-3,#888);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.pwd-eye:hover{color:var(--fg,#222)}
+.pwd-eye:focus-visible{outline:2px solid var(--accent,#e8743b);outline-offset:-2px;border-radius:8px}
+.pwd-eye svg{width:20px;height:20px;pointer-events:none}
+.pwd-eye .off{display:none}
+.pwd-eye[aria-pressed="true"] .on{display:none}
+.pwd-eye[aria-pressed="true"] .off{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="ptour" role="dialog" aria-modal="true" aria-labelledby="ptour-title" aria-hidden="true">
+    <div id="ptour-spot" class="none"></div>
+    <div class="ptour-card">
+      <div class="ptour-top"><span class="ptour-kicker">Знакомство</span><button type="button" class="ptour-skip" id="ptour-skip">Пропустить</button></div>
+      <div class="ptour-title" id="ptour-title"></div>
+      <div class="ptour-text" id="ptour-text" aria-live="polite"></div>
+      <div class="ptour-dots" id="ptour-dots" aria-hidden="true"></div>
+      <div class="ptour-nav">
+        <button type="button" class="secondary" id="ptour-back">Назад</button>
+        <button type="button" id="ptour-next">Далее</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-create">
+    <div class="pet-topbar"><button type="button" class="pet-exit-btn" data-pet-exit aria-label="Назад">←</button></div>
+    <h1>Заведи питомца</h1>
+    <p class="hint">Придумай ему имя — характер появится из того, как ты будешь за ним ухаживать.</p>
+    <input type="text" id="input-name" placeholder="Имя питомца" maxlength="16">
+    <button id="btn-create">Создать</button>
+  </div>
+
+  <div id="screen-status" class="hidden">
+    <div class="pet-topbar"><button type="button" class="pet-exit-btn" data-pet-exit aria-label="Назад">←</button></div>
+    <div class="name" id="text-name"></div>
+    <div class="mood" id="text-mood"></div>
+    <div id="sensor-status" class="sensor-status off">Датчик шагов выключен</div>
+
+    <div class="sprite-card" id="sprite-card">
+      <span class="sprite-placeholder" id="sprite-placeholder">🦝</span>
+      <img id="sprite-img" class="hidden" alt="">
+      <div class="gold-badge" id="gold-badge" title="Золото"><span class="g-icon">🪙</span><span id="text-gold">0</span></div>
+      <button type="button" class="bio-toggle-btn" id="btn-bio-toggle" title="Биография">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+      </button>
+    </div>
+
+    <div class="rings-row">
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-satiety" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon" title="Сытость">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 6c0-1.5 1-2.5 2-3"/></svg>
+          </div>
+        </div>
+        <div class="ring-label">Сытость</div>
+        <div class="ring-value" id="text-satiety"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-fat" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon" title="Жир">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c4 5 6 8.5 6 11.5A6 6 0 0112 21a6 6 0 01-6-6.5C6 11.5 8 8 12 3z"/></svg>
+          </div>
+        </div>
+        <div class="ring-label">Жир</div>
+        <div class="ring-value" id="text-fat"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-energy" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon" title="Энергия">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          </div>
+        </div>
+        <div class="ring-label">Энергия</div>
+        <div class="ring-value" id="text-energy"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-fun" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon" title="Веселье">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.1 6.1-.6z"/></svg>
+          </div>
+        </div>
+        <div class="ring-label">Веселье</div>
+        <div class="ring-value" id="text-fun"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-steps" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon" title="Шаги">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 18c0-2 1-3 3-3.5 1.5-.4 2-1 2-2V9c0-2 1.5-3.5 3.5-3.5S16 7 16 9v2c0 1.5 1 2 2.5 2.5 1 .3 1.5 1 1.5 2v2.5c0 .5-.5 1-1 1H5c-.5 0-1-.5-1-1z"/></svg>
+          </div>
+        </div>
+        <div class="ring-label">Шаги</div>
+        <div class="ring-value" id="text-steps"></div>
+      </div>
+    </div>
+
+    <div class="rings-row hidden" id="hc-metrics">
+      <div class="ring-item" id="ring-item-hc-distance">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-hc-distance" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Дистанция">🚶</div>
+        </div>
+        <div class="ring-label">Дистанция</div>
+        <div class="ring-value" id="text-hc-distance"></div>
+      </div>
+      <div class="ring-item" id="ring-item-hc-calories">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-hc-calories" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Активные калории">🔥</div>
+        </div>
+        <div class="ring-label">Калории</div>
+        <div class="ring-value" id="text-hc-calories"></div>
+      </div>
+      <div class="ring-item" id="ring-item-hc-sleep">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-hc-sleep" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Сон">😴</div>
+        </div>
+        <div class="ring-label">Сон</div>
+        <div class="ring-value" id="text-hc-sleep"></div>
+      </div>
+      <div class="ring-item" id="ring-item-hc-exercise">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-hc-exercise" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Тренировка">🏋️</div>
+        </div>
+        <div class="ring-label">Тренировка</div>
+        <div class="ring-value" id="text-hc-exercise"></div>
+      </div>
+      <div class="ring-item" id="ring-item-hc-heart">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-hc-heart" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Пульс">❤️</div>
+        </div>
+        <div class="ring-label">Пульс</div>
+        <div class="ring-value" id="text-hc-heart"></div>
+      </div>
+    </div>
+
+    <div class="rings-row hidden" id="kbju-metrics">
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-kcal" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Калории">🍽️</div>
+        </div>
+        <div class="ring-label">Калории</div>
+        <div class="ring-value" id="text-kcal"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-protein" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Белки">🥩</div>
+        </div>
+        <div class="ring-label">Белки</div>
+        <div class="ring-value" id="text-protein"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-macro-fat" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Жиры">🧈</div>
+        </div>
+        <div class="ring-label">Жиры</div>
+        <div class="ring-value" id="text-macro-fat"></div>
+      </div>
+      <div class="ring-item">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-fill" id="ring-carb" cx="32" cy="32" r="28"></circle>
+          </svg>
+          <div class="ring-icon emoji" title="Углеводы">🍞</div>
+        </div>
+        <div class="ring-label">Углеводы</div>
+        <div class="ring-value" id="text-carb"></div>
+      </div>
+    </div>
+
+    <div class="bodycomp-card hidden" id="bodycomp-card">
+      <div class="bodycomp-title-row">
+        <div class="bodycomp-title">⚖️ Баланс калорий и состав тела (оценка)</div>
+        <button type="button" id="btn-bodycomp-info" class="bc-info-btn" title="Как это считается">?</button>
+      </div>
+      <div class="bodycomp-norm" id="bc-norm-line"></div>
+      <div class="bodycomp-row"><span>Баланс калорий за день</span><span id="bc-balance"></span></div>
+      <div class="bodycomp-row"><span>Изменение массы — жиры</span><span id="bc-fat"></span></div>
+      <div class="bodycomp-row"><span>Изменение массы — белки</span><span id="bc-protein"></span></div>
+      <div class="bodycomp-row"><span>Изменение массы — углеводы</span><span id="bc-carb"></span></div>
+      <div class="bodycomp-row"><span>Мышечная масса</span><span id="bc-muscle"></span></div>
+      <div class="bodycomp-row"><span>Жировая масса</span><span id="bc-fatmass"></span></div>
+      <div class="bodycomp-row"><span>Мышц — благодаря тренировкам</span><span id="bc-muscle-workout"></span></div>
+      <div class="bodycomp-row"><span>Жира сожжено — благодаря тренировкам</span><span id="bc-fatburn-workout"></span></div>
+      <div class="bodycomp-hint">Считаем, что вы съедаете свою расчётную норму калорий и БЖУ. Грубая оценка на основе базового обмена, активности и стандартных коэффициентов — не заменяет реальные измерения состава тела.</div>
+    </div>
+
+    <div class="meals-card" id="meals-card">
+      <div class="meals-title-row">
+        <div class="meals-title">🍽️ Приёмы пищи сегодня</div>
+        <button type="button" id="btn-meals-info" class="bc-info-btn" title="Как это работает">?</button>
+      </div>
+      <div class="meals-list" id="meals-list"></div>
+      <div class="meals-empty" id="meals-empty">Ещё не добавлено ни одного приёма пищи — норма выше пока считается по предположению.</div>
+      <div class="meals-total" id="meals-total"></div>
+      <button type="button" id="btn-meal-add" class="secondary">+ Добавить приём пищи</button>
+    </div>
+
+    <div class="workouts-card hidden" id="workouts-card">
+      <div class="workouts-title">Тренировки сегодня</div>
+      <div id="workouts-list"></div>
+    </div>
+
+    <div class="bio-card hidden" id="bio-card">
+      <div class="weight-row">
+        <label for="input-weight">Ваш вес, кг</label>
+        <input type="number" id="input-weight" min="20" max="300" step="0.5" placeholder="70">
+      </div>
+      <div class="weight-row">
+        <label for="input-height">Ваш рост, см</label>
+        <input type="number" id="input-height" min="100" max="250" step="1" placeholder="170">
+      </div>
+      <div class="weight-row">
+        <label for="input-age">Ваш возраст, лет</label>
+        <input type="number" id="input-age" min="5" max="120" step="1" placeholder="30">
+      </div>
+      <div class="weight-row">
+        <label for="input-gender">Пол</label>
+        <select id="input-gender">
+          <option value="">—</option>
+          <option value="m">Мужской</option>
+          <option value="f">Женский</option>
+        </select>
+      </div>
+      <p class="weight-hint">Используется для оценки калорий по шагам и показателя "сожжено жира", если Health Connect их не считает (так делают некоторые фитнес-браслеты).</p>
+      <div class="weight-row">
+        <label for="input-bodyfat">Ваш % жира тела (если знаете)</label>
+        <input type="number" id="input-bodyfat" min="3" max="60" step="0.1" placeholder="20">
+      </div>
+      <p class="weight-hint">Заполните вручную, если ваши умные весы не передают % жира тела в Health Connect (некоторые приложения, например Zepp Life, показывают его только у себя и не пишут в Health Connect). Если Health Connect всё же пришлёт это значение — оно заменит введённое здесь.</p>
+      <label for="input-bio" class="bio-label">Биография</label>
+      <textarea id="input-bio" rows="4" maxlength="2000" placeholder="Характер, история, привычки питомца..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button id="btn-chat" class="secondary">Поговорить</button>
+      <button id="btn-assess" class="secondary">Оценить состояние</button>
+      <button id="btn-sensor" class="secondary">Включить датчик шагов</button>
+      <button id="btn-sync-steps" class="secondary hidden">Обновить шаги сейчас</button>
+      <button id="btn-hc-info" class="secondary">ℹ️ Информация о показателях</button>
+      <button id="btn-games" class="secondary">Игры</button>
+      <button id="btn-pdd" class="secondary">Билеты ПДД</button>
+      <button id="btn-sprout" class="secondary">🌱 Росток</button>
+      <button id="btn-shop" class="secondary">🛍️ Магазин</button>
+      <button id="btn-inventory" class="secondary">🎒 Инвентарь</button>
+    </div>
+
+    <p class="footer-hint" id="text-hint"></p>
+    <button id="btn-pet-tour" class="ghost">Показать обучение</button>
+    <button id="btn-reset" class="ghost">Начать заново</button>
+  </div>
+
+  <div id="screen-chat" class="hidden">
+    <div class="chat-header">
+      <button id="btn-chat-back">←</button>
+      <h1 id="chat-title">Питомец</h1>
+    </div>
+    <div id="chat-login">
+      <p class="hint">Чат доступен только с аккаунта Alliby yarich92@gmail.com. Войдите, чтобы поговорить с питомцем.</p>
+      <input type="email" id="chat-login-email" placeholder="Email" autocomplete="username">
+      <input type="password" id="chat-login-password" placeholder="Пароль" autocomplete="current-password">
+      <button id="btn-chat-login">Войти</button>
+    </div>
+    <div class="chat-log hidden" id="chat-log"></div>
+    <div class="chat-input-row hidden" id="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Напишите питомцу..." maxlength="300">
+      <button id="btn-chat-send">Отправить</button>
+    </div>
+  </div>
+
+  <div id="screen-games" class="hidden">
+    <div class="game-header">
+      <button id="btn-games-back">←</button>
+      <h1>Игры</h1>
+    </div>
+    <div class="game-hub-grid">
+      <button type="button" data-game="chess"><span class="g-icon">♟️</span> Шахматы</button>
+      <button type="button" data-game="checkers"><span class="g-icon">🔴</span> Шашки</button>
+      <button type="button" data-game="go"><span class="g-icon">⚫</span> Го</button>
+      <button type="button" data-game="guard"><span class="g-icon">🛡️</span> Страж и клинок</button>
+    </div>
+  </div>
+
+  <div id="screen-sprout" class="hidden">
+    <div class="game-header">
+      <button id="btn-sprout-back">←</button>
+      <h1>Росток</h1>
+    </div>
+    <div class="sprite-card">
+      <canvas id="sprout-canvas" width="600" height="600" style="width:100%;height:100%;display:block"></canvas>
+    </div>
+    <p class="footer-hint">
+      Ассет: «Interactive Sprout Mascot | Tamagotchi Mini-Game» — автор design-QYBVX,
+      <a href="https://www.rive.app/marketplace/28531-53934-interactive-sprout-mascot-or-tamagotchi-mini-game/" target="_blank" rel="noopener">Rive Marketplace</a>,
+      лицензия CC BY.
+    </p>
+  </div>
+
+  <div id="screen-shop" class="hidden">
+    <div class="game-header">
+      <button id="btn-shop-back">←</button>
+      <h1>Магазин</h1>
+      <div class="gold-badge" style="position:static" id="gold-badge-shop"><span class="g-icon">🪙</span><span id="text-gold-shop">0</span></div>
+    </div>
+    <div class="shop-list" id="shop-list"></div>
+  </div>
+
+  <div id="screen-inventory" class="hidden">
+    <div class="game-header">
+      <button id="btn-inventory-back">←</button>
+      <h1>Инвентарь</h1>
+    </div>
+    <div class="inventory-list" id="inventory-list"></div>
+  </div>
+
+  <div id="screen-game-setup" class="hidden">
+    <div class="game-header">
+      <button id="btn-setup-back">←</button>
+      <h1 id="setup-title">Настройка</h1>
+    </div>
+    <div class="setup-block">
+      <h2>Сложность</h2>
+      <div class="chip-row" id="setup-difficulty">
+        <div class="chip" data-diff="1">Лёгкая</div>
+        <div class="chip" data-diff="2">Средняя</div>
+        <div class="chip" data-diff="3">Сложная</div>
+      </div>
+    </div>
+    <div class="setup-block">
+      <h2>Играть за</h2>
+      <div class="chip-row" id="setup-color">
+        <div class="chip" data-color="w">Белые</div>
+        <div class="chip" data-color="b">Чёрные</div>
+        <div class="chip" data-color="r">Случайно</div>
+      </div>
+    </div>
+    <button id="btn-game-start">Начать игру</button>
+  </div>
+
+  <div id="screen-game-board" class="hidden">
+    <div class="game-header">
+      <button id="btn-board-back">←</button>
+      <h1 id="board-title">Игра</h1>
+      <button id="btn-game-rules" class="btn-rules">Правила</button>
+    </div>
+    <div class="game-status-line" id="game-status-line"></div>
+    <div class="game-result hidden" id="game-result"></div>
+    <div class="board-wrap hidden" id="board-wrap"></div>
+    <div class="go-wrap hidden" id="go-wrap"><div class="go-grid" id="go-grid"></div></div>
+    <div class="game-controls">
+      <button id="btn-game-pass" class="secondary hidden">Пас</button>
+      <button id="btn-game-resign" class="secondary">Сдаться</button>
+    </div>
+  </div>
+
+  <div id="rules-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet">
+      <h2 id="rules-title">Правила</h2>
+      <div id="rules-body"></div>
+      <button id="btn-rules-close">Понятно</button>
+    </div>
+  </div>
+
+  <div id="assess-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet" style="text-align:center">
+      <h2 id="assess-title">Состояние</h2>
+      <svg id="assess-svg" viewBox="0 0 320 320" style="width:100%;max-width:240px;aspect-ratio:1/1;display:block;margin:0 auto 14px">
+        <ellipse id="assess-shape" class="assess-shape-fill" cx="160" cy="160" rx="60" ry="140"></ellipse>
+      </svg>
+      <p id="assess-text"></p>
+      <button id="btn-assess-close">Понятно</button>
+    </div>
+  </div>
+
+  <div id="hc-info-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet">
+      <h2>Показатели Health Connect</h2>
+      <p>Из Health Connect собираются шесть показателей за сегодня: шаги, дистанция, активные калории, сон, минуты тренировки и средний пульс.</p>
+      <ul>
+        <li><b>Шаги</b> — влияют на общий уровень активности питомца, а он, в свою очередь, на настроение. Если калории и тренировка не переданы, шаги также используются для баланса Жира.</li>
+        <li><b>Калории + тренировка</b> — вместе задают уровень активности для баланса Жира: чем он выше относительно сытости, тем меньше растёт Жир. Как только Health Connect передаёт хотя бы одну из этих метрик, она заменяет собой расчёт по шагам.</li>
+        <li><b>Сон</b> — напрямую задаёт Энергию питомца, пока доступны данные о сне. В этом случае прогулка, спорт, игра и отдых больше не тратят и не восстанавливают Энергию — за неё отвечает только сон.</li>
+        <li><b>Дистанция</b> и <b>пульс</b> — только отображаются на кольцах, на характеристики питомца и на золото не влияют.</li>
+      </ul>
+      <p>Золото от Health Connect не зависит: оно начисляется за добавление приёма пищи и за победы в играх.</p>
+      <button id="btn-hc-info-close">Понятно</button>
+    </div>
+  </div>
+
+  <div id="bodycomp-info-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet">
+      <h2>Как считается баланс калорий и состав тела</h2>
+      <p>Мы предполагаем, что за день вы съедаете свою расчётную норму калорий и БЖУ (белков, жиров, углеводов) — норма считается по формуле базового обмена (BMR) с учётом сидячей активности. Если в Health Connect есть данные умных весов (вес и % жира тела), используется более точная формула Кэтча-МакАрдла — она опирается на реальную безжировую массу, а не на возраст и пол как приближение к ней. Иначе используется формула Миффлина-Сан Жеора по вручную введённым весу, росту, возрасту и полу.</p>
+      <ul>
+        <li><b>Баланс калорий за день</b> — разница между съеденной нормой и потраченными калориями (базовый обмен + активность/тренировки) на текущий момент дня.</li>
+        <li><b>Изменение массы — жиры/белки/углеводы</b> — на сколько грамм изменилась бы масса тела за счёт каждого макронутриента отдельно, если бы весь дневной баланс калорий пришёлся именно на него (жир даёт ≈7.7 ккал/г, белки и углеводы — ≈4 ккал/г).</li>
+        <li><b>Мышечная масса</b> и <b>жировая масса</b> — тот же общий баланс калорий, но разделённый на мышечную и жировую ткань: при профиците и наличии тренировок часть массы условно идёт в мышцы, при дефиците без тренировок часть возможных потерь условно идёт в мышцы (риск катаболизма).</li>
+        <li><b>Мышц / жира сожжено — благодаря тренировкам</b> — вклад именно сегодняшних тренировок: сожжённые тренировкой калории пересчитаны в граммы жира, а часть калорий (если есть профицит) — в граммы потенциального мышечного роста.</li>
+      </ul>
+      <p>Это грубая оценка на стандартных коэффициентах, а не измерение — она не заменяет реальные весы или анализ состава тела.</p>
+      <button id="btn-bodycomp-info-close">Понятно</button>
+    </div>
+  </div>
+
+  <div id="meals-info-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet">
+      <h2>Приёмы пищи</h2>
+      <p>Пока приёмов пищи за сегодня нет, «Баланс калорий и состав тела» выше считает съеденное по предположению (норма пропорционально прошедшей части дня). Как только вы добавите хотя бы один реальный приём пищи — баланс начинает считаться по факту.</p>
+      <ul>
+        <li><b>Поиск</b> — ищет продукт по названию в базе FatSecret, дальше можно указать граммы или количество порций.</li>
+        <li><b>Штрихкод</b> — сканирует штрихкод камерой (если устройство поддерживает) или принимает цифры вручную, затем ищет товар в FatSecret по коду.</li>
+        <li><b>Вручную</b> — ввод калорий и БЖУ напрямую, если продукта нет в базе или для быстрой прикидки.</li>
+      </ul>
+      <p>Поиск и штрихкод требуют доступа к FatSecret API — если сервис ещё не настроен или не отвечает, останется ручной ввод.</p>
+      <p>Сытость питомца тоже завязана на этот лог: она плавно снижается к завтраку (10:00), обеду (18:00) и ужину (23:00), доходя до 0%, если приём пищи не добавлен вовремя, и мгновенно восстанавливается до 100%, как только вы добавите приём пищи (любого типа).</p>
+      <button id="btn-meals-info-close">Понятно</button>
+    </div>
+  </div>
+
+  <div id="meal-add-overlay" class="rules-overlay hidden">
+    <div class="rules-sheet">
+      <h2>Добавить приём пищи</h2>
+      <div class="meal-tabs" id="meal-tabs">
+        <button type="button" class="meal-tab active" data-tab="search">Поиск</button>
+        <!-- Штрихкод работает через Open Food Facts (у FatSecret-аккаунта нет scope "barcode") -->
+        <button type="button" class="meal-tab" data-tab="barcode">Штрихкод</button>
+        <button type="button" class="meal-tab" data-tab="manual">Вручную</button>
+      </div>
+
+      <div class="meal-tab-panel" id="meal-panel-search">
+        <div class="meal-search-row">
+          <input lang="ru" type="text" inputmode="text" autocomplete="off" id="meal-search-input" placeholder="Например: гречка, куриная грудка">
+          <button type="button" id="btn-meal-search">Искать</button>
+        </div>
+        <div id="meal-search-results" class="meal-search-results"></div>
+      </div>
+
+      <div class="meal-tab-panel hidden" id="meal-panel-barcode">
+        <video id="meal-barcode-video" class="meal-barcode-video hidden" playsinline muted></video>
+        <button type="button" id="btn-meal-barcode-scan" class="secondary">📷 Сканировать камерой</button>
+        <div class="meal-barcode-manual">
+          <input type="text" id="meal-barcode-input" placeholder="Или введите код цифрами" inputmode="numeric">
+          <button type="button" id="btn-meal-barcode-lookup">Найти</button>
+        </div>
+        <div id="meal-barcode-status" class="meal-barcode-status"></div>
+      </div>
+
+      <div class="meal-tab-panel hidden" id="meal-panel-manual">
+        <div class="weight-row"><label for="meal-manual-type">Приём пищи</label>
+          <select id="meal-manual-type">
+            <option value="breakfast">Завтрак</option>
+            <option value="lunch">Обед</option>
+            <option value="snack">Полдник</option>
+            <option value="dinner">Ужин</option>
+          </select>
+        </div>
+        <div class="weight-row"><label for="meal-manual-name">Название</label><input type="text" id="meal-manual-name" placeholder="Обед"></div>
+        <div class="weight-row"><label for="meal-manual-kcal">Калории, ккал</label><input type="number" id="meal-manual-kcal" min="0" step="1"></div>
+        <div class="weight-row"><label for="meal-manual-protein">Белки, г</label><input type="number" id="meal-manual-protein" min="0" step="1"></div>
+        <div class="weight-row"><label for="meal-manual-fat">Жиры, г</label><input type="number" id="meal-manual-fat" min="0" step="1"></div>
+        <div class="weight-row"><label for="meal-manual-carb">Углеводы, г</label><input type="number" id="meal-manual-carb" min="0" step="1"></div>
+        <button type="button" id="btn-meal-manual-add">Добавить</button>
+      </div>
+
+      <div class="meal-tab-panel hidden" id="meal-panel-portion">
+        <div class="meal-portion-name" id="meal-portion-name"></div>
+        <div class="weight-row"><label for="meal-portion-amount" id="meal-portion-amount-label">Количество, г</label><input type="number" id="meal-portion-amount" min="1" step="1"></div>
+        <div class="meal-portion-preview" id="meal-portion-preview"></div>
+        <button type="button" id="btn-meal-portion-add">Добавить</button>
+        <button type="button" id="btn-meal-portion-back" class="ghost">← Назад к результатам</button>
+      </div>
+
+      <button type="button" id="btn-meal-add-close" class="ghost">Закрыть</button>
+    </div>
+  </div>
+
+  <div id="screen-pdd-tickets" class="hidden">
+    <div class="game-header">
+      <button id="btn-pdd-back">←</button>
+      <h1>Билеты ПДД</h1>
+    </div>
+    <p class="hint">Категория A,B — 40 билетов по 20 вопросов, как на настоящем экзамене.</p>
+    <div class="pdd-ticket-grid" id="pdd-ticket-grid"></div>
+  </div>
+
+  <div id="screen-pdd-question" class="hidden">
+    <div class="game-header">
+      <button id="btn-pdd-question-back">←</button>
+      <h1 id="pdd-question-title">Билет</h1>
+    </div>
+    <div id="pdd-question-view">
+      <div class="pdd-progress-line" id="pdd-progress-line"></div>
+      <img class="pdd-image hidden" id="pdd-image">
+      <p class="pdd-question" id="pdd-question-text"></p>
+      <div class="pdd-answers" id="pdd-answers"></div>
+      <div class="pdd-tip hidden" id="pdd-tip"></div>
+      <button id="btn-pdd-next" class="hidden">Следующий вопрос</button>
+    </div>
+    <div id="pdd-result-view" class="pdd-result hidden">
+      <div class="pdd-score" id="pdd-score"></div>
+      <p class="hint" id="pdd-result-text"></p>
+      <button id="btn-pdd-result-back">К списку билетов</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(function(){
+  var toastTimer = null;
+  function showToast(msg, ms){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.add('hidden'); }, ms || 2600);
+  }
+  'use strict';
+
+  // ── Модель питомца — та же схема таймстемп-настройки (settle), что в нативном
+  // MVP, расширенная под сытость/энергию/веселье и новые активности. ─────────
+  // Сытость больше не декеится линейно по времени — она считается по расписанию
+  // приёмов пищи: плавно идёт к 0 к каждому дедлайну (завтрак/обед/ужин) и
+  // мгновенно восстанавливается до 100 при добавлении любого приёма пищи. См.
+  // computeSatiety().
+  var SATIETY_CHECKPOINTS_MIN = [10 * 60, 18 * 60, 23 * 60]; // 10:00, 18:00, 23:00
+
+  var FAT_RATE_PER_HOUR = 1.6;
+
+  var ENERGY_DECAY_PER_HOUR = 3.0;
+  var FUN_DECAY_PER_HOUR = 3.5;
+
+  var DAILY_STEP_GOAL = 6000;
+
+  // ── Дневные ориентиры для колец остальных метрик Health Connect (сверх
+  // шагов) — чисто для наполнения кольца, не завязаны на геймплей. Пульс —
+  // не "цель", а условная шкала 40-180 уд/мин (от почти состояния покоя до
+  // пиковой нагрузки), чтобы визуально тоже влезал в кольцо-прогресс. ──────
+  var DAILY_DISTANCE_GOAL_M = 5000;
+  var DAILY_ACTIVE_CALORIES_GOAL = 500;
+  var DAILY_SLEEP_GOAL_MIN = 480;
+  var DAILY_EXERCISE_GOAL_MIN = 30;
+  var HEART_RATE_SCALE_MIN = 40;
+  var HEART_RATE_SCALE_MAX = 180;
+
+  // ── Спрайт питомца: одна статичная картинка на все состояния. ──────────
+  var SPRITE_DEFAULT = './assets/raccoon.svg';
+  function setSprite(src){
+    var img = document.getElementById('sprite-img');
+    var ph = document.getElementById('sprite-placeholder');
+    if (src){ img.src = src; img.classList.remove('hidden'); ph.classList.add('hidden'); }
+    else { img.classList.add('hidden'); ph.classList.remove('hidden'); }
+  }
+  function applySprite(pet){
+    setSprite(SPRITE_DEFAULT);
+  }
+
+  var LS_PREFIX = 'tama_';
+  function lsGet(key, fallback){
+    var v = localStorage.getItem(LS_PREFIX + key);
+    return v === null ? fallback : v;
+  }
+  function lsSet(key, val){ localStorage.setItem(LS_PREFIX + key, String(val)); }
+  function lsNum(key, fallback){ var v = lsGet(key, null); return v === null ? fallback : parseFloat(v); }
+
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function hasPet(){ return localStorage.getItem(LS_PREFIX + 'name') !== null; }
+
+  function loadPet(){
+    return {
+      name: lsGet('name', 'Питомец'),
+      satiety: lsNum('satiety', 75),
+      fat: lsNum('fat', 20),
+      energy: lsNum('energy', 80),
+      fun: lsNum('fun', 60),
+      createdAt: lsNum('createdAt', Date.now()),
+      lastUpdatedAt: lsNum('lastUpdatedAt', Date.now())
+    };
+  }
+  function savePet(p){
+    lsSet('name', p.name); lsSet('satiety', p.satiety); lsSet('fat', p.fat);
+    lsSet('energy', p.energy); lsSet('fun', p.fun);
+    lsSet('createdAt', p.createdAt); lsSet('lastUpdatedAt', p.lastUpdatedAt);
+  }
+  function createPet(name){
+    var now = Date.now();
+    savePet({
+      name: name, satiety: 75, fat: 20, energy: 80, fun: 60,
+      createdAt: now, lastUpdatedAt: now
+    });
+  }
+  function resetAll(){
+    Object.keys(localStorage).filter(function(k){ return k.indexOf(LS_PREFIX) === 0; })
+      .forEach(function(k){ localStorage.removeItem(k); });
+  }
+
+  // ── Золото и инвентарь ──────────────────────────────────────────────────
+  function getGold(){ return lsNum('gold', 0); }
+  function addGold(amount){
+    lsSet('gold', getGold() + amount);
+    updateGoldDisplay();
+  }
+  function updateGoldDisplay(){
+    var val = String(getGold());
+    var a = document.getElementById('text-gold'), b = document.getElementById('text-gold-shop');
+    if (a) a.textContent = val;
+    if (b) b.textContent = val;
+  }
+
+  var SHOP_ITEMS = [
+    { id: 'bow',      icon: '🎀', name: 'Бантик',            desc: 'Милый аксессуар на шею', price: 15 },
+    { id: 'ball',     icon: '🎾', name: 'Мячик',              desc: 'Любимая игрушка для игр', price: 20 },
+    { id: 'bone',     icon: '🦴', name: 'Косточка',           desc: 'Вкусное лакомство',        price: 25 },
+    { id: 'hat',      icon: '🎩', name: 'Цилиндр',            desc: 'Стильный головной убор',   price: 40 },
+    { id: 'glasses',  icon: '🕶️', name: 'Очки',               desc: 'Крутые тёмные очки',       price: 45 },
+    { id: 'blanket',  icon: '🧣', name: 'Плед',               desc: 'Уютно для отдыха',         price: 35 },
+    { id: 'medal',    icon: '🏅', name: 'Медаль чемпиона',    desc: 'За победы в играх',         price: 80 },
+    { id: 'crown',    icon: '👑', name: 'Корона',             desc: 'Для истинного короля',      price: 150 }
+  ];
+
+  function getInventory(){
+    try { return JSON.parse(lsGet('inventory', '{}')) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveInventory(inv){ lsSet('inventory', JSON.stringify(inv)); }
+
+  function buyItem(itemId){
+    var item = SHOP_ITEMS.filter(function(i){ return i.id === itemId; })[0];
+    if (!item) return;
+    if (getGold() < item.price){ showToast('Недостаточно золота'); return; }
+    addGold(-item.price);
+    var inv = getInventory();
+    inv[itemId] = (inv[itemId] || 0) + 1;
+    saveInventory(inv);
+    showToast('Куплено: ' + item.name);
+    renderShop();
+  }
+
+  function renderShop(){
+    updateGoldDisplay();
+    var list = document.getElementById('shop-list');
+    list.innerHTML = '';
+    SHOP_ITEMS.forEach(function(item){
+      var row = document.createElement('div');
+      row.className = 'shop-item';
+      var afford = getGold() >= item.price;
+      row.innerHTML =
+        '<div class="s-icon">' + item.icon + '</div>' +
+        '<div class="s-info"><div class="s-name">' + item.name + '</div>' +
+        '<div class="s-desc">' + item.desc + '</div></div>' +
+        '<button' + (afford ? '' : ' disabled') + '>' + item.price + ' 🪙</button>';
+      row.querySelector('button').addEventListener('click', function(){ buyItem(item.id); });
+      list.appendChild(row);
+    });
+  }
+
+  function renderInventory(){
+    var list = document.getElementById('inventory-list');
+    list.innerHTML = '';
+    var inv = getInventory();
+    var ownedIds = Object.keys(inv).filter(function(id){ return inv[id] > 0; });
+    if (!ownedIds.length){
+      list.innerHTML = '<p class="inventory-empty">Пока пусто — загляните в магазин</p>';
+      return;
+    }
+    ownedIds.forEach(function(id){
+      var item = SHOP_ITEMS.filter(function(i){ return i.id === id; })[0];
+      if (!item) return;
+      var row = document.createElement('div');
+      row.className = 'inventory-item';
+      row.innerHTML =
+        '<div class="s-icon">' + item.icon + '</div>' +
+        '<div class="s-info"><div class="s-name">' + item.name + '</div>' +
+        '<div class="s-count">Количество: ' + inv[id] + '</div></div>';
+      list.appendChild(row);
+    });
+  }
+
+  function clamp(v){ return Math.max(0, Math.min(100, v)); }
+
+  // ── Цвет прогресс-бара: ниже 15% — красный, ниже 60% — жёлтый, выше —
+  // плавный переход от жёлтого к зелёному по мере роста заполнения. ─────────
+  var BAR_RED = 'rgb(239,68,68)';
+  var BAR_YELLOW = [234, 179, 8];
+  var BAR_GREEN = [34, 197, 94];
+  function mixColor(c1, c2, t){
+    return 'rgb(' + Math.round(c1[0] + (c2[0]-c1[0])*t) + ',' +
+      Math.round(c1[1] + (c2[1]-c1[1])*t) + ',' +
+      Math.round(c1[2] + (c2[2]-c1[2])*t) + ')';
+  }
+  function barColor(pct){
+    if (pct < 15) return BAR_RED;
+    if (pct < 60) return mixColor(BAR_YELLOW, BAR_YELLOW, 0);
+    return mixColor(BAR_YELLOW, BAR_GREEN, (pct-60)/40);
+  }
+  var RING_R = 28;
+  var RING_C = 2 * Math.PI * RING_R;
+  function setRing(id, pct){
+    pct = clamp(pct);
+    var el = document.getElementById(id);
+    el.style.strokeDashoffset = RING_C * (1 - pct / 100);
+    el.style.stroke = barColor(pct);
+  }
+
+  // Считает сытость на момент now по логу приёмов пищи за сегодня — чистая
+  // функция без зависимости от предыдущего значения, поэтому самовосстанав-
+  // ливается корректно даже если приложение не открывали много часов.
+  // Опорная точка — последний приём пищи (сытость=100 в момент его добавления)
+  // или полночь, если приёмов ещё не было. От опорной точки сытость линейно
+  // идёт к 0 к ближайшему дедлайну из SATIETY_CHECKPOINTS_MIN, наступающему
+  // позже опорной точки, и остаётся на 0, если дедлайн уже прошёл, а новый
+  // приём пищи ещё не добавлен (не поднимается сама по себе с началом
+  // следующего отрезка).
+  function computeSatiety(now, todayMeals){
+    var d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    var dayStart = d.getTime();
+    var checkpoints = SATIETY_CHECKPOINTS_MIN.map(function(min){ return dayStart + min * 60000; });
+    var lastMealTs = null;
+    todayMeals.forEach(function(m){
+      if (m.ts <= now && (lastMealTs === null || m.ts > lastMealTs)) lastMealTs = m.ts;
+    });
+    var refTs = lastMealTs !== null ? lastMealTs : dayStart;
+    var nextCp = null;
+    for (var i = 0; i < checkpoints.length; i++){
+      if (checkpoints[i] > refTs){ nextCp = checkpoints[i]; break; }
+    }
+    if (nextCp === null) nextCp = dayStart + 24 * 3600000; // после ужина держим до полуночи
+    if (now <= refTs) return 100;
+    if (now >= nextCp) return 0;
+    return 100 * (1 - (now - refTs) / (nextCp - refTs));
+  }
+  function settle(pet, now, activityLevel, hc){
+    var hours = Math.max(0, (now - pet.lastUpdatedAt) / 3600000);
+    if (hours <= 0) return pet;
+    pet.satiety = clamp(computeSatiety(now, getAllTodayMeals()));
+    var realFat = getRealBodyFatPercent();
+    if (realFat !== null) {
+      pet.fat = realFat;
+    } else {
+      var fatActivity = getFatActivityLevel(hc);
+      if (fatActivity === null) fatActivity = activityLevel;
+      var imbalance = (pet.satiety/100) - (fatActivity/100);
+      pet.fat = clamp(pet.fat + FAT_RATE_PER_HOUR * hours * imbalance);
+    }
+    var sleepEnergy = getSleepEnergyLevel(hc);
+    if (sleepEnergy !== null) {
+      pet.energy = sleepEnergy;
+    } else {
+      pet.energy = clamp(pet.energy - ENERGY_DECAY_PER_HOUR * hours);
+    }
+    pet.fun = clamp(pet.fun - FUN_DECAY_PER_HOUR * hours);
+    pet.lastUpdatedAt = now;
+    return pet;
+  }
+  function moodLabel(satiety, fat, energy, fun, activityLevel){
+    // Взвешенное среднее пяти нормированных 0..100 показателей — так ни один
+    // отдельный нулевой показатель (например, активность в день создания
+    // питомца) не утягивает итог в минус сам по себе.
+    var wellbeing = 0.30*satiety + 0.20*(100-fat) + 0.15*energy + 0.15*fun + 0.20*activityLevel;
+    if (wellbeing >= 70) return 'Отличное настроение';
+    if (wellbeing >= 50) return 'Хорошее настроение';
+    if (wellbeing >= 30) return 'Так себе';
+    if (wellbeing >= 15) return 'Плохое настроение';
+    return 'Совсем грустит';
+  }
+
+  // ── Шаги: в вебе — акселерометр (считает только пока страница открыта и
+  // видима — у веб-страницы нет фонового выполнения на телефоне). В нативном
+  // приложении — Health Connect через Capacitor-плагин Tamagotchi (см.
+  // Native shell/android/.../tamagotchi/TamagotchiPlugin.java): туда уже
+  // агрегированы шаги со всех источников (телефон/часы/браслет), поэтому
+  // счётчик там не инкрементируется, а просто перезаписывается свежим числом. ──
+  var isNative = window.Capacitor?.isNativePlatform?.() ?? false;
+
+  function getStepsState(){
+    var date = lsGet('stepsDate', '');
+    var today = todayKey();
+    if (date !== today){
+      lsSet('stepsDate', today);
+      lsSet('stepsToday', 0);
+      lsSet('bonusToday', 0);
+      return { steps: 0, bonus: 0 };
+    }
+    return { steps: lsNum('stepsToday', 0), bonus: lsNum('bonusToday', 0) };
+  }
+  function addStep(){
+    var s = getStepsState();
+    lsSet('stepsToday', s.steps + 1);
+  }
+  function setStepsFromHealthConnect(steps){
+    lsSet('stepsDate', todayKey());
+    lsSet('stepsToday', steps);
+  }
+  function getActivityLevel(){
+    var s = getStepsState();
+    var total = s.steps + s.bonus;
+    return Math.max(0, Math.min(100, Math.round(100 * total / DAILY_STEP_GOAL)));
+  }
+
+  // Наивное пик-детектирование по модулю ускорения — тот же принцип, что в
+  // простых шагомерных приложениях: считаем локальный максимум выше порога
+  // с антидребезгом по времени, чтобы не считать один шаг несколько раз.
+  var sensorActive = false;
+  var lastStepTs = 0;
+  var lastMagnitude = 0;
+  var rising = false;
+  var STEP_THRESHOLD = 11.5; // м/с², подобрано эмпирически под ходьбу в кармане/руке
+  var STEP_MIN_INTERVAL_MS = 280;
+
+  function handleMotion(e){
+    var a = e.accelerationIncludingGravity;
+    if (!a || a.x === null) return;
+    var mag = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+    var now = Date.now();
+    if (mag > STEP_THRESHOLD && !rising && (now - lastStepTs) > STEP_MIN_INTERVAL_MS){
+      rising = true;
+      lastStepTs = now;
+      addStep();
+      renderStatus();
+    } else if (mag < STEP_THRESHOLD - 2){
+      rising = false;
+    }
+    lastMagnitude = mag;
+  }
+
+  function enableSensor(){
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+      DeviceMotionEvent.requestPermission().then(function(state){
+        if (state === 'granted'){ startSensor(); } else { showToast('Без разрешения на датчик движения шаги считать нельзя.'); }
+      }).catch(function(){ showToast('Не удалось запросить доступ к датчику движения.'); });
+    } else if (typeof DeviceMotionEvent !== 'undefined'){
+      startSensor();
+    } else {
+      showToast('Этот браузер не поддерживает датчик движения.');
+    }
+  }
+  function startSensor(){
+    window.addEventListener('devicemotion', handleMotion);
+    sensorActive = true;
+    lsSet('sensorEnabled', '1');
+    updateSensorStatusUI();
+  }
+  function stopSensor(){
+    window.removeEventListener('devicemotion', handleMotion);
+    sensorActive = false;
+    updateSensorStatusUI();
+  }
+
+  // Health Connect (только нативное приложение) — заменяет акселерометр.
+  // Автообновление раз в 30 сек, пока экран открыт (см. setInterval/visibilitychange
+  // в init) + кнопка ручной синхронизации на случай, если нужны данные прямо сейчас.
+  function refreshHealthConnectSteps(manual){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return;
+    var btn = document.getElementById('btn-sync-steps');
+    if (manual && btn) btn.disabled = true;
+    window.Capacitor.Plugins.Tamagotchi.getTodaySteps().then(function(res){
+      if (res && res.available){
+        setStepsFromHealthConnect(res.steps);
+        lsSet('hcLastSync', String(Date.now()));
+      } else if (manual){
+        showToast('Не удалось получить шаги из Health Connect');
+      }
+      renderStatus();
+      updateSensorStatusUI();
+      if (btn) btn.disabled = false;
+    }).catch(function(){
+      if (manual) showToast('Не удалось получить шаги из Health Connect');
+      if (btn) btn.disabled = false;
+    });
+  }
+  function enableHealthConnect(){
+    window.Capacitor.Plugins.Tamagotchi.isAvailable().then(function(res){
+      if (!res || !res.available){
+        showToast('Установите приложение Health Connect и попробуйте снова');
+        window.Capacitor.Plugins.Tamagotchi.openHealthConnectSetup();
+        return;
+      }
+      window.Capacitor.Plugins.Tamagotchi.requestPermission().then(function(perm){
+        if (perm && perm.granted){
+          lsSet('healthConnectEnabled', '1');
+          refreshHealthConnectSteps();
+          refreshHealthConnectMetrics();
+          refreshHealthConnectBodyMetrics();
+          refreshHealthConnectNutrition();
+          showToast('Готово, шаги из Health Connect будут учитываться');
+        } else {
+          showToast('Разрешение не выдано');
+        }
+        updateSensorStatusUI();
+      });
+    }).catch(function(){ showToast('Health Connect недоступен на этом устройстве'); });
+  }
+  function disableHealthConnect(){
+    lsSet('healthConnectEnabled', '0');
+    lsSet('hcMetrics', '');
+    lsSet('hcNutrition', '');
+    updateSensorStatusUI();
+  }
+
+  // Остальные метрики Health Connect (сверх шагов) — только для отображения,
+  // на характеристики питомца и золото не влияют. Кэшируются в localStorage,
+  // чтобы сразу показать последние известные значения без ожидания сети.
+  function getHealthMetrics(){
+    try { return JSON.parse(lsGet('hcMetrics', 'null')); } catch(e){ return null; }
+  }
+  // Метрики учитываются для геймплея только если пользователь подключил Health Connect —
+  // иначе возвращаем null и весь код ниже работает по старой логике (декей + кнопки).
+  function getActiveHealthMetrics(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return null;
+    return getHealthMetrics();
+  }
+  // Калории + минуты тренировки → «уровень активности» для баланса Жира.
+  // null, если ни одна из двух метрик не пришла (разрешение не выдано на обе) — тогда
+  // settle() откатывается на старый шаго-based imbalance.
+  function getFatActivityLevel(hc){
+    if (!hc) return null;
+    var parts = [];
+    if (typeof hc.activeCaloriesKcal === 'number') parts.push(clamp(100 * hc.activeCaloriesKcal / DAILY_ACTIVE_CALORIES_GOAL));
+    if (typeof hc.exerciseMinutes === 'number') parts.push(clamp(100 * hc.exerciseMinutes / DAILY_EXERCISE_GOAL_MIN));
+    if (!parts.length) return null;
+    return parts.reduce(function(a, b){ return a + b; }, 0) / parts.length;
+  }
+  // Сон → Энергия напрямую (без декея и кнопок), пока метрика доступна.
+  function getSleepEnergyLevel(hc){
+    if (!hc || typeof hc.sleepMinutes !== 'number') return null;
+    return clamp(100 * hc.sleepMinutes / DAILY_SLEEP_GOAL_MIN);
+  }
+  // Реальный % жира тела (умные весы через Health Connect) → Жир питомца
+  // напрямую (без баланса сытость/активность и без кнопок), пока метрика
+  // доступна — по просьбе пользователя показатель питомца должен буквально
+  // равняться его собственному проценту жира, а не имитировать его.
+  function getRealBodyFatPercent(){
+    var bf = lsNum('bodyFatPercent', 0);
+    return bf > 0 ? clamp(bf) : null;
+  }
+  function refreshHealthConnectMetrics(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return;
+    // Плагин может ещё не содержать этот метод, если веб-часть уже задеплоена,
+    // а нативное приложение (APK) — ещё нет: деплой веб-ассетов и сборка APK
+    // не связаны (см. Native shell/...). Без этой проверки вызов несуществующего
+    // метода бросает синхронное исключение и в init() ломает регистрацию
+    // всех последующих обработчиков кнопок.
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.getTodayHealthMetrics !== 'function') return;
+    try {
+      plugin.getTodayHealthMetrics().then(function(res){
+        res = res || {};
+        // Некоторые фитнес-браслеты (напр. Zepp Life) считают активные калории сами
+        // по шагам и весу, но не пишут их в Health Connect отдельной записью — тогда
+        // activeCaloriesKcal приходит либо отсутствующим, либо нулевым при ненулевых
+        // шагах. В этом случае считаем калории тем же способом сами.
+        if (!res.activeCaloriesKcal){
+          var weightKg = lsNum('weightKg', 0);
+          var steps = getStepsState().steps;
+          if (weightKg > 0 && steps > 0){
+            res.activeCaloriesKcal = steps * weightKg * 0.0005;
+            res.activeCaloriesEstimated = true;
+          }
+        }
+        return refreshHealthConnectWorkouts().then(function(workouts){
+          // Если калории — наша оценка по шагам (activeCaloriesEstimated), а не
+          // реальные данные Health Connect, формула "шаги × вес" плохо отражает
+          // нагрузку не-шаговых тренировок (силовая, велосипед и т.д.) — добавляем
+          // калории тренировок сверху. Если же калории реальные из Health Connect,
+          // считаем что источник их уже учёл — иначе задвоим одну и ту же нагрузку.
+          var workoutsKcal = sumWorkoutsKcal(workouts);
+          if (res.activeCaloriesEstimated && workoutsKcal > 0){
+            res.activeCaloriesKcal += workoutsKcal;
+          }
+          lsSet('hcMetrics', JSON.stringify(res));
+          renderHealthMetrics();
+          renderBodyComposition();
+        });
+      }).catch(function(){});
+    } catch (e) {}
+  }
+
+  // ── Тренировки за сегодня (Health Connect) — отдельные сессии с началом/концом,
+  // средним пульсом за КАЖДУЮ тренировку и оценкой калорий по MET, в отличие от
+  // exerciseMinutes/avgHeartRateBpm выше, которые лишь суточные агрегаты. ────────
+  function refreshHealthConnectWorkouts(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return Promise.resolve([]);
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.getTodayWorkouts !== 'function') return Promise.resolve([]);
+    return plugin.getTodayWorkouts().then(function(res){
+      var workouts = (res && res.workouts) || [];
+      lsSet('hcWorkouts', JSON.stringify(workouts));
+      renderWorkoutsList(workouts);
+      return workouts;
+    }).catch(function(){ return []; });
+  }
+  function getCachedWorkouts(){
+    try { return JSON.parse(lsGet('hcWorkouts', '[]')) || []; } catch(e){ return []; }
+  }
+  function sumWorkoutsKcal(workouts){
+    return (workouts || []).reduce(function(sum, w){
+      return sum + (typeof w.caloriesKcal === 'number' ? w.caloriesKcal : 0);
+    }, 0);
+  }
+  function renderWorkoutsList(workouts){
+    var card = document.getElementById('workouts-card');
+    var list = document.getElementById('workouts-list');
+    list.innerHTML = '';
+    if (!workouts || !workouts.length){ card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    workouts.forEach(function(w){
+      var row = document.createElement('div');
+      row.className = 'workout-row';
+      var t = function(ms){ var d = new Date(ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+      var meta = [t(w.startTimeMs) + '–' + t(w.endTimeMs), w.durationMinutes + ' мин'];
+      if (typeof w.avgHeartRateBpm === 'number') meta.push(w.avgHeartRateBpm + ' уд/мин');
+      if (typeof w.caloriesKcal === 'number') meta.push(Math.round(w.caloriesKcal) + ' ккал');
+      var typeEl = document.createElement('div');
+      typeEl.className = 'workout-type';
+      typeEl.textContent = w.type;
+      var metaEl = document.createElement('div');
+      metaEl.className = 'workout-meta';
+      metaEl.textContent = meta.join(' · ');
+      row.appendChild(typeEl);
+      row.appendChild(metaEl);
+      list.appendChild(row);
+    });
+  }
+
+  // ── Вес и % жира тела из Health Connect (напр. умные весы, синхронизированные
+  // сторонним приложением) — это НЕ "за сегодня", а последнее известное измерение
+  // за последние 90 дней, т.к. взвешиваются не каждый день. Если данные есть,
+  // подставляем их вместо ручного ввода веса и используем более точную формулу
+  // обмена веществ (Кэтча-МакАрдла) вместо Миффлина-Сан Жеора. ─────────────────
+  function refreshHealthConnectBodyMetrics(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return;
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.getBodyMetrics !== 'function') return;
+    try {
+      plugin.getBodyMetrics().then(function(res){
+        res = res || {};
+        if (typeof res.weightKg === 'number' && res.weightKg > 0){
+          lsSet('weightKg', res.weightKg);
+          document.getElementById('input-weight').value = res.weightKg;
+          syncBodyWeightToNative(res.weightKg);
+        }
+        // Не затираем пустым значением: если Health Connect ничего не прислал
+        // (например, Zepp Life не пишет % жира тела в Health Connect), оставляем
+        // как есть — там может быть значение, введённое пользователем вручную.
+        if (typeof res.bodyFatPercent === 'number' && res.bodyFatPercent > 0){
+          lsSet('bodyFatPercent', res.bodyFatPercent);
+          document.getElementById('input-bodyfat').value = res.bodyFatPercent;
+        }
+        renderBodyComposition();
+      }).catch(function(){});
+    } catch (e) {}
+  }
+
+  // ── Приёмы пищи, залогированные сторонним приложением (напр. официальным
+  // клиентом FatSecret) в Health Connect — не наш собственный лог питания, а
+  // отдельный источник, который объединяется с ним в getAllTodayMeals(). ──────
+  function refreshHealthConnectNutrition(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return;
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.getTodayNutrition !== 'function') return;
+    try {
+      plugin.getTodayNutrition().then(function(res){
+        var items = (res && res.items) || [];
+        var meals = items.map(function(it, idx){
+          return {
+            id: 'hc_' + it.timeMs + '_' + idx,
+            ts: it.timeMs,
+            name: it.name || 'Приём пищи (Health Connect)',
+            type: it.mealType !== 'unknown' ? it.mealType : undefined,
+            kcal: it.kcal || 0,
+            protein: it.proteinG || 0,
+            fat: it.fatG || 0,
+            carb: it.carbsG || 0,
+            source: 'hc'
+          };
+        });
+        lsSet('hcNutritionDate', todayKey());
+        lsSet('hcNutrition', JSON.stringify(meals));
+        renderMeals();
+        renderBodyComposition();
+        renderStatus();
+      }).catch(function(){});
+    } catch (e) {}
+  }
+
+  // ── Баланс калорий и состав тела — НЕ путать с игровым показателем "Жир"
+  // (pet.fat, 0-100%, косметическая механика ухода за питомцем) — это разные
+  // вещи с разным смыслом и разным хранилищем, поэтому у всех показателей ниже
+  // намеренно другие названия в UI ("масса", а не "жир питомца"). ───────────
+  function getBMR(){
+    var w = lsNum('weightKg', 0);
+    if (!(w > 0)) return null;
+    // Если известен реальный % жира тела (весы, синхронизированные через Health
+    // Connect) — считаем по формуле Кэтча-МакАрдла: она точнее, т.к. опирается на
+    // фактическую безжировую массу, а не на возраст/пол как приближение к ней.
+    var bf = lsNum('bodyFatPercent', 0);
+    if (bf > 0 && bf < 100){
+      var leanMassKg = w * (1 - bf / 100);
+      return 370 + 21.6 * leanMassKg;
+    }
+    var h = lsNum('heightCm', 0);
+    var a = lsNum('ageYears', 0);
+    var g = lsGet('gender', '');
+    if (!(h > 0 && a > 0 && (g === 'm' || g === 'f'))) return null;
+    return 10 * w + 6.25 * h - 5 * a + (g === 'm' ? 5 : -161);
+  }
+  // Активные калории за сегодня: реальные из Health Connect (уже включают
+  // тренировки, см. refreshHealthConnectMetrics), иначе оценка по шагам × весу
+  // для веб-версии/устройств без Health Connect.
+  function getTodayActivityKcalEstimate(){
+    var hc = getHealthMetrics();
+    if (hc && typeof hc.activeCaloriesKcal === 'number') return hc.activeCaloriesKcal;
+    var weightKg = lsNum('weightKg', 0);
+    var steps = getStepsState().steps;
+    if (weightKg > 0 && steps > 0) return steps * weightKg * 0.0005;
+    return 0;
+  }
+
+  // Коэффициенты приблизительной модели (все — грубые оценки, не медицинские):
+  var FAT_KCAL_PER_G = 7.7;      // ≈7700 ккал на кг жировой ткани
+  var MUSCLE_KCAL_PER_G = 2.5;   // мышечная ткань в основном вода+белок, "дешевле" жировой
+  var SEDENTARY_FACTOR = 1.2;    // норма калорий = BMR × коэффициент малой активности
+  var PROTEIN_G_PER_KG = 1.6;    // норма белка, г/кг веса
+  var FAT_G_PER_KG = 1.0;        // норма жиров, г/кг веса (остальное — углеводы)
+  var MUSCLE_SURPLUS_SHARE = 0.15; // доля профицита калорий, которая может пойти на мышцы (только при тренировках)
+  var MUSCLE_DEFICIT_RISK_SHARE = 0.10; // доля дефицита, которая может "съедать" мышцы (только без тренировок)
+
+  // Считаем, что человек потребляет свою расчётную норму калорий и БЖУ (допущение,
+  // т.к. реального учёта питания в приложении нет) — норма = BMR × коэффициент
+  // малой активности, БЖУ — по стандартным граммам на кг веса, углеводы — остаток.
+  function getDailyNorm(){
+    var bmr = getBMR();
+    if (bmr === null) return null;
+    var weightKg = lsNum('weightKg', 0);
+    var calories = bmr * SEDENTARY_FACTOR;
+    var proteinG = PROTEIN_G_PER_KG * weightKg;
+    var fatG = FAT_G_PER_KG * weightKg;
+    var carbG = Math.max(0, (calories - proteinG * 4 - fatG * 9) / 4);
+    return { calories: calories, proteinG: proteinG, fatG: fatG, carbG: carbG };
+  }
+  function fmtSignedMassG(g){
+    return (g >= 0 ? '+' : '−') + Math.round(Math.abs(g)) + ' г';
+  }
+  function fmtSignedKcal(k){
+    return (k >= 0 ? '+' : '−') + Math.round(Math.abs(k)) + ' ккал';
+  }
+  function renderBodyComposition(){
+    var card = document.getElementById('bodycomp-card');
+    var norm = getDailyNorm();
+    if (norm === null){ card.classList.add('hidden'); document.getElementById('kbju-metrics').classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+
+    var startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    var dayFraction = Math.max(0, Math.min(1, (Date.now() - startOfDay.getTime()) / 86400000));
+
+    // Приход: если за сегодня залогирован хотя бы один приём пищи — берём
+    // реальную сумму из лога, иначе по-старому предполагаем норму пропорционально
+    // прошедшей части дня. Расход всегда фактический (BMR за прошедшую часть дня
+    // + реальная активность/тренировки).
+    var todayMeals = getAllTodayMeals();
+    var mealsTotal = sumMeals(todayMeals);
+    var hasMeals = todayMeals.length > 0;
+    var intakeKcal = hasMeals ? mealsTotal.kcal : norm.calories * dayFraction;
+    var proteinKcalSoFar = hasMeals ? mealsTotal.protein * 4 : norm.proteinG * dayFraction * 4;
+    var fatKcalSoFar = hasMeals ? mealsTotal.fat * 9 : norm.fatG * dayFraction * 9;
+    var carbKcalSoFar = hasMeals ? mealsTotal.carb * 4 : norm.carbG * dayFraction * 4;
+
+    var bmrSoFar = getBMR() * dayFraction;
+    var expenditureKcal = bmrSoFar + getTodayActivityKcalEstimate();
+    var netKcal = intakeKcal - expenditureKcal;
+
+    // Разбивка прироста/убыли массы по источнику (Б/Ж/У) — доля каждого макро-
+    // нутриента в усвоенных калориях, применённая к балансу дня и переведённая
+    // в граммы через собственную калорийность этого макронутриента.
+    var proteinShare = intakeKcal > 0 ? proteinKcalSoFar / intakeKcal : 0;
+    var fatShare = intakeKcal > 0 ? fatKcalSoFar / intakeKcal : 0;
+    var carbShare = intakeKcal > 0 ? carbKcalSoFar / intakeKcal : 0;
+    var massFromProteinG = (netKcal * proteinShare) / 4;
+    var massFromFatG = (netKcal * fatShare) / 9;
+    var massFromCarbG = (netKcal * carbShare) / 4;
+
+    // Разбивка того же баланса по типу ткани (мышцы/жир) — в профиците доля
+    // идёт на мышцы только при наличии тренировки сегодня, в дефиците мышцы
+    // "защищены" тренировкой, иначе часть дефицита условно берётся из мышц.
+    var workouts = getCachedWorkouts();
+    var hasWorkout = workouts.length > 0;
+    var workoutsKcalToday = sumWorkoutsKcal(workouts);
+    var muscleMassG, fatMassG;
+    if (netKcal >= 0){
+      var muscleShare = hasWorkout ? MUSCLE_SURPLUS_SHARE : 0;
+      muscleMassG = (netKcal * muscleShare) / MUSCLE_KCAL_PER_G;
+      fatMassG = (netKcal * (1 - muscleShare)) / FAT_KCAL_PER_G;
+    } else {
+      var deficit = -netKcal;
+      var muscleRiskShare = hasWorkout ? 0 : MUSCLE_DEFICIT_RISK_SHARE;
+      muscleMassG = -(deficit * muscleRiskShare) / MUSCLE_KCAL_PER_G;
+      fatMassG = -(deficit * (1 - muscleRiskShare)) / FAT_KCAL_PER_G;
+    }
+
+    // Вклад именно тренировок (изолированно от общего баланса дня): калории
+    // тренировок сами по себе, переведённые в потенциальные граммы жира/мышц.
+    var workoutFatBurnG = workoutsKcalToday / FAT_KCAL_PER_G;
+    var workoutMuscleG = (hasWorkout && netKcal >= 0)
+      ? (workoutsKcalToday * MUSCLE_SURPLUS_SHARE) / MUSCLE_KCAL_PER_G
+      : 0;
+
+    var bfPercent = lsNum('bodyFatPercent', 0);
+    var normLine = hasMeals
+      ? 'Съедено сегодня (факт): ≈' + Math.round(mealsTotal.kcal) + ' ккал (Б ' + Math.round(mealsTotal.protein) +
+        ' / Ж ' + Math.round(mealsTotal.fat) + ' / У ' + Math.round(mealsTotal.carb) + ' г) из нормы ≈' + Math.round(norm.calories) + ' ккал'
+      : 'Норма: ≈' + Math.round(norm.calories) + ' ккал (Б ' + Math.round(norm.proteinG) +
+        ' / Ж ' + Math.round(norm.fatG) + ' / У ' + Math.round(norm.carbG) + ' г) — предположительно, приёмы пищи ещё не отмечены';
+    if (bfPercent > 0) normLine += ' · по Health Connect: жир тела ' + Math.round(bfPercent) + '%';
+    document.getElementById('bc-norm-line').textContent = normLine;
+    document.getElementById('bc-balance').textContent = fmtSignedKcal(netKcal);
+    document.getElementById('bc-fat').textContent = fmtSignedMassG(massFromFatG);
+    document.getElementById('bc-protein').textContent = fmtSignedMassG(massFromProteinG);
+    document.getElementById('bc-carb').textContent = fmtSignedMassG(massFromCarbG);
+    document.getElementById('bc-muscle').textContent = fmtSignedMassG(muscleMassG);
+    document.getElementById('bc-fatmass').textContent = fmtSignedMassG(fatMassG);
+    document.getElementById('bc-muscle-workout').textContent = Math.round(workoutMuscleG) + ' г';
+    document.getElementById('bc-fatburn-workout').textContent = Math.round(workoutFatBurnG) + ' г';
+    syncBodyCompositionToNative(muscleMassG, fatMassG);
+
+    // Кольца заполнения КБЖУ за день — тот же приход (факт из лога или
+    // предположение по доле прошедшего дня), что и выше, относительно нормы.
+    document.getElementById('kbju-metrics').classList.remove('hidden');
+    var proteinGSoFar = proteinKcalSoFar / 4, fatGSoFar = fatKcalSoFar / 9, carbGSoFar = carbKcalSoFar / 4;
+    setRing('ring-kcal', norm.calories > 0 ? (intakeKcal / norm.calories) * 100 : 0);
+    document.getElementById('text-kcal').textContent = Math.round(intakeKcal) + '/' + Math.round(norm.calories);
+    setRing('ring-protein', norm.proteinG > 0 ? (proteinGSoFar / norm.proteinG) * 100 : 0);
+    document.getElementById('text-protein').textContent = Math.round(proteinGSoFar) + '/' + Math.round(norm.proteinG) + ' г';
+    setRing('ring-macro-fat', norm.fatG > 0 ? (fatGSoFar / norm.fatG) * 100 : 0);
+    document.getElementById('text-macro-fat').textContent = Math.round(fatGSoFar) + '/' + Math.round(norm.fatG) + ' г';
+    setRing('ring-carb', norm.carbG > 0 ? (carbGSoFar / norm.carbG) * 100 : 0);
+    document.getElementById('text-carb').textContent = Math.round(carbGSoFar) + '/' + Math.round(norm.carbG) + ' г';
+  }
+
+  // ── Приёмы пищи — реальный дневной лог питания. Когда за сегодня есть хотя
+  // бы одна запись, renderBodyComposition() выше берёт съеденные калории/БЖУ
+  // отсюда вместо предположения "норма пропорционально прошедшей части дня".
+  // Источники записи: поиск по названию и штрихкод через FatSecret (Edge
+  // Function fatsecret-proxy — секреты API живут только там), либо ручной
+  // ввод БЖУ как запасной вариант, не зависящий ни от каких ключей. ──────────
+  var MEAL_TYPE_LABELS = { breakfast: 'Завтрак', lunch: 'Обед', snack: 'Полдник', dinner: 'Ужин' };
+  function getTodayMeals(){
+    if (lsGet('mealsDate', '') !== todayKey()){
+      lsSet('mealsDate', todayKey());
+      lsSet('meals', '[]');
+    }
+    try { return JSON.parse(lsGet('meals', '[]')) || []; } catch(e){ return []; }
+  }
+  function saveTodayMeals(meals){
+    lsSet('mealsDate', todayKey());
+    lsSet('meals', JSON.stringify(meals));
+  }
+  function sumMeals(meals){
+    return meals.reduce(function(acc, m){
+      acc.kcal += m.kcal || 0; acc.protein += m.protein || 0;
+      acc.fat += m.fat || 0; acc.carb += m.carb || 0;
+      return acc;
+    }, { kcal: 0, protein: 0, fat: 0, carb: 0 });
+  }
+  // Приёмы пищи, залогированные сторонним приложением (напр. официальным клиентом
+  // FatSecret) в Health Connect — читаются нативным плагином (refreshHealthConnectNutrition)
+  // и кэшируются здесь тем же принципом посуточного сброса, что и свой лог (mealsDate/meals).
+  // Не хранятся в 'meals'/localStorage напрямую: источник истины для них — Health Connect,
+  // не наш собственный лог, поэтому removeMeal() их не трогает и не может удалить.
+  function getHcNutritionMeals(){
+    if (!isNative || lsGet('healthConnectEnabled', '') !== '1') return [];
+    if (lsGet('hcNutritionDate', '') !== todayKey()) return [];
+    try { return JSON.parse(lsGet('hcNutrition', '[]')) || []; } catch(e){ return []; }
+  }
+  // Объединённый лог за сегодня — свои записи + подтянутые из Health Connect,
+  // по времени. Пользователь явно попросил учитывать оба источника вместе
+  // (риск задвоить калории, если одна и та же еда занесена в обоих местах,
+  // принят осознанно — это его выбор).
+  function getAllTodayMeals(){
+    return getTodayMeals().concat(getHcNutritionMeals()).sort(function(a, b){ return a.ts - b.ts; });
+  }
+  function addMeal(meal){
+    var meals = getTodayMeals();
+    meal.id = Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    meal.ts = Date.now();
+    meals.push(meal);
+    saveTodayMeals(meals);
+    addGold(1);
+    renderMeals();
+    renderBodyComposition();
+    renderStatus();
+  }
+  function removeMeal(id){
+    saveTodayMeals(getTodayMeals().filter(function(m){ return m.id !== id; }));
+    renderMeals();
+    renderBodyComposition();
+    renderStatus();
+  }
+  function renderMeals(){
+    var meals = getAllTodayMeals();
+    var list = document.getElementById('meals-list');
+    var empty = document.getElementById('meals-empty');
+    var totalEl = document.getElementById('meals-total');
+    list.innerHTML = '';
+    if (!meals.length){
+      empty.classList.remove('hidden');
+      totalEl.textContent = '';
+      return;
+    }
+    empty.classList.add('hidden');
+    meals.forEach(function(m){
+      var row = document.createElement('div');
+      row.className = 'meal-row';
+      var t = new Date(m.ts);
+      var timeStr = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+      var nameEl = document.createElement('div');
+      nameEl.className = 'meal-name';
+      nameEl.textContent = m.name;
+      var metaEl = document.createElement('div');
+      metaEl.className = 'meal-meta';
+      var typeLabel = MEAL_TYPE_LABELS[m.type] ? MEAL_TYPE_LABELS[m.type] + ' · ' : '';
+      var sourceLabel = m.source === 'hc' ? ' · Health Connect' : '';
+      metaEl.textContent = typeLabel + timeStr + ' · ' + Math.round(m.kcal) + ' ккал · Б' + Math.round(m.protein) +
+        ' Ж' + Math.round(m.fat) + ' У' + Math.round(m.carb) + sourceLabel;
+      row.appendChild(nameEl);
+      row.appendChild(metaEl);
+      if (m.source !== 'hc'){
+        // Записи из Health Connect живут не в нашем localStorage, а в самом Health
+        // Connect — удалить их отсюда нечем, поэтому кнопка ✕ только у своих записей.
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'meal-del';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', function(){ removeMeal(m.id); });
+        row.appendChild(delBtn);
+      }
+      list.appendChild(row);
+    });
+    var total = sumMeals(meals);
+    totalEl.textContent = 'Итого: ' + Math.round(total.kcal) + ' ккал (Б ' + Math.round(total.protein) +
+      ' / Ж ' + Math.round(total.fat) + ' / У ' + Math.round(total.carb) + ' г)';
+  }
+
+  // ── FatSecret через прокси (Edge Function) — ключи API не могут жить в
+  // статической странице, поэтому вся авторизация и запросы к FatSecret идут
+  // через сервер, страница получает только уже готовый JSON. ─────────────────
+  function fatsecretRequest(params){
+    return fetch(SB_URL + '/functions/v1/fatsecret-proxy?' + params)
+      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, status: r.status, data: data }; }); });
+  }
+  function fatsecretSearch(q){
+    return fatsecretRequest('action=search&q=' + encodeURIComponent(q));
+  }
+  function fatsecretDetail(foodId){
+    return fatsecretRequest('action=detail&food_id=' + encodeURIComponent(foodId));
+  }
+  function fatsecretBarcode(code){
+    return fatsecretRequest('action=barcode&code=' + encodeURIComponent(code));
+  }
+
+  // ── Open Food Facts — открытая база продуктов (ODbL), без ключей, CORS открыт.
+  // Работает напрямую из страницы; даёт и поиск, и штрихкоды. ──────────────────
+  var USE_FATSECRET = false;
+  var OFF_FIELDS = 'code,product_name,brands,nutriments,serving_quantity';
+  function offPer1g(n){
+    if (!n) return null;
+    var p = Number(n['proteins_100g']), f = Number(n['fat_100g']), c = Number(n['carbohydrates_100g']);
+    if (!isFinite(p) || !isFinite(f) || !isFinite(c)) return null;
+    var kcal = Number(n['energy-kcal_100g']);
+    if (!isFinite(kcal) || kcal <= 0){
+      var kj = Number(n['energy-kj_100g'] || n['energy_100g']);
+      kcal = isFinite(kj) && kj > 0 ? kj / 4.184 : p * 4 + f * 9 + c * 4;
+    }
+    return { kcal: kcal / 100, protein: p / 100, fat: f / 100, carb: c / 100 };
+  }
+  function offItem(prod){
+    var per1g = offPer1g(prod && prod.nutriments);
+    var name = prod && prod.product_name;
+    if (!per1g || !name) return null;
+    var brand = Array.isArray(prod.brands) ? prod.brands[0] : (prod.brands || '').split(',')[0].trim();
+    var serv = Number(prod.serving_quantity);
+    return {
+      source: 'off', name: name, brand: brand || '', per1g: per1g,
+      servingHint: { isGrams: true, amount: isFinite(serv) && serv > 0 ? serv : 100 },
+      description: Math.round(per1g.kcal * 100) + ' ккал · Б ' + Math.round(per1g.protein * 1000) / 10 +
+        ' / Ж ' + Math.round(per1g.fat * 1000) / 10 + ' / У ' + Math.round(per1g.carb * 1000) / 10 + ' г на 100 г · Open Food Facts'
+    };
+  }
+  function offSearch(q){
+    return fetch(SB_URL + '/functions/v1/off-proxy?action=search&langs=ru&q=' + encodeURIComponent(q))
+      .then(function(r){ if (!r.ok) throw new Error('off ' + r.status); return r.json(); })
+      .then(function(d){ return (d.hits || []).map(offItem).filter(Boolean); })
+      .then(function(items){
+        if (items.length) return items;
+        // по-русски ничего — пробуем без языкового фильтра (латиница, бренды)
+        return fetch(SB_URL + '/functions/v1/off-proxy?action=search&q=' + encodeURIComponent(q))
+          .then(function(r){ return r.json(); })
+          .then(function(d){ return (d.hits || []).map(offItem).filter(Boolean); });
+      });
+  }
+  function offBarcode(code){
+    return fetch(SB_URL + '/functions/v1/off-proxy?action=barcode&code=' + encodeURIComponent(code))
+      .then(function(r){ return r.json(); })
+      .then(function(d){ return d && d.status === 1 ? offItem(d.product) : null; });
+  }
+
+  // ── Модалка добавления приёма пищи — три вкладки (поиск/штрихкод/вручную) +
+  // отдельная вкладка "порция" для уточнения количества у продукта, найденного
+  // в FatSecret, перед добавлением его в сегодняшний лог. ─────────────────────
+  var mealPickedFood = null; // { name, per1g: {kcal,protein,fat,carb} } — выбранный продукт
+  var barcodeStream = null;
+  var barcodeDetector = null;
+  var barcodeScanRAF = null;
+
+  function openMealAdd(){
+    document.getElementById('meal-add-overlay').classList.remove('hidden');
+    switchMealTab('search');
+    // фокус внутри жеста открытия — иначе Android WebView не поднимает клавиатуру с первого тапа
+    var inp = document.getElementById('meal-search-input');
+    inp.setAttribute('lang', 'ru');
+    inp.focus();
+  }
+  function closeMealAdd(){
+    stopBarcodeScan();
+    document.getElementById('meal-add-overlay').classList.add('hidden');
+  }
+  function switchMealTab(tab){
+    ['search', 'barcode', 'manual', 'portion'].forEach(function(t){
+      document.getElementById('meal-panel-' + t).classList.toggle('hidden', t !== tab);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.meal-tab'), function(btn){
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    if (tab !== 'barcode') stopBarcodeScan();
+  }
+
+  function renderMealSearchResults(items){
+    var box = document.getElementById('meal-search-results');
+    box.innerHTML = '';
+    if (!items || !items.length){
+      box.innerHTML = '<div class="meal-search-status">Ничего не найдено</div>';
+      return;
+    }
+    items.forEach(function(item){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'meal-result-item';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'mr-name';
+      nameEl.textContent = item.name + (item.brand ? ' · ' + item.brand : '');
+      var descEl = document.createElement('div');
+      descEl.className = 'mr-desc';
+      descEl.textContent = item.description || '';
+      btn.appendChild(nameEl);
+      btn.appendChild(descEl);
+      btn.addEventListener('click', function(){
+        if (item.source === 'off') openMealPortion(item.name, item.per1g, item.servingHint);
+        else pickMealFood(item.food_id, item.name);
+      });
+      box.appendChild(btn);
+    });
+  }
+
+  function pickMealFood(foodId, fallbackName){
+    var box = document.getElementById('meal-search-results');
+    box.innerHTML = '<div class="meal-search-status">Загрузка...</div>';
+    fatsecretDetail(foodId).then(function(res){
+      if (!res.ok || !res.data || !res.data.per1g){
+        showToast((res.data && res.data.error) || 'Не удалось получить данные о продукте');
+        renderMealSearchResults([]);
+        return;
+      }
+      openMealPortion(res.data.name || fallbackName, res.data.per1g, res.data.servingHint);
+    }).catch(function(){
+      showToast('Нет связи с сервером FatSecret');
+    });
+  }
+
+  function openMealPortion(name, per1g, servingHint){
+    mealPickedFood = { name: name, per1g: per1g };
+    document.getElementById('meal-portion-name').textContent = name;
+    document.getElementById('meal-portion-amount-label').textContent = (servingHint && !servingHint.isGrams)
+      ? 'Количество порций (' + servingHint.label + ')' : 'Количество, г';
+    var amountInput = document.getElementById('meal-portion-amount');
+    amountInput.value = (servingHint && !servingHint.isGrams) ? 1 : Math.round((servingHint && servingHint.amount) || 100);
+    updateMealPortionPreview();
+    switchMealTab('portion');
+  }
+  function updateMealPortionPreview(){
+    if (!mealPickedFood) return;
+    var amount = parseFloat(document.getElementById('meal-portion-amount').value) || 0;
+    var per1g = mealPickedFood.per1g;
+    var kcal = per1g.kcal * amount, protein = per1g.protein * amount,
+      fat = per1g.fat * amount, carb = per1g.carb * amount;
+    document.getElementById('meal-portion-preview').textContent =
+      Math.round(kcal) + ' ккал · Б ' + Math.round(protein) + ' / Ж ' + Math.round(fat) + ' / У ' + Math.round(carb) + ' г';
+  }
+
+  // ── Штрихкод: BarcodeDetector — нативный API самого браузера/WebView, без
+  // сторонних библиотек; если его нет (старый WebView), остаётся только ручной
+  // ввод цифр штрихкода ниже. ──────────────────────────────────────────────
+  var zxingReader = null;
+  function loadZXing(){
+    if (window.ZXing) return Promise.resolve();
+    return new Promise(function(resolve, reject){
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+      sc.onload = resolve; sc.onerror = reject;
+      document.head.appendChild(sc);
+    });
+  }
+  function onBarcodeFound(code){
+    stopBarcodeScan();
+    lookupBarcode(code);
+  }
+  function startBarcodeScan(){
+    var status = document.getElementById('meal-barcode-status');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      status.textContent = 'Камера недоступна — введите код цифрами ниже';
+      return;
+    }
+    var video = document.getElementById('meal-barcode-video');
+    if ('BarcodeDetector' in window){
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream){
+        barcodeStream = stream;
+        video.srcObject = stream;
+        video.classList.remove('hidden');
+        video.play();
+        barcodeDetector = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+        var scanLoop = function(){
+          if (!barcodeStream) return;
+          barcodeDetector.detect(video).then(function(codes){
+            if (codes && codes.length) onBarcodeFound(codes[0].rawValue);
+            else barcodeScanRAF = requestAnimationFrame(scanLoop);
+          }).catch(function(){ barcodeScanRAF = requestAnimationFrame(scanLoop); });
+        };
+        scanLoop();
+      }).catch(function(){
+        status.textContent = 'Нет доступа к камере. Разрешите её в настройках приложения или введите код цифрами ниже';
+      });
+      return;
+    }
+    // Нет встроенного BarcodeDetector (WebView, Safari) — декодируем через ZXing
+    status.textContent = 'Запускаем камеру...';
+    loadZXing().then(function(){
+      var hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E]);
+      zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+      video.classList.remove('hidden');
+      status.textContent = 'Наведите камеру на штрихкод';
+      zxingReader.decodeFromConstraints({ video: { facingMode: 'environment' } }, video, function(result){
+        if (result) onBarcodeFound(result.getText());
+      }).catch(function(){
+        status.textContent = 'Нет доступа к камере. Разрешите её в настройках приложения или введите код цифрами ниже';
+        video.classList.add('hidden');
+      });
+    }).catch(function(){
+      status.textContent = 'Не удалось загрузить сканер — введите код цифрами ниже';
+    });
+  }
+  function stopBarcodeScan(){
+    if (zxingReader){ try { zxingReader.reset(); } catch(e){} zxingReader = null; }
+    if (barcodeScanRAF) cancelAnimationFrame(barcodeScanRAF);
+    barcodeScanRAF = null;
+    if (barcodeStream){
+      barcodeStream.getTracks().forEach(function(t){ t.stop(); });
+      barcodeStream = null;
+    }
+    var video = document.getElementById('meal-barcode-video');
+    video.pause();
+    video.srcObject = null;
+    video.classList.add('hidden');
+  }
+  function lookupBarcode(code){
+    code = (code || '').replace(/\D/g, '');
+    if (!code){ showToast('Некорректный штрихкод'); return; }
+    document.getElementById('meal-barcode-status').textContent = 'Ищем по штрихкоду ' + code + '...';
+    offBarcode(code).then(function(item){
+      if (!item){
+        document.getElementById('meal-barcode-status').textContent = 'Продукт с таким штрихкодом не найден в Open Food Facts';
+        return;
+      }
+      document.getElementById('meal-barcode-status').textContent = '';
+      openMealPortion(item.name, item.per1g, item.servingHint);
+    }).catch(function(){
+      document.getElementById('meal-barcode-status').textContent = 'Нет связи с Open Food Facts';
+    });
+  }
+
+  // Зеркалит вес в SharedPreferences нативного приложения, чтобы им мог пользоваться
+  // виджет питомца (PetWidgetProvider) — у него нет доступа к localStorage WebView,
+  // а без веса он не может посчитать калории тем же способом, что и веб-версия.
+  function syncBodyWeightToNative(weightKg){
+    if (!isNative) return;
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.setBodyWeightKg !== 'function') return;
+    try { plugin.setBodyWeightKg({ weightKg: weightKg }).catch(function(){}); } catch (e) {}
+  }
+  // Зеркалит дневной баланс мышечной/жировой массы (те же граммы, что и в карточке
+  // "Композиция тела") в SharedPreferences, чтобы виджет питомца на рабочем столе
+  // мог показать "приобретено/сожжено за сегодня" — без открытия приложения он не
+  // видит ни лог питания, ни расчёт из renderBodyComposition() (оба живут только в
+  // localStorage WebView).
+  function syncBodyCompositionToNative(muscleG, fatG){
+    if (!isNative) return;
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.setBodyComposition !== 'function') return;
+    try { plugin.setBodyComposition({ muscleG: muscleG, fatG: fatG }).catch(function(){}); } catch (e) {}
+  }
+  function setHealthRing(key, present, pct, text){
+    document.getElementById('ring-item-hc-' + key).classList.toggle('hidden', !present);
+    if (!present) return;
+    setRing('ring-hc-' + key, pct);
+    document.getElementById('text-hc-' + key).textContent = text;
+  }
+
+  function renderHealthMetrics(){
+    var el = document.getElementById('hc-metrics');
+    var m = (isNative && lsGet('healthConnectEnabled', '') === '1') ? getHealthMetrics() : null;
+    var any = false;
+
+    var hasDistance = !!(m && typeof m.distanceMeters === 'number');
+    if (hasDistance) any = true;
+    setHealthRing('distance', hasDistance, hasDistance ? 100 * m.distanceMeters / DAILY_DISTANCE_GOAL_M : 0,
+      hasDistance ? (m.distanceMeters/1000).toFixed(1) + ' км' : '');
+
+    var hasCalories = !!(m && typeof m.activeCaloriesKcal === 'number');
+    if (hasCalories) any = true;
+    setHealthRing('calories', hasCalories, hasCalories ? 100 * m.activeCaloriesKcal / DAILY_ACTIVE_CALORIES_GOAL : 0,
+      hasCalories ? (m.activeCaloriesEstimated ? '≈' : '') + Math.round(m.activeCaloriesKcal) + ' ккал' : '');
+
+    var hasSleep = !!(m && typeof m.sleepMinutes === 'number');
+    if (hasSleep) any = true;
+    setHealthRing('sleep', hasSleep, hasSleep ? 100 * m.sleepMinutes / DAILY_SLEEP_GOAL_MIN : 0,
+      hasSleep ? Math.floor(m.sleepMinutes/60) + 'ч ' + (m.sleepMinutes%60) + 'м' : '');
+
+    var hasExercise = !!(m && typeof m.exerciseMinutes === 'number');
+    if (hasExercise) any = true;
+    setHealthRing('exercise', hasExercise, hasExercise ? 100 * m.exerciseMinutes / DAILY_EXERCISE_GOAL_MIN : 0,
+      hasExercise ? m.exerciseMinutes + ' мин' : '');
+
+    var hasHeart = !!(m && typeof m.avgHeartRateBpm === 'number');
+    if (hasHeart) any = true;
+    var heartPct = 100 * (m && m.avgHeartRateBpm - HEART_RATE_SCALE_MIN) / (HEART_RATE_SCALE_MAX - HEART_RATE_SCALE_MIN);
+    setHealthRing('heart', hasHeart, heartPct, hasHeart ? m.avgHeartRateBpm + ' уд/мин' : '');
+
+    el.classList.toggle('hidden', !any);
+  }
+
+  function updateSensorStatusUI(){
+    var el = document.getElementById('sensor-status');
+    var btn = document.getElementById('btn-sensor');
+    var syncBtn = document.getElementById('btn-sync-steps');
+    if (isNative){
+      var on = lsGet('healthConnectEnabled', '') === '1';
+      var lastSync = lsGet('hcLastSync', '');
+      var syncText = lastSync ? ' (обновлено ' + new Date(Number(lastSync)).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) + ')' : '';
+      el.textContent = on ? ('Шаги считаются через Health Connect' + syncText) : 'Health Connect не подключён';
+      el.className = 'sensor-status ' + (on ? 'on' : 'off');
+      btn.textContent = on ? 'Health Connect подключён' : 'Подключить Health Connect';
+      if (syncBtn) syncBtn.classList.toggle('hidden', !on);
+    } else if (sensorActive){
+      el.textContent = 'Датчик шагов включён (считает, пока страница открыта)';
+      el.className = 'sensor-status on';
+      btn.textContent = 'Выключить датчик шагов';
+    } else {
+      el.textContent = 'Датчик шагов выключен';
+      el.className = 'sensor-status off';
+      btn.textContent = 'Включить датчик шагов';
+    }
+    renderHealthMetrics();
+  }
+
+  // ── UI ───────────────────────────────────────────────────────────────────
+  // Выход из питомца в основное приложение: открываем «Главную», а не последний экран клиента.
+  function exitPet(){
+    try{ localStorage.setItem('alliby_nav','home'); }catch(e){}
+    window.location.href='/';
+  }
+  document.querySelectorAll('[data-pet-exit]').forEach(function(b){ b.addEventListener('click', exitPet); });
+
+  // ── Обучающий тур питомца: запускается один раз сразу после того, как пользователь дал имя ──
+  // Шаг: target — CSS-селектор (берётся первый видимый элемент), skip — пропустить, если цели нет.
+  var PTOUR_KEY = 'alliby_pet_tour_seen';
+  var PTOUR_STEPS = [
+    { title: 'Знакомься с питомцем', text: 'Это твой питомец. Он живёт по-настоящему: голодает, устаёт и радуется — в зависимости от того, как ты о нём заботишься.', target: '#sprite-card', skip: true },
+    { title: 'Показатели', text: 'Кольца показывают состояние питомца. Со временем они меняются, а часть показателей зависит от твоей реальной активности.', target: '.rings-row', skip: true },
+    { title: 'Питание', text: 'Записывай приёмы пищи — это влияет на питомца и на расчёт баланса калорий.', target: '#btn-meal-add', skip: true },
+    { title: 'Общение', text: 'Питомцу можно написать — у него есть собственный характер, который складывается из ухода.', target: '#btn-chat', skip: true },
+    { title: 'Игры', text: 'Играй с питомцем, чтобы повысить веселье и заработать золото.', target: '#btn-games', skip: true },
+    { title: 'Магазин и инвентарь', text: 'Золото можно потратить в магазине на украшения для питомца. Купленное лежит в инвентаре.', target: '#btn-shop', skip: true }
+  ];
+  var ptSteps = [], ptIdx = 0, ptOn = false, ptTok = 0;
+  function ptSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  function ptFind(sel){
+    var list = document.querySelectorAll(sel);
+    for (var i = 0; i < list.length; i++){
+      var r = list[i].getBoundingClientRect();
+      if (list[i].offsetParent !== null && r.width > 0 && r.height > 0) return list[i];
+    }
+    return null;
+  }
+  function ptPlace(t){
+    var spot = document.getElementById('ptour-spot'), box = document.getElementById('ptour');
+    if (!t){
+      spot.classList.add('none');
+      spot.style.left = '50%'; spot.style.top = '50%'; spot.style.width = '0px'; spot.style.height = '0px';
+      box.classList.remove('pos-top');
+      return;
+    }
+    var r = t.getBoundingClientRect(), pad = 6, vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var x = Math.max(4, r.left - pad), y = Math.max(4, r.top - pad);
+    var w = Math.min(vw - 4, r.right + pad) - x, h = Math.min(vh - 4, r.bottom + pad) - y;
+    spot.classList.remove('none');
+    spot.style.left = x + 'px'; spot.style.top = y + 'px'; spot.style.width = w + 'px'; spot.style.height = h + 'px';
+    box.classList.toggle('pos-top', y + h / 2 > vh * 0.5);
+  }
+  function ptShow(dir){
+    var tok = ++ptTok, st = ptSteps[ptIdx];
+    var tries = 0;
+    (function find(){
+      if (tok !== ptTok) return;
+      var t = st.target ? ptFind(st.target) : null;
+      if (st.target && !t && tries++ < 8){ setTimeout(find, 150); return; }
+      if (st.target && !t && st.skip){
+        var d = dir || 1, n = ptIdx + d;
+        if (n < 0){ d = 1; n = ptIdx + 1; }
+        if (n >= ptSteps.length){ closePetTour(); return; }
+        ptIdx = n; ptShow(d); return;
+      }
+      if (t) { try { t.scrollIntoView({ block: 'center' }); } catch (e) {} }
+      setTimeout(function(){
+        if (tok !== ptTok) return;
+        ptPlace(t);
+        var last = ptIdx === ptSteps.length - 1;
+        document.getElementById('ptour-title').textContent = st.title;
+        document.getElementById('ptour-text').textContent = st.text;
+        var dots = '';
+        for (var i = 0; i < ptSteps.length; i++) dots += '<span class="ptour-dot' + (i === ptIdx ? ' on' : '') + '"></span>';
+        document.getElementById('ptour-dots').innerHTML = dots;
+        document.getElementById('ptour-back').style.visibility = ptIdx ? 'visible' : 'hidden';
+        document.getElementById('ptour-next').textContent = last ? 'Готово' : 'Далее';
+        document.getElementById('ptour-skip').style.visibility = last ? 'hidden' : 'visible';
+      }, 90);
+    })();
+  }
+  function startPetTour(){
+    if (ptOn) return;
+    ptSteps = PTOUR_STEPS.slice();
+    ptIdx = 0; ptOn = true;
+    var box = document.getElementById('ptour');
+    box.classList.add('open'); box.setAttribute('aria-hidden', 'false');
+    document.addEventListener('keydown', ptKey);
+    window.addEventListener('resize', ptReflow);
+    document.getElementById('ptour-next').focus({ preventScroll: true });
+    ptShow(1);
+  }
+  function ptReflow(){ if (ptOn) { var st = ptSteps[ptIdx]; ptPlace(st && st.target ? ptFind(st.target) : null); } }
+  function ptStep(d){
+    if (!ptOn) return;
+    var n = ptIdx + d;
+    if (n >= ptSteps.length){ closePetTour(); return; }
+    if (n < 0) return;
+    ptIdx = n; ptShow(d);
+  }
+  function closePetTour(){
+    ptTok++; ptOn = false;
+    try { localStorage.setItem(PTOUR_KEY, '1'); } catch (e) {}
+    var box = document.getElementById('ptour');
+    box.classList.remove('open', 'pos-top'); box.setAttribute('aria-hidden', 'true');
+    ptPlace(null);
+    document.removeEventListener('keydown', ptKey);
+    window.removeEventListener('resize', ptReflow);
+    window.scrollTo(0, 0);
+  }
+  function ptKey(e){
+    if (e.key === 'Escape') closePetTour();
+    else if (e.key === 'ArrowRight') ptStep(1);
+    else if (e.key === 'ArrowLeft') ptStep(-1);
+  }
+  document.getElementById('ptour-next').addEventListener('click', function(){ ptStep(1); });
+  document.getElementById('ptour-back').addEventListener('click', function(){ ptStep(-1); });
+  document.getElementById('ptour-skip').addEventListener('click', closePetTour);
+  document.getElementById('btn-pet-tour').addEventListener('click', startPetTour);
+
+  // Зеркалит имя питомца в SharedPreferences нативного приложения — его показывает виджет питомца.
+  function syncPetNameToNative(name){
+    if (!isNative) return;
+    var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Tamagotchi;
+    if (!plugin || typeof plugin.setPetName !== 'function') return;
+    try { plugin.setPetName({ name: name || '' }).catch(function(){}); } catch (e) {}
+  }
+
+  function showScreen(id){
+    document.getElementById('screen-create').classList.toggle('hidden', id !== 'create');
+    document.getElementById('screen-status').classList.toggle('hidden', id !== 'status');
+    document.getElementById('screen-chat').classList.toggle('hidden', id !== 'chat');
+    document.getElementById('screen-games').classList.toggle('hidden', id !== 'games');
+    document.getElementById('screen-sprout').classList.toggle('hidden', id !== 'sprout');
+    document.getElementById('screen-shop').classList.toggle('hidden', id !== 'shop');
+    document.getElementById('screen-inventory').classList.toggle('hidden', id !== 'inventory');
+    document.getElementById('screen-game-setup').classList.toggle('hidden', id !== 'game-setup');
+    document.getElementById('screen-game-board').classList.toggle('hidden', id !== 'game-board');
+    document.getElementById('screen-pdd-tickets').classList.toggle('hidden', id !== 'pdd-tickets');
+    document.getElementById('screen-pdd-question').classList.toggle('hidden', id !== 'pdd-question');
+    document.getElementById('rules-overlay').classList.add('hidden');
+  }
+
+  // ── Чат с питомцем — прокси на Gemini через Edge Function tamagotchi-chat,
+  // доступ ограничен одним аккаунтом Alliby (yarich92@gmail.com), поэтому
+  // перед первым сообщением нужен обычный email+password логин через тот же
+  // Supabase Auth (GoTrue), что использует client/. ──────────────────────────
+  var SB_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:54321' : 'https://alliby.ru';
+  var SB_ANON = 'sb_publishable_HILQWfLrBvlWcUPz6Atam__5M5vw3nq';
+  var CHAT_ENDPOINT = SB_URL + '/functions/v1/tamagotchi-chat';
+  var CHAT_HISTORY_LIMIT = 20;
+
+  function loadSession(){
+    try { return JSON.parse(lsGet('session', 'null')); } catch(e){ return null; }
+  }
+  function saveSession(s){ lsSet('session', JSON.stringify(s)); }
+  function clearSession(){ localStorage.removeItem(LS_PREFIX + 'session'); }
+
+  function loadChatHistory(){
+    try { return JSON.parse(lsGet('chat', '[]')); } catch(e){ return []; }
+  }
+  function saveChatHistory(hist){
+    lsSet('chat', JSON.stringify(hist.slice(-CHAT_HISTORY_LIMIT)));
+  }
+  function renderChatLog(){
+    var log = document.getElementById('chat-log');
+    var hist = loadChatHistory();
+    log.innerHTML = '';
+    hist.forEach(function(m){
+      var el = document.createElement('div');
+      el.className = 'msg ' + (m.role === 'user' ? 'user' : 'pet');
+      el.textContent = m.text;
+      log.appendChild(el);
+    });
+    log.scrollTop = log.scrollHeight;
+  }
+  function updateChatAuthUI(){
+    var loggedIn = !!loadSession();
+    document.getElementById('chat-login').classList.toggle('hidden', loggedIn);
+    document.getElementById('chat-log').classList.toggle('hidden', !loggedIn);
+    document.getElementById('chat-input-row').classList.toggle('hidden', !loggedIn);
+  }
+  function openChat(){
+    var pet = loadPet();
+    document.getElementById('chat-title').textContent = pet.name;
+    showScreen('chat');
+    updateChatAuthUI();
+    renderChatLog();
+  }
+  function chatLogin(){
+    var email = document.getElementById('chat-login-email').value.trim();
+    var password = document.getElementById('chat-login-password').value;
+    if (!email || !password){ showToast('Введите email и пароль'); return; }
+    var btn = document.getElementById('btn-chat-login');
+    btn.disabled = true;
+    fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_ANON },
+      body: JSON.stringify({ email: email, password: password })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, status: r.status, data: data }; }); })
+      .then(function(res){
+        btn.disabled = false;
+        if (!res.ok || !res.data.access_token){
+          var st = res.status, c = (res.data && (res.data.error_code || res.data.code)) || '';
+          showToast(st === 429 ? 'Слишком много попыток — подождите минуту'
+            : (c === 'email_not_confirmed' ? 'Email не подтверждён — откройте письмо и перейдите по ссылке'
+            : (st >= 500 ? 'Сервер временно недоступен — повторите через пару минут'
+            : 'Неверный email или пароль')));
+          return;
+        }
+        saveSession({ access_token: res.data.access_token, email: email });
+        document.getElementById('chat-login-password').value = '';
+        updateChatAuthUI();
+      }).catch(function(){
+        btn.disabled = false;
+        showToast(navigator.onLine === false ? 'Нет интернета — проверьте сеть' : 'Нет связи с сервером. Отключите VPN и повторите');
+      });
+  }
+  function sendChatMessage(){
+    var session = loadSession();
+    if (!session){ showToast('Сначала войдите в аккаунт'); return; }
+    var input = document.getElementById('chat-input');
+    var text = input.value.trim();
+    if (!text) return;
+    var hist = loadChatHistory();
+    hist.push({ role: 'user', text: text });
+    saveChatHistory(hist);
+    renderChatLog();
+    input.value = '';
+
+    var now = Date.now();
+    var pet = loadPet();
+    settle(pet, now, getActivityLevel(), getActiveHealthMetrics());
+    fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({
+        message: text,
+        pet: {
+          name: pet.name, satiety: Math.round(pet.satiety), fat: Math.round(pet.fat),
+          energy: Math.round(pet.energy), fun: Math.round(pet.fun),
+          mood: moodLabel(pet.satiety, pet.fat, pet.energy, pet.fun, getActivityLevel())
+        },
+        history: hist.slice(-8)
+      })
+    }).then(function(r){
+      if (r.status === 401 || r.status === 403){
+        clearSession();
+        updateChatAuthUI();
+        throw new Error('unauthorized');
+      }
+      return r.json();
+    }).then(function(data){
+      var h = loadChatHistory();
+      h.push({ role: 'pet', text: data.reply || '...' });
+      saveChatHistory(h);
+      renderChatLog();
+    }).catch(function(err){
+      if (err && err.message === 'unauthorized'){
+        showToast('Сессия истекла — войдите снова');
+      } else {
+        showToast('Не удалось связаться с питомцем — проверьте интернет');
+      }
+    });
+  }
+
+  // ── Игры: шахматы/шашки/го для тренировки. Правила и ИИ подключены как
+  // готовые библиотеки (chess.js, rapid-draughts, tenuki) — самостоятельно
+  // захостены в assets/lib и подгружаются через dynamic import только при
+  // первом заходе в раздел «Игры», чтобы не раздувать стартовую загрузку.
+  // Для шашек используются английские (американские) правила — они реализо-
+  // ваны в готовой библиотеке; от русских шашек отличаются тем, что бой
+  // возможен только вперёд, а дамка не «летающая». Для Го нет готовых лёгких
+  // ИИ-движков в природе — используется собственный простой эвристический
+  // бот (захваты/свободы/близость к своим камням), а не полноценный ИИ. ────
+  var GO_SIZE = 9;
+  var gameLibs = {};
+  function loadLib(name, path){
+    if (!gameLibs[name]) gameLibs[name] = import(path);
+    return gameLibs[name];
+  }
+
+  var RULES = {
+    chess: {
+      title: 'Шахматы — правила',
+      html: '<p>Обычные классические шахматы. Цель — поставить мат королю соперника.</p>' +
+        '<ul>' +
+        '<li>Пешка ходит на 1 клетку вперёд (на 2 с начальной позиции), бьёт по диагонали; дойдя до последней горизонтали, превращается в любую фигуру (в игре — всегда в ферзя).</li>' +
+        '<li>Ладья ходит по горизонтали и вертикали на любое число клеток.</li>' +
+        '<li>Слон ходит по диагонали на любое число клеток.</li>' +
+        '<li>Ферзь ходит как ладья и слон вместе.</li>' +
+        '<li>Конь ходит буквой «Г» и перепрыгивает через фигуры.</li>' +
+        '<li>Король ходит на 1 клетку в любую сторону; его нельзя подставлять под шах.</li>' +
+        '</ul>' +
+        '<p>Мат — королю объявлен шах и нет хода, снимающего угрозу. Пат (нет шаха, но и нет ходов) — ничья.</p>'
+    },
+    checkers: {
+      title: 'Шашки — правила',
+      html: '<p>Английские (американские) шашки, 8×8, играют только по тёмным клеткам.</p>' +
+        '<ul>' +
+        '<li>Обычная шашка ходит на 1 клетку по диагонали только вперёд.</li>' +
+        '<li>Бой — прыжок через шашку соперника на свободную клетку за ней, тоже только вперёд; если после боя возможен ещё один прыжок, бить нужно продолжать.</li>' +
+        '<li>Если есть возможность бить — бой обязателен.</li>' +
+        '<li>Дойдя до последней горизонтали, шашка становится дамкой (♛) и после этого может ходить и бить по диагонали на любое число клеток вперёд и назад.</li>' +
+        '</ul>' +
+        '<p>Побеждает тот, у кого соперник не может сделать ход — все шашки взяты или заблокированы.</p>'
+    },
+    go: {
+      title: 'Го — правила',
+      html: '<p>Доска 9×9. Игроки по очереди ставят камни на пересечения линий; чёрные ходят первыми.</p>' +
+        '<ul>' +
+        '<li>Группа камней одного цвета захватывается и снимается с доски, если у неё не осталось ни одной свободной соседней точки (свободы/«дыхания»).</li>' +
+        '<li>Ставить камень в точку, где группа сразу лишится последней свободы, нельзя, если это не бьёт вражескую группу.</li>' +
+        '<li>Игрок может пропустить ход (Пас). Игра заканчивается, когда оба игрока подряд пасуют.</li>' +
+        '<li>Счёт — очки за захваченные (снятые с доски) камни соперника и за территорию — пустые точки, окружённые только своим цветом. У кого больше очков — тот и победил.</li>' +
+        '</ul>' +
+        '<p>Совет: не оставляйте свои группы без свобод и старайтесь окружать пустые области, а не только ловить камни соперника.</p>'
+    },
+    guard: {
+      title: 'Страж и клинок — правила',
+      html: '<p>Своя тактическая игра на доске 8×8, пять типов фигур. Побеждает тот, кто уничтожит все фигуры соперника.</p>' +
+        '<ul>' +
+        '<li>🛡 Защитник — ходит на 1 клетку по вертикали/горизонтали, сам не атакует. Прикрывает щитом свои фигуры по той же горизонтали слева и справа (на 1 клетку, с уровня 2 — на 2, с уровня 3 — на 3) — щит не действует на клетки впереди/позади.</li>' +
+        '<li>🏹 Стрелок — ходит на 2 клетки в любом из 8 направлений. Атакует только по прямой (вертикаль/горизонталь) на расстояние 4 клетки (5 с уровня 2, 6 с уровня 3), бьёт первую фигуру на луче.</li>' +
+        '<li>🪨 Катапульта — ходит на 1 клетку в любом из 8 направлений. Атакует только по диагонали на расстояние 3 клетки (4 с уровня 2, 5 с уровня 3), бьёт сильнее Стрелка, но менее подвижна.</li>' +
+        '<li>⚔ Мечник — ходит до 3 клеток в любом из 8 направлений (не может проходить сквозь фигуры). Атакует в любом из 8 направлений на 1 клетку (2 клетки с уровня 2).</li>' +
+        '<li>🗡 Убийца — ходит до 2 клеток в любом из 8 направлений. Атакует любую соседнюю клетку и мгновенно убивает цель независимо от её HP, уровня и щита Защитника, но сам очень хрупкий (1-2 HP, максимум 2 уровня).</li>' +
+        '</ul>' +
+        '<p>Серые точки на доске — клетки, которые прямо сейчас прикрыты чьим-то щитом (атака по стоящей там фигуре не пройдёт, кроме атаки Убийцы).</p>' +
+        '<p>Ход и атака — разные действия: атака не двигает фигуру с её клетки. У каждой фигуры есть HP (полоска под ней); убийство цели поднимает фигуре уровень (сила и HP растут, здоровье полностью восстанавливается).</p>' +
+        '<p>Если 60 полуходов подряд никто никого не убивает — партия завершается вничью.</p>'
+    }
+  };
+
+  function openRules(){
+    var type = gameState && gameState.type;
+    var r = RULES[type];
+    if (!r) return;
+    document.getElementById('rules-title').textContent = r.title;
+    document.getElementById('rules-body').innerHTML = r.html;
+    document.getElementById('rules-overlay').classList.remove('hidden');
+  }
+  function closeRules(){
+    document.getElementById('rules-overlay').classList.add('hidden');
+  }
+
+  var curGame = null, curDiff = 2, curColor = 'w';
+  var gameState = {};
+
+  function scheduleAi(fn, ms){
+    var st = gameState;
+    setTimeout(function(){ if (gameState === st && !st.over) fn(); }, ms);
+  }
+  function setGameStatus(text){ document.getElementById('game-status-line').textContent = text; }
+  function hideGameResult(){ document.getElementById('game-result').classList.add('hidden'); }
+  var GAME_WIN_GOLD = 10;
+  function showGameResult(text, won){
+    if (won) {
+      addGold(GAME_WIN_GOLD);
+      text += ' +' + GAME_WIN_GOLD + ' 🪙';
+    }
+    var el = document.getElementById('game-result');
+    el.textContent = text;
+    el.classList.remove('hidden');
+  }
+
+  function openGameSetup(kind){
+    curGame = kind;
+    var titles = { chess: 'Шахматы', checkers: 'Шашки', go: 'Го', guard: 'Страж и клинок' };
+    document.getElementById('setup-title').textContent = titles[kind];
+    curDiff = 2; curColor = 'w';
+    document.querySelectorAll('#setup-difficulty .chip').forEach(function(c){ c.classList.toggle('selected', c.dataset.diff === '2'); });
+    document.querySelectorAll('#setup-color .chip').forEach(function(c){ c.classList.toggle('selected', c.dataset.color === 'w'); });
+    showScreen('game-setup');
+  }
+
+  function startSelectedGame(){
+    showScreen('game-board');
+    document.getElementById('board-wrap').innerHTML = '';
+    document.getElementById('go-grid').innerHTML = '';
+    if (curGame === 'chess') startChess();
+    else if (curGame === 'checkers') startCheckers();
+    else if (curGame === 'go') startGo();
+    else if (curGame === 'guard') startGuard();
+  }
+
+  // ── Шахматы ────────────────────────────────────────────────────────────
+  var PIECE_GLYPH = { p:'♟', n:'♞', b:'♝', r:'♜', q:'♛', k:'♚' };
+  var CHESS_VAL = { p:100, n:320, b:330, r:500, q:900, k:0 };
+  function sqName(rr, cc){ return 'abcdefgh'[cc] + (8 - rr); }
+
+  function startChess(){
+    document.getElementById('go-wrap').classList.add('hidden');
+    document.getElementById('board-wrap').classList.remove('hidden');
+    document.getElementById('btn-game-pass').classList.add('hidden');
+    document.getElementById('board-title').textContent = 'Шахматы';
+    hideGameResult();
+    setGameStatus('Загрузка...');
+    loadLib('chess', './assets/lib/chess.js').then(function(mod){
+      var Chess = mod.Chess;
+      var playerColor = curColor === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : curColor;
+      gameState = { type:'chess', chess:new Chess(), playerColor:playerColor, diff:curDiff, selected:null, legalTargets:null, over:false };
+      renderChessBoard();
+      updateChessStatus();
+      if (playerColor !== gameState.chess.turn()) scheduleAi(chessAiMove, 500);
+    });
+  }
+  function renderChessBoard(){
+    var st = gameState;
+    var board = st.chess.board();
+    var el = document.getElementById('board-wrap');
+    el.style.gridTemplateColumns = 'repeat(8,1fr)';
+    el.style.gridTemplateRows = 'repeat(8,1fr)';
+    el.innerHTML = '';
+    var flip = st.playerColor === 'b';
+    for (var r = 0; r < 8; r++){
+      for (var c = 0; c < 8; c++){
+        var rr = flip ? 7 - r : r, cc = flip ? 7 - c : c;
+        var sq = board[rr][cc];
+        var div = document.createElement('div');
+        div.className = 'sq ' + ((rr + cc) % 2 === 0 ? 'light' : 'dark');
+        div.dataset.row = rr; div.dataset.col = cc;
+        if (sq){
+          var span = document.createElement('span');
+          span.textContent = PIECE_GLYPH[sq.type];
+          span.className = sq.color === 'w' ? 'piece-lt' : 'piece-dk';
+          div.appendChild(span);
+        }
+        el.appendChild(div);
+      }
+    }
+    if (st.selected){
+      Array.prototype.forEach.call(el.children, function(div){
+        var name = sqName(+div.dataset.row, +div.dataset.col);
+        if (name === st.selected) div.classList.add('sel');
+        if (st.legalTargets && st.legalTargets[name]){
+          var dot = document.createElement('div'); dot.className = 'dot'; div.appendChild(dot);
+        }
+      });
+    }
+    el.onclick = onChessSquareClick;
+  }
+  function selectChessSquare(name){
+    var st = gameState;
+    st.selected = name;
+    var moves = st.chess.moves({ square:name, verbose:true });
+    st.legalTargets = {};
+    moves.forEach(function(m){ st.legalTargets[m.to] = true; });
+    renderChessBoard();
+  }
+  function onChessSquareClick(e){
+    var st = gameState;
+    if (st.over || st.playerColor !== st.chess.turn()) return;
+    var div = e.target.closest('.sq'); if (!div) return;
+    var name = sqName(+div.dataset.row, +div.dataset.col);
+    if (st.selected){
+      if (st.selected === name){ st.selected = null; st.legalTargets = null; renderChessBoard(); return; }
+      if (st.legalTargets && st.legalTargets[name]){
+        st.chess.move({ from:st.selected, to:name, promotion:'q' });
+        st.selected = null; st.legalTargets = null;
+        renderChessBoard();
+        updateChessStatus();
+        if (!st.over) scheduleAi(chessAiMove, 400);
+        return;
+      }
+      var piece = st.chess.get(name);
+      if (piece && piece.color === st.playerColor) selectChessSquare(name);
+      else { st.selected = null; st.legalTargets = null; renderChessBoard(); }
+    } else {
+      var piece2 = st.chess.get(name);
+      if (piece2 && piece2.color === st.playerColor) selectChessSquare(name);
+    }
+  }
+  function evalChessBoard(chess){
+    var board = chess.board(), score = 0;
+    for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++){
+      var sq = board[r][c]; if (!sq) continue;
+      score += sq.color === 'w' ? CHESS_VAL[sq.type] : -CHESS_VAL[sq.type];
+    }
+    return score;
+  }
+  function chessMinimax(chess, depth, alpha, beta, maximizing){
+    if (depth === 0 || chess.isGameOver()) return evalChessBoard(chess);
+    var moves = chess.moves();
+    if (maximizing){
+      var best = -Infinity;
+      for (var i = 0; i < moves.length; i++){
+        chess.move(moves[i]);
+        best = Math.max(best, chessMinimax(chess, depth - 1, alpha, beta, false));
+        chess.undo();
+        alpha = Math.max(alpha, best);
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+    var worst = Infinity;
+    for (var j = 0; j < moves.length; j++){
+      chess.move(moves[j]);
+      worst = Math.min(worst, chessMinimax(chess, depth - 1, alpha, beta, true));
+      chess.undo();
+      beta = Math.min(beta, worst);
+      if (beta <= alpha) break;
+    }
+    return worst;
+  }
+  function chessAiMove(){
+    var st = gameState;
+    var chess = st.chess;
+    var moves = chess.moves({ verbose:true });
+    if (!moves.length){ updateChessStatus(); return; }
+    var aiIsWhite = chess.turn() === 'w';
+    var candidates = moves.map(function(m){
+      chess.move(m);
+      var score = chessMinimax(chess, st.diff - 1, -Infinity, Infinity, !aiIsWhite);
+      chess.undo();
+      return { m:m, score:score };
+    });
+    candidates.sort(function(a, b){ return aiIsWhite ? b.score - a.score : a.score - b.score; });
+    var poolSize = st.diff === 1 ? 4 : (st.diff === 2 ? 2 : 1);
+    var pool = candidates.slice(0, Math.min(poolSize, candidates.length));
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    chess.move(pick.m);
+    renderChessBoard();
+    updateChessStatus();
+  }
+  function updateChessStatus(){
+    var st = gameState, chess = st.chess;
+    if (chess.isGameOver()){
+      st.over = true;
+      var msg, chessWon = false;
+      if (chess.isCheckmate()){
+        var winner = chess.turn() === 'w' ? 'b' : 'w';
+        chessWon = winner === st.playerColor;
+        msg = chessWon ? 'Мат! Вы победили.' : 'Мат! Победил ИИ.';
+      } else if (chess.isStalemate()) msg = 'Пат — ничья.';
+      else msg = 'Ничья.';
+      setGameStatus('');
+      showGameResult(msg, chessWon);
+      return;
+    }
+    setGameStatus(chess.turn() === st.playerColor ? 'Ваш ход' : 'Ход соперника...');
+  }
+
+  // ── Шашки (английские/американские правила, готовый движок rapid-draughts) ─
+  function startCheckers(){
+    document.getElementById('go-wrap').classList.add('hidden');
+    document.getElementById('board-wrap').classList.remove('hidden');
+    document.getElementById('btn-game-pass').classList.add('hidden');
+    document.getElementById('board-title').textContent = 'Шашки';
+    hideGameResult();
+    setGameStatus('Загрузка...');
+    loadLib('draughts', './assets/lib/draughts.js').then(function(mod){
+      var Draughts = mod.EnglishDraughts, CF = mod.EnglishDraughtsComputerFactory;
+      var playerLight = curColor === 'r' ? (Math.random() < 0.5) : (curColor === 'w');
+      var ai = curDiff === 1 ? CF.random() : CF.alphaBeta({ maxDepth: curDiff === 2 ? 3 : 6 });
+      gameState = { type:'checkers', draughts:Draughts.setup(), ai:ai, playerLight:playerLight, selected:null, posMap:{}, over:false };
+      renderCheckersBoard();
+      updateCheckersStatus();
+      if (!isCheckersPlayerTurn()) scheduleAi(checkersAiMove, 500);
+    });
+  }
+  function isCheckersPlayerTurn(){
+    var st = gameState;
+    return (st.draughts.player === 'light') === st.playerLight;
+  }
+  function renderCheckersBoard(){
+    var st = gameState;
+    var el = document.getElementById('board-wrap');
+    el.style.gridTemplateColumns = 'repeat(8,1fr)';
+    el.style.gridTemplateRows = 'repeat(8,1fr)';
+    el.innerHTML = '';
+    var board = st.draughts.board;
+    st.posMap = {};
+    var flip = !st.playerLight;
+    for (var r = 0; r < 8; r++){
+      for (var c = 0; c < 8; c++){
+        var rr = flip ? 7 - r : r, cc = flip ? 7 - c : c;
+        var sq = board[rr * 8 + cc];
+        var div = document.createElement('div');
+        div.className = 'sq ' + (sq.dark ? 'dark' : 'light');
+        if (sq.dark){
+          div.dataset.pos = sq.position;
+          st.posMap[sq.position] = sq.piece || null;
+          if (sq.piece){
+            var cp = document.createElement('div');
+            cp.className = 'cp ' + (sq.piece.player === 'light' ? 'pl' : 'pd') + (sq.piece.king ? ' king' : '');
+            div.appendChild(cp);
+          }
+        }
+        el.appendChild(div);
+      }
+    }
+    if (st.selected != null){
+      var dests = st.draughts.moves.filter(function(m){ return m.origin === st.selected; }).map(function(m){ return m.destination; });
+      Array.prototype.forEach.call(el.children, function(div){
+        var pos = div.dataset.pos !== undefined ? +div.dataset.pos : null;
+        if (pos === st.selected) div.classList.add('sel');
+        if (pos !== null && dests.indexOf(pos) !== -1){
+          var dot = document.createElement('div'); dot.className = 'dot'; div.appendChild(dot);
+        }
+      });
+    }
+    el.onclick = onCheckersSquareClick;
+  }
+  function onCheckersSquareClick(e){
+    var st = gameState;
+    if (st.over || !isCheckersPlayerTurn()) return;
+    var div = e.target.closest('.sq');
+    if (!div || div.dataset.pos === undefined) return;
+    var pos = +div.dataset.pos;
+    var myPlayer = st.playerLight ? 'light' : 'dark';
+    if (st.selected != null){
+      var move = st.draughts.moves.filter(function(m){ return m.origin === st.selected && m.destination === pos; })[0];
+      if (move){
+        st.draughts.move(move);
+        st.selected = null;
+        renderCheckersBoard();
+        updateCheckersStatus();
+        if (!st.over && !isCheckersPlayerTurn()) scheduleAi(checkersAiMove, 400);
+        return;
+      }
+      var piece = st.posMap[pos];
+      st.selected = (piece && piece.player === myPlayer) ? pos : null;
+      renderCheckersBoard();
+    } else {
+      var piece2 = st.posMap[pos];
+      if (piece2 && piece2.player === myPlayer){ st.selected = pos; renderCheckersBoard(); }
+    }
+  }
+  function checkersAiMove(){
+    var st = gameState;
+    Promise.resolve(st.ai(st.draughts)).then(function(move){
+      if (gameState !== st || st.over) return;
+      if (move) st.draughts.move(move);
+      renderCheckersBoard();
+      updateCheckersStatus();
+    });
+  }
+  function updateCheckersStatus(){
+    var st = gameState;
+    var status = st.draughts.status;
+    if (status !== 'playing'){
+      st.over = true;
+      var msg, playerWon = false;
+      if (status === 'draw') msg = 'Ничья.';
+      else {
+        playerWon = (status === 'light_won') === st.playerLight;
+        msg = playerWon ? 'Вы победили!' : 'Победил ИИ.';
+      }
+      setGameStatus('');
+      showGameResult(msg, playerWon);
+      return;
+    }
+    setGameStatus(isCheckersPlayerTurn() ? 'Ваш ход' : 'Ход соперника...');
+  }
+
+  // ── Го (правила и хранение состояния — tenuki, без встроенного рендерера;
+  // доска рисуется своими минималистичными стилями; ИИ — простая эвристика) ─
+  function startGo(){
+    document.getElementById('board-wrap').classList.add('hidden');
+    document.getElementById('go-wrap').classList.remove('hidden');
+    document.getElementById('btn-game-pass').classList.remove('hidden');
+    document.getElementById('board-title').textContent = 'Го';
+    hideGameResult();
+    setGameStatus('Загрузка...');
+    loadLib('tenuki', './assets/lib/tenuki.js').then(function(mod){
+      var Game = mod.Game;
+      var playerBlack = curColor === 'r' ? (Math.random() < 0.5) : (curColor === 'b');
+      gameState = { type:'go', game:new Game({ boardSize:GO_SIZE }), playerBlack:playerBlack, diff:curDiff, passCount:0, over:false };
+      renderGoBoard();
+      updateGoStatus();
+      if (!isGoPlayerTurn()) scheduleAi(goAiMove, 500);
+    });
+  }
+  function isGoPlayerTurn(){
+    var st = gameState;
+    return (st.game.currentPlayer() === 'black') === st.playerBlack;
+  }
+  function renderGoBoard(){
+    var st = gameState;
+    var grid = document.getElementById('go-grid');
+    grid.style.gridTemplateColumns = 'repeat(' + GO_SIZE + ',1fr)';
+    grid.style.gridTemplateRows = 'repeat(' + GO_SIZE + ',1fr)';
+    grid.innerHTML = '';
+    for (var y = 0; y < GO_SIZE; y++){
+      for (var x = 0; x < GO_SIZE; x++){
+        var cell = document.createElement('div');
+        cell.className = 'go-pt';
+        if (x === 0) cell.classList.add('edge-l');
+        if (x === GO_SIZE - 1) cell.classList.add('edge-r');
+        if (y === 0) cell.classList.add('edge-t');
+        if (y === GO_SIZE - 1) cell.classList.add('edge-b');
+        cell.dataset.y = y; cell.dataset.x = x;
+        var val = st.game.intersectionAt(y, x).value;
+        if (val === 'black' || val === 'white'){
+          var stone = document.createElement('div');
+          stone.className = 'stone ' + val;
+          cell.appendChild(stone);
+        }
+        grid.appendChild(cell);
+      }
+    }
+    grid.onclick = onGoPointClick;
+  }
+  function onGoPointClick(e){
+    var st = gameState;
+    if (st.over || !isGoPlayerTurn()) return;
+    var cell = e.target.closest('.go-pt'); if (!cell) return;
+    var y = +cell.dataset.y, x = +cell.dataset.x;
+    if (!st.game.playAt(y, x, { render:false })){ showToast('Так ходить нельзя'); return; }
+    st.passCount = 0;
+    renderGoBoard();
+    updateGoStatus();
+    if (!st.over) scheduleAi(goAiMove, 400);
+  }
+  function goCountStones(game){
+    var c = { black:0, white:0 };
+    for (var y = 0; y < GO_SIZE; y++) for (var x = 0; x < GO_SIZE; x++){
+      var v = game.intersectionAt(y, x).value;
+      if (v === 'black' || v === 'white') c[v]++;
+    }
+    return c;
+  }
+  function goNeighborBonus(game, y, x){
+    var n = 0;
+    [[y-1,x],[y+1,x],[y,x-1],[y,x+1]].forEach(function(p){
+      if (p[0] >= 0 && p[0] < GO_SIZE && p[1] >= 0 && p[1] < GO_SIZE && game.intersectionAt(p[0], p[1]).value !== 'empty') n++;
+    });
+    return n;
+  }
+  function goGroupLiberties(game, y, x){
+    var color = game.intersectionAt(y, x).value;
+    var seen = {}, libs = {}, stack = [[y, x]];
+    while (stack.length){
+      var p = stack.pop(), key = p[0] + ',' + p[1];
+      if (seen[key]) continue;
+      seen[key] = true;
+      [[p[0]-1,p[1]],[p[0]+1,p[1]],[p[0],p[1]-1],[p[0],p[1]+1]].forEach(function(n){
+        if (n[0] < 0 || n[0] >= GO_SIZE || n[1] < 0 || n[1] >= GO_SIZE) return;
+        var v = game.intersectionAt(n[0], n[1]).value;
+        if (v === 'empty') libs[n[0] + ',' + n[1]] = true;
+        else if (v === color) stack.push(n);
+      });
+    }
+    return Object.keys(libs).length;
+  }
+  function goAiMove(){
+    var st = gameState, game = st.game;
+    var before = goCountStones(game);
+    var candidates = [];
+    for (var y = 0; y < GO_SIZE; y++){
+      for (var x = 0; x < GO_SIZE; x++){
+        if (game.intersectionAt(y, x).value !== 'empty') continue;
+        if (!game.playAt(y, x, { render:false })) continue;
+        var after = goCountStones(game);
+        var myColor = game.currentPlayer() === 'black' ? 'white' : 'black';
+        var opp = myColor === 'black' ? 'white' : 'black';
+        var captured = Math.max(0, before[opp] - after[opp]);
+        var libs = goGroupLiberties(game, y, x);
+        var score = captured * 20 + libs * 2 + goNeighborBonus(game, y, x) + Math.random() * 2 - (libs <= 1 ? 15 : 0);
+        candidates.push({ y:y, x:x, score:score });
+        game.undo();
+      }
+    }
+    if (!candidates.length){
+      game.pass({ render:false }); st.passCount++;
+      renderGoBoard(); updateGoStatus();
+      return;
+    }
+    candidates.sort(function(a, b){ return b.score - a.score; });
+    if (st.passCount > 0 && candidates[0].score <= 0){
+      game.pass({ render:false }); st.passCount++;
+      renderGoBoard(); updateGoStatus();
+      return;
+    }
+    var pool = st.diff === 1 ? candidates.slice(0, Math.max(1, Math.ceil(candidates.length * 0.6)))
+      : st.diff === 2 ? candidates.slice(0, Math.min(6, candidates.length))
+      : candidates.slice(0, Math.min(2, candidates.length));
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    game.playAt(pick.y, pick.x, { render:false });
+    st.passCount = 0;
+    renderGoBoard();
+    updateGoStatus();
+  }
+  function updateGoStatus(){
+    var st = gameState;
+    if (st.game.isOver()){
+      st.over = true;
+      var score = st.game.score();
+      var winner = score.black > score.white ? 'black' : (score.white > score.black ? 'white' : null);
+      var scoreStr = 'Чёрные ' + score.black.toFixed(1) + ' — Белые ' + score.white.toFixed(1);
+      var msg, playerWon = false;
+      if (!winner) msg = 'Ничья! ' + scoreStr;
+      else {
+        playerWon = (winner === 'black') === st.playerBlack;
+        msg = (playerWon ? 'Вы победили! ' : 'Победил ИИ. ') + scoreStr;
+      }
+      setGameStatus('');
+      showGameResult(msg, playerWon);
+      return;
+    }
+    setGameStatus(isGoPlayerTurn() ? 'Ваш ход' : 'Ход соперника...');
+  }
+
+  // ── Страж и клинок — своя тактическая игра на шахматной доске 8×8:────────
+  // Защитник/Стрелок/Мечник/Убийца, у фигур HP и уровни (за убийство +1
+  // уровень и полное лечение). Атака никогда не двигает фигуру — это
+  // отдельное от хода действие, в отличие от шахмат/шашек.
+  var GUARD_TYPES = {
+    defender:  { name:'Защитник',   glyph:'🛡', hp:[4,5,6], move:1, moveDirs:'orth' },
+    archer:    { name:'Стрелок',    glyph:'🏹', hp:[2,3,4], move:2, moveDirs:'all8', atkDirs:'orth', atkRange:[4,5,6], dmg:[1,2,3] },
+    catapult:  { name:'Катапульта', glyph:'🪨', hp:[3,4,5], move:1, moveDirs:'all8', atkDirs:'diag', atkRange:[3,4,5], dmg:[2,3,4] },
+    swordsman: { name:'Мечник',     glyph:'⚔', hp:[3,4,5], move:3, moveDirs:'all8', atkDirs:'all8', atkRange:[1,2,2], dmg:[1,2,3] },
+    assassin:  { name:'Убийца',     glyph:'🗡', hp:[1,2],   move:2, moveDirs:'all8' }
+  };
+  var GUARD_MAX_LEVEL = { defender:3, archer:3, catapult:3, swordsman:3, assassin:2 };
+  var GUARD_BASE_VALUE = { defender:28, archer:33, catapult:33, swordsman:34, assassin:40 };
+  var GUARD_DIRS8 = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  var GUARD_DIRS_ORTH = [[-1,0],[1,0],[0,-1],[0,1]];
+  var GUARD_DIRS_DIAG = [[-1,-1],[-1,1],[1,-1],[1,1]];
+
+  function guardEnemySide(side){ return side === 'w' ? 'b' : 'w'; }
+  function guardInBounds(r, c){ return r >= 0 && r < 8 && c >= 0 && c < 8; }
+  function guardDirsFor(key){
+    if (key === 'orth') return GUARD_DIRS_ORTH;
+    if (key === 'diag') return GUARD_DIRS_DIAG;
+    return GUARD_DIRS8;
+  }
+
+  function guardBuildBoard(){
+    var board = [];
+    for (var r = 0; r < 8; r++) board.push([null,null,null,null,null,null,null,null]);
+    var backRank = [ {type:'archer',col:1}, {type:'defender',col:3}, {type:'defender',col:4}, {type:'catapult',col:6} ];
+    var frontRank = [ {type:'swordsman',col:0}, {type:'assassin',col:2}, {type:'archer',col:5}, {type:'swordsman',col:7} ];
+    function place(side, row, list){
+      list.forEach(function(item){
+        var hp = GUARD_TYPES[item.type].hp[0];
+        board[row][item.col] = { type:item.type, side:side, level:1, hp:hp, maxHp:hp };
+      });
+    }
+    place('w', 7, backRank); place('w', 6, frontRank);
+    place('b', 0, backRank); place('b', 1, frontRank);
+    return board;
+  }
+
+  function guardCloneBoard(board){
+    return board.map(function(row){
+      return row.map(function(p){ return p ? { type:p.type, side:p.side, level:p.level, hp:p.hp, maxHp:p.maxHp } : null; });
+    });
+  }
+
+  function guardGenMoves(board, r, c){
+    var piece = board[r][c];
+    var def = GUARD_TYPES[piece.type];
+    var dirs = guardDirsFor(def.moveDirs);
+    var moves = [];
+    dirs.forEach(function(d){
+      for (var step = 1; step <= def.move; step++){
+        var rr = r + d[0]*step, cc = c + d[1]*step;
+        if (!guardInBounds(rr,cc) || board[rr][cc]) break;
+        moves.push({ r:rr, c:cc });
+      }
+    });
+    return moves;
+  }
+
+  // Стрелок/Катапульта/Мечник — луч в заданных направлениях, бьёт первую
+  // фигуру на пути (перебросить через фигуру нельзя); Убийца — особый случай
+  // (см. ниже, мгновенное убийство любой соседней цели в упор).
+  function guardGenAttacks(board, r, c){
+    var piece = board[r][c];
+    var def = GUARD_TYPES[piece.type];
+    var enemy = guardEnemySide(piece.side);
+    var targets = [];
+    if (piece.type === 'assassin'){
+      GUARD_DIRS8.forEach(function(d){
+        var rr = r + d[0], cc = c + d[1];
+        if (guardInBounds(rr,cc)){
+          var target = board[rr][cc];
+          if (target && target.side === enemy) targets.push({ r:rr, c:cc });
+        }
+      });
+      return targets;
+    }
+    if (!def.atkDirs) return targets;
+    var range = def.atkRange[piece.level-1];
+    guardDirsFor(def.atkDirs).forEach(function(d){
+      for (var step = 1; step <= range; step++){
+        var rr = r + d[0]*step, cc = c + d[1]*step;
+        if (!guardInBounds(rr,cc)) break;
+        var target = board[rr][cc];
+        if (target){ if (target.side === enemy) targets.push({ r:rr, c:cc }); break; }
+      }
+    });
+    return targets;
+  }
+
+  // Защитник больше не прикрывает клетки впереди себя — только свои фигуры
+  // по той же горизонтали слева и справа, дальность щита растёт с уровнем.
+  function guardCellProtected(board, r, c, side){
+    for (var rr = 0; rr < 8; rr++){
+      for (var cc = 0; cc < 8; cc++){
+        var p = board[rr][cc];
+        if (!p || p.type !== 'defender' || p.side !== side) continue;
+        if (rr !== r) continue;
+        var dist = Math.abs(cc - c);
+        if (dist >= 1 && dist <= p.level) return true;
+      }
+    }
+    return false;
+  }
+
+  function guardApplyMove(board, from, to){
+    board[to.r][to.c] = board[from.r][from.c];
+    board[from.r][from.c] = null;
+  }
+
+  function guardApplyAttack(board, from, to){
+    var attacker = board[from.r][from.c];
+    var target = board[to.r][to.c];
+    if (!target) return { blocked:false, killed:false };
+    var killed;
+    if (attacker.type === 'assassin'){
+      killed = true;
+    } else {
+      if (guardCellProtected(board, to.r, to.c, target.side)) return { blocked:true, killed:false };
+      target.hp -= GUARD_TYPES[attacker.type].dmg[attacker.level-1];
+      killed = target.hp <= 0;
+    }
+    if (killed){
+      board[to.r][to.c] = null;
+      var maxLvl = GUARD_MAX_LEVEL[attacker.type];
+      if (attacker.level < maxLvl){
+        attacker.level++;
+        attacker.maxHp = GUARD_TYPES[attacker.type].hp[attacker.level-1];
+        attacker.hp = attacker.maxHp;
+      }
+    }
+    return { blocked:false, killed:killed };
+  }
+
+  function guardAllActions(board, side){
+    var actions = [];
+    for (var r = 0; r < 8; r++){
+      for (var c = 0; c < 8; c++){
+        var p = board[r][c];
+        if (!p || p.side !== side) continue;
+        guardGenMoves(board, r, c).forEach(function(m){ actions.push({ from:{r:r,c:c}, to:m, kind:'move' }); });
+        guardGenAttacks(board, r, c).forEach(function(m){ actions.push({ from:{r:r,c:c}, to:m, kind:'attack' }); });
+      }
+    }
+    return actions;
+  }
+
+  function guardApplyAction(board, action){
+    if (action.kind === 'move') guardApplyMove(board, action.from, action.to);
+    else return guardApplyAttack(board, action.from, action.to);
+  }
+
+  function guardCountSide(board, side){
+    var n = 0;
+    for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) if (board[r][c] && board[r][c].side === side) n++;
+    return n;
+  }
+
+  function guardEvalBoard(board, side){
+    var score = 0;
+    for (var r = 0; r < 8; r++){
+      for (var c = 0; c < 8; c++){
+        var p = board[r][c];
+        if (!p) continue;
+        var val = GUARD_BASE_VALUE[p.type] + (p.level-1)*15 + (p.hp/p.maxHp)*10;
+        score += p.side === side ? val : -val;
+      }
+    }
+    return score;
+  }
+
+  function guardMinimax(board, depth, alpha, beta, maximizing, aiSide, deadline){
+    if (depth === 0 || Date.now() > deadline) return guardEvalBoard(board, aiSide);
+    var side = maximizing ? aiSide : guardEnemySide(aiSide);
+    var actions = guardAllActions(board, side);
+    if (!actions.length) return guardEvalBoard(board, aiSide);
+    var best = maximizing ? -Infinity : Infinity;
+    for (var i = 0; i < actions.length; i++){
+      var next = guardCloneBoard(board);
+      guardApplyAction(next, actions[i]);
+      var score = guardMinimax(next, depth-1, alpha, beta, !maximizing, aiSide, deadline);
+      if (maximizing){ best = Math.max(best, score); alpha = Math.max(alpha, best); }
+      else { best = Math.min(best, score); beta = Math.min(beta, best); }
+      if (beta <= alpha || Date.now() > deadline) break;
+    }
+    return best;
+  }
+
+  function guardPickAiAction(board, aiSide, timeBudgetMs){
+    var deadline = Date.now() + timeBudgetMs;
+    var actions = guardAllActions(board, aiSide);
+    if (!actions.length) return null;
+    actions.sort(function(a,b){ return (b.kind==='attack') - (a.kind==='attack'); });
+    var bestAction = actions[0];
+    for (var depth = 1; Date.now() < deadline && depth <= 4; depth++){
+      var curBest = null, curBestScore = -Infinity;
+      for (var i = 0; i < actions.length; i++){
+        var next = guardCloneBoard(board);
+        guardApplyAction(next, actions[i]);
+        var score = guardMinimax(next, depth-1, -Infinity, Infinity, false, aiSide, deadline) + Math.random()*0.01;
+        if (score > curBestScore){ curBestScore = score; curBest = actions[i]; }
+        if (Date.now() > deadline) break;
+      }
+      if (curBest) bestAction = curBest;
+    }
+    return bestAction;
+  }
+
+  function startGuard(){
+    document.getElementById('go-wrap').classList.add('hidden');
+    document.getElementById('board-wrap').classList.remove('hidden');
+    document.getElementById('btn-game-pass').classList.add('hidden');
+    document.getElementById('board-title').textContent = 'Страж и клинок';
+    hideGameResult();
+    var playerSide = curColor === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : curColor;
+    gameState = { type:'guard', board:guardBuildBoard(), turn:'w', playerSide:playerSide, diff:curDiff,
+      selected:null, moveTargets:null, atkTargets:null, noKillCount:0, over:false };
+    renderGuardBoard();
+    updateGuardStatus();
+    if (playerSide !== gameState.turn) scheduleAi(guardAiMove, 500);
+  }
+
+  function renderGuardBoard(){
+    var st = gameState;
+    var el = document.getElementById('board-wrap');
+    el.style.gridTemplateColumns = 'repeat(8,1fr)';
+    el.style.gridTemplateRows = 'repeat(8,1fr)';
+    el.innerHTML = '';
+    var flip = st.playerSide === 'b';
+    // Подсказка: серые точки на клетках, которые щит какого-либо Защитника
+    // прикрывает от атак (по горизонтали слева/справа от него).
+    var shielded = {};
+    for (var sr = 0; sr < 8; sr++) for (var sc = 0; sc < 8; sc++){
+      if (guardCellProtected(st.board, sr, sc, 'w') || guardCellProtected(st.board, sr, sc, 'b')) shielded[sr+'_'+sc] = true;
+    }
+    for (var r = 0; r < 8; r++){
+      for (var c = 0; c < 8; c++){
+        var rr = flip ? 7-r : r, cc = flip ? 7-c : c;
+        var piece = st.board[rr][cc];
+        var div = document.createElement('div');
+        div.className = 'sq ' + ((rr+cc)%2===0 ? 'light' : 'dark');
+        div.dataset.row = rr; div.dataset.col = cc;
+        if (shielded[rr+'_'+cc]){
+          var hint = document.createElement('div'); hint.className = 'shield-hint'; div.appendChild(hint);
+        }
+        if (piece){
+          var gp = document.createElement('div');
+          gp.className = 'gp side-' + piece.side;
+          gp.textContent = GUARD_TYPES[piece.type].glyph;
+          var hp = document.createElement('div'); hp.className = 'gp-hp';
+          var fill = document.createElement('div'); fill.className = 'gp-hp-fill';
+          fill.style.width = Math.max(0, piece.hp/piece.maxHp*100) + '%';
+          hp.appendChild(fill); gp.appendChild(hp);
+          if (piece.level > 1){
+            var lvl = document.createElement('div'); lvl.className = 'gp-lvl'; lvl.textContent = '★'+piece.level;
+            gp.appendChild(lvl);
+          }
+          div.appendChild(gp);
+        }
+        if (st.selected){
+          if (st.selected.r === rr && st.selected.c === cc) div.classList.add('sel');
+          if (st.moveTargets && st.moveTargets.some(function(m){ return m.r===rr && m.c===cc; })){
+            var dot = document.createElement('div'); dot.className = 'dot'; div.appendChild(dot);
+          }
+          if (st.atkTargets && st.atkTargets.some(function(m){ return m.r===rr && m.c===cc; })) div.classList.add('dot-capture');
+        }
+        el.appendChild(div);
+      }
+    }
+    el.onclick = onGuardSquareClick;
+  }
+
+  function guardClearSelection(st){ st.selected = null; st.moveTargets = null; st.atkTargets = null; }
+
+  function guardSelect(st, r, c){
+    st.selected = { r:r, c:c };
+    st.moveTargets = guardGenMoves(st.board, r, c);
+    st.atkTargets = guardGenAttacks(st.board, r, c);
+    renderGuardBoard();
+  }
+
+  function guardEndTurn(st){
+    guardClearSelection(st);
+    st.turn = guardEnemySide(st.turn);
+    renderGuardBoard();
+    updateGuardStatus();
+    if (!st.over && st.turn !== st.playerSide) scheduleAi(guardAiMove, 400);
+  }
+
+  function onGuardSquareClick(e){
+    var st = gameState;
+    if (st.over || st.turn !== st.playerSide) return;
+    var div = e.target.closest('.sq');
+    if (!div) return;
+    var r = +div.dataset.row, c = +div.dataset.col;
+    if (st.selected){
+      if (st.selected.r === r && st.selected.c === c){ guardClearSelection(st); renderGuardBoard(); return; }
+      var isMove = st.moveTargets && st.moveTargets.some(function(m){ return m.r===r && m.c===c; });
+      var isAtk = st.atkTargets && st.atkTargets.some(function(m){ return m.r===r && m.c===c; });
+      if (isMove){
+        guardApplyMove(st.board, st.selected, { r:r, c:c });
+        st.noKillCount++;
+        guardEndTurn(st);
+        return;
+      }
+      if (isAtk){
+        var result = guardApplyAttack(st.board, st.selected, { r:r, c:c });
+        st.noKillCount = result.killed ? 0 : st.noKillCount + 1;
+        guardEndTurn(st);
+        return;
+      }
+      var piece = st.board[r][c];
+      if (piece && piece.side === st.playerSide) guardSelect(st, r, c);
+      else { guardClearSelection(st); renderGuardBoard(); }
+    } else {
+      var piece2 = st.board[r][c];
+      if (piece2 && piece2.side === st.playerSide) guardSelect(st, r, c);
+    }
+  }
+
+  function guardAiMove(){
+    var st = gameState;
+    var aiSide = guardEnemySide(st.playerSide);
+    var timeBudget = st.diff === 1 ? 150 : (st.diff === 2 ? 350 : 700);
+    var action = guardPickAiAction(st.board, aiSide, timeBudget);
+    if (!action) return;
+    var killed = false;
+    if (action.kind === 'attack') killed = guardApplyAttack(st.board, action.from, action.to).killed;
+    else guardApplyMove(st.board, action.from, action.to);
+    st.noKillCount = killed ? 0 : st.noKillCount + 1;
+    st.turn = st.playerSide;
+    renderGuardBoard();
+    updateGuardStatus();
+  }
+
+  function updateGuardStatus(){
+    var st = gameState;
+    var wAlive = guardCountSide(st.board, 'w') > 0, bAlive = guardCountSide(st.board, 'b') > 0;
+    if (!wAlive || !bAlive){
+      st.over = true;
+      var winnerSide = wAlive ? 'w' : 'b';
+      var guardWon = winnerSide === st.playerSide;
+      setGameStatus('');
+      showGameResult(guardWon ? 'Вы победили!' : 'Победил ИИ.', guardWon);
+      return;
+    }
+    if (st.noKillCount >= 60){
+      st.over = true;
+      setGameStatus('');
+      showGameResult('Ничья — слишком долго без убийств.');
+      return;
+    }
+    setGameStatus(st.turn === st.playerSide ? 'Ваш ход' : 'Ход соперника...');
+  }
+
+  // ── Билеты ПДД (категория A,B, датасет etspring/pdd_russia) — вопросы и
+  // структура билетов лежат статикой в assets/pdd/tickets.json (кэшируется
+  // service worker'ом как обычный app-shell файл), а картинки к вопросам —
+  // в БД на VPS, отдаются через Edge Function pdd-image (см. supabase/functions),
+  // не через объектное хранилище, чтобы не платить трафик за S3-прокси
+  // ради статичного набора картинок. ──────────────────────────────────────
+  var PDD_IMAGE_ENDPOINT = SB_URL + '/functions/v1/pdd-image';
+  var pddTicketsPromise = null;
+  var pddState = null;
+
+  function loadPddTickets(){
+    if (!pddTicketsPromise){
+      pddTicketsPromise = fetch('./assets/pdd/tickets.json').then(function(r){ return r.json(); });
+    }
+    return pddTicketsPromise;
+  }
+  function loadPddProgress(){
+    try { return JSON.parse(lsGet('pdd_progress', '{}')); } catch(e){ return {}; }
+  }
+  function savePddProgress(ticketNum, correct, total){
+    var progress = loadPddProgress();
+    progress[ticketNum] = { correct: correct, total: total, at: Date.now() };
+    lsSet('pdd_progress', JSON.stringify(progress));
+  }
+
+  function openPddTickets(){
+    showScreen('pdd-tickets');
+    var grid = document.getElementById('pdd-ticket-grid');
+    grid.innerHTML = '<p class="hint">Загрузка...</p>';
+    loadPddTickets().then(function(tickets){
+      var progress = loadPddProgress();
+      grid.innerHTML = '';
+      tickets.forEach(function(t){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.ticket = t.n;
+        var p = progress[t.n];
+        var badge = p ? (p.correct + '/' + p.total) : '';
+        if (p) btn.classList.add('pdd-done');
+        btn.innerHTML = '<span>Билет ' + t.n + '</span><span class="pdd-badge">' + badge + '</span>';
+        grid.appendChild(btn);
+      });
+    }).catch(function(){
+      grid.innerHTML = '<p class="hint">Не удалось загрузить билеты.</p>';
+    });
+  }
+
+  function startPddTicket(n){
+    loadPddTickets().then(function(tickets){
+      var ticket = tickets.filter(function(t){ return t.n === n; })[0];
+      if (!ticket) return;
+      pddState = { ticket: ticket, idx: 0, correct: 0, answered: false };
+      showScreen('pdd-question');
+      document.getElementById('pdd-question-title').textContent = 'Билет ' + n;
+      document.getElementById('pdd-question-view').classList.remove('hidden');
+      document.getElementById('pdd-result-view').classList.add('hidden');
+      renderPddQuestion();
+    });
+  }
+
+  function renderPddQuestion(){
+    var st = pddState;
+    var q = st.ticket.questions[st.idx];
+    st.answered = false;
+    document.getElementById('pdd-progress-line').textContent = 'Вопрос ' + (st.idx + 1) + '/' + st.ticket.questions.length;
+    var img = document.getElementById('pdd-image');
+    if (q.img){
+      img.src = PDD_IMAGE_ENDPOINT + '?id=' + encodeURIComponent(q.img);
+      img.classList.remove('hidden');
+    } else {
+      img.classList.add('hidden');
+      img.removeAttribute('src');
+    }
+    document.getElementById('pdd-question-text').textContent = q.q;
+    var answersEl = document.getElementById('pdd-answers');
+    answersEl.innerHTML = '';
+    q.answers.forEach(function(a, i){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pdd-answer';
+      btn.dataset.idx = i;
+      btn.textContent = a.text;
+      answersEl.appendChild(btn);
+    });
+    document.getElementById('pdd-tip').classList.add('hidden');
+    var nextBtn = document.getElementById('btn-pdd-next');
+    nextBtn.classList.add('hidden');
+    nextBtn.textContent = (st.idx + 1 >= st.ticket.questions.length) ? 'Завершить билет' : 'Следующий вопрос';
+  }
+
+  function onPddAnswerClick(idx){
+    var st = pddState;
+    if (st.answered) return;
+    st.answered = true;
+    var q = st.ticket.questions[st.idx];
+    if (q.answers[idx].correct) st.correct++;
+    document.querySelectorAll('#pdd-answers .pdd-answer').forEach(function(btn){
+      var i = parseInt(btn.dataset.idx, 10);
+      if (q.answers[i].correct) btn.classList.add('correct');
+      else if (i === idx) btn.classList.add('wrong');
+    });
+    if (q.tip){
+      var tip = document.getElementById('pdd-tip');
+      tip.textContent = q.tip;
+      tip.classList.remove('hidden');
+    }
+    document.getElementById('btn-pdd-next').classList.remove('hidden');
+  }
+
+  function onPddNextClick(){
+    var st = pddState;
+    if (st.idx + 1 >= st.ticket.questions.length){
+      savePddProgress(st.ticket.n, st.correct, st.ticket.questions.length);
+      document.getElementById('pdd-question-view').classList.add('hidden');
+      document.getElementById('pdd-result-view').classList.remove('hidden');
+      document.getElementById('pdd-score').textContent = st.correct + '/' + st.ticket.questions.length;
+      document.getElementById('pdd-result-text').textContent = st.correct === st.ticket.questions.length
+        ? 'Отлично, все ответы верные!' : 'Пересдайте билет, если хотите закрепить материал.';
+      return;
+    }
+    st.idx++;
+    renderPddQuestion();
+  }
+
+  function renderStatus(){
+    var now = Date.now();
+    var pet = loadPet();
+    var hc = getActiveHealthMetrics();
+    settle(pet, now, getActivityLevel(), hc);
+    savePet(pet);
+
+    var activity = getActivityLevel();
+    var s = getStepsState();
+    var fatFromRealBody = getRealBodyFatPercent() !== null;
+    var fatFromHC = !fatFromRealBody && getFatActivityLevel(hc) !== null;
+    var energyFromHC = getSleepEnergyLevel(hc) !== null;
+
+    applySprite(pet);
+    document.getElementById('text-name').textContent = pet.name;
+    document.getElementById('text-mood').textContent = moodLabel(pet.satiety, pet.fat, pet.energy, pet.fun, activity);
+    document.getElementById('text-satiety').textContent = Math.round(pet.satiety) + '%';
+    document.getElementById('text-fat').textContent = Math.round(pet.fat) + '%' + ((fatFromHC || fatFromRealBody) ? ' 🔗' : '');
+    document.getElementById('text-energy').textContent = Math.round(pet.energy) + '%' + (energyFromHC ? ' 🔗' : '');
+    document.getElementById('text-fun').textContent = Math.round(pet.fun) + '%';
+    document.getElementById('text-steps').textContent = String(s.steps + s.bonus);
+    document.getElementById('btn-assess').textContent = 'Оценить состояние ' + pet.name;
+    setRing('ring-satiety', pet.satiety);
+    setRing('ring-fat', pet.fat);
+    setRing('ring-energy', pet.energy);
+    setRing('ring-fun', pet.fun);
+    setRing('ring-steps', activity);
+    updateGoldDisplay();
+    renderHealthMetrics();
+    var hcHint = [];
+    if (energyFromHC) hcHint.push('Энергия считается по сну из Health Connect и не меняется кнопками.');
+    if (fatFromRealBody) hcHint.push('Жир питомца равен вашему % жира тела из Health Connect и не меняется кнопками.');
+    else if (fatFromHC) hcHint.push('Жир считается по калориям/тренировкам из Health Connect и не меняется кнопками напрямую.');
+    document.getElementById('text-hint').textContent =
+      'Сытость идёт к 0 к завтраку (10:00), обеду (18:00) и ужину (23:00) — добавьте приём пищи, чтобы восстановить её. ' +
+      (isNative ? 'Шаги берутся из Health Connect.' : 'Шаги считаются только пока эта страница открыта в браузере.') +
+      (hcHint.length ? ' ' + hcHint.join(' ') : '');
+  }
+
+  // Овал состояния: высота фиксирована (ry всегда 140, большая сторона овала —
+  // вертикаль при низком % жира), ширина (rx) растёт от узкой при 0% жира до
+  // идеального круга (rx === ry) при 100%.
+  var ASSESS_RY = 140;
+  var ASSESS_RX_MIN = 60;
+  function openAssess(){
+    var pet = loadPet();
+    var fat = Math.max(0, Math.min(100, pet.fat));
+    var rx = ASSESS_RX_MIN + (ASSESS_RY - ASSESS_RX_MIN) * (fat / 100);
+    document.getElementById('assess-shape').setAttribute('rx', rx.toFixed(1));
+    document.getElementById('assess-title').textContent = 'Состояние: ' + pet.name;
+    document.getElementById('assess-text').textContent = 'Жир: ' + Math.round(fat) + '%';
+    document.getElementById('assess-overlay').classList.remove('hidden');
+  }
+  function closeAssess(){
+    document.getElementById('assess-overlay').classList.add('hidden');
+  }
+
+  // ── Росток (Rive) — готовый бесплатный маскот с Rive Marketplace, показан
+  // как есть: явных входов, подтверждённых для этого файла, нет — встроенные
+  // взаимодействия (перетаскивание, щекотка, день/ночь) реализованы через
+  // Rive Listeners внутри артборда и реагируют на события указателя сами.
+  // Рантайм подгружается лениво при первом открытии экрана, по тому же
+  // принципу, что и игровые библиотеки выше. ────────────────────────────────
+  var sproutRiveInstance = null;
+  function openSproutScreen(){
+    showScreen('sprout');
+    if (sproutRiveInstance) return;
+    function start(){
+      var canvas = document.getElementById('sprout-canvas');
+      sproutRiveInstance = new rive.Rive({
+        src: './sprout-mascot.riv',
+        canvas: canvas,
+        autoplay: true,
+        stateMachines: ['State Machine 1'],
+        layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
+        onLoad: function(){
+          sproutRiveInstance.resizeDrawingSurfaceToCanvas();
+        }
+      });
+      window.addEventListener('resize', function(){
+        if (sproutRiveInstance) sproutRiveInstance.resizeDrawingSurfaceToCanvas();
+      });
+    }
+    if (window.rive){ start(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/@rive-app/canvas@latest';
+    s.onload = start;
+    document.head.appendChild(s);
+  }
+
+  function init(){
+    if (hasPet()){
+      showScreen('status');
+      renderStatus();
+      syncPetNameToNative(loadPet().name);
+      document.getElementById('input-bio').value = lsGet('bio', '');
+      document.getElementById('input-weight').value = lsGet('weightKg', '');
+      document.getElementById('input-height').value = lsGet('heightCm', '');
+      document.getElementById('input-age').value = lsGet('ageYears', '');
+      document.getElementById('input-gender').value = lsGet('gender', '');
+      document.getElementById('input-bodyfat').value = lsGet('bodyFatPercent', '');
+      renderWorkoutsList(getCachedWorkouts());
+      renderMeals();
+      renderBodyComposition();
+      if (isNative){ try { syncBodyWeightToNative(lsNum('weightKg', 0)); refreshHealthConnectSteps(); refreshHealthConnectMetrics(); refreshHealthConnectBodyMetrics(); refreshHealthConnectNutrition(); } catch (e) {} }
+      else if (lsGet('sensorEnabled', '') === '1') startSensor();
+    } else {
+      showScreen('create');
+    }
+
+    document.getElementById('btn-sync-steps').addEventListener('click', function(){
+      refreshHealthConnectSteps(true);
+      refreshHealthConnectMetrics();
+      refreshHealthConnectBodyMetrics();
+      refreshHealthConnectNutrition();
+    });
+
+    document.getElementById('btn-assess').addEventListener('click', openAssess);
+    document.getElementById('btn-assess-close').addEventListener('click', closeAssess);
+    document.getElementById('assess-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'assess-overlay') closeAssess();
+    });
+
+    // Health Connect есть только в Android-приложении — в вебе кнопку не показываем
+    if (!isNative){
+      var hcBtn = document.getElementById('btn-hc-info');
+      hcBtn.textContent = '🤖 Health Connect — в Android-приложении';
+      hcBtn.addEventListener('click', function(e){ e.stopImmediatePropagation(); showToast('Health Connect (шаги, сон, пульс) доступен в Android-приложении Alliby'); }, true);
+    }
+    document.getElementById('btn-hc-info').addEventListener('click', function(){
+      document.getElementById('hc-info-overlay').classList.remove('hidden');
+    });
+    document.getElementById('btn-hc-info-close').addEventListener('click', function(){
+      document.getElementById('hc-info-overlay').classList.add('hidden');
+    });
+    document.getElementById('hc-info-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'hc-info-overlay') document.getElementById('hc-info-overlay').classList.add('hidden');
+    });
+
+    document.getElementById('btn-bodycomp-info').addEventListener('click', function(){
+      document.getElementById('bodycomp-info-overlay').classList.remove('hidden');
+    });
+    document.getElementById('btn-bodycomp-info-close').addEventListener('click', function(){
+      document.getElementById('bodycomp-info-overlay').classList.add('hidden');
+    });
+    document.getElementById('bodycomp-info-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'bodycomp-info-overlay') document.getElementById('bodycomp-info-overlay').classList.add('hidden');
+    });
+
+    document.getElementById('btn-meals-info').addEventListener('click', function(){
+      document.getElementById('meals-info-overlay').classList.remove('hidden');
+    });
+    document.getElementById('btn-meals-info-close').addEventListener('click', function(){
+      document.getElementById('meals-info-overlay').classList.add('hidden');
+    });
+    document.getElementById('meals-info-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'meals-info-overlay') document.getElementById('meals-info-overlay').classList.add('hidden');
+    });
+
+    document.getElementById('btn-meal-add').addEventListener('click', openMealAdd);
+    document.getElementById('btn-meal-add-close').addEventListener('click', closeMealAdd);
+    document.getElementById('meal-add-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'meal-add-overlay') closeMealAdd();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.meal-tab'), function(btn){
+      btn.addEventListener('click', function(){ switchMealTab(btn.dataset.tab); });
+    });
+
+    document.getElementById('btn-meal-search').addEventListener('click', function(){
+      var q = document.getElementById('meal-search-input').value.trim();
+      if (!q) return;
+      var box = document.getElementById('meal-search-results');
+      box.innerHTML = '<div class="meal-search-status">Ищем...</div>';
+      // Источник — Open Food Facts. FatSecret отключён (USE_FATSECRET): он ищет только по-английски.
+      var sources = [offSearch(q).then(function(items){ return { items: items }; })
+        .catch(function(){ return { err: 'Нет связи с Open Food Facts' }; })];
+      if (USE_FATSECRET){
+        sources.push(fatsecretSearch(q).then(function(res){ return res.ok ? { items: res.data.items || [] } : { err: (res.data && res.data.error) || 'Ошибка поиска' }; })
+          .catch(function(){ return { err: 'Нет связи с сервером FatSecret' }; }));
+      }
+      Promise.all(sources).then(function(rs){
+        var items = [];
+        rs.forEach(function(r){ if (r.items) items = items.concat(r.items); });
+        if (!items.length && rs.every(function(r){ return r.err; })){
+          box.innerHTML = '<div class="meal-search-status">' + rs[0].err + '</div>';
+          return;
+        }
+        renderMealSearchResults(items);
+      });
+    });
+    // первый тап иногда не показывает клавиатуру — фокусируем явно на touchend/click
+    ['touchend', 'click'].forEach(function(ev){
+      document.getElementById('meal-search-input').addEventListener(ev, function(){
+        var el = this; if (document.activeElement !== el) el.focus();
+      });
+    });
+    document.getElementById('meal-search-input').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') document.getElementById('btn-meal-search').click();
+    });
+
+    document.getElementById('btn-meal-barcode-scan').addEventListener('click', startBarcodeScan);
+    document.getElementById('btn-meal-barcode-lookup').addEventListener('click', function(){
+      lookupBarcode(document.getElementById('meal-barcode-input').value);
+    });
+
+    document.getElementById('meal-portion-amount').addEventListener('input', updateMealPortionPreview);
+    document.getElementById('btn-meal-portion-back').addEventListener('click', function(){ switchMealTab('search'); });
+    document.getElementById('btn-meal-portion-add').addEventListener('click', function(){
+      if (!mealPickedFood) return;
+      var amount = parseFloat(document.getElementById('meal-portion-amount').value) || 0;
+      var per1g = mealPickedFood.per1g;
+      addMeal({
+        name: mealPickedFood.name,
+        kcal: per1g.kcal * amount,
+        protein: per1g.protein * amount,
+        fat: per1g.fat * amount,
+        carb: per1g.carb * amount,
+      });
+      closeMealAdd();
+    });
+
+    document.getElementById('btn-meal-manual-add').addEventListener('click', function(){
+      var type = document.getElementById('meal-manual-type').value;
+      var name = document.getElementById('meal-manual-name').value.trim() || 'Приём пищи';
+      var kcal = parseFloat(document.getElementById('meal-manual-kcal').value) || 0;
+      var protein = parseFloat(document.getElementById('meal-manual-protein').value) || 0;
+      var fat = parseFloat(document.getElementById('meal-manual-fat').value) || 0;
+      var carb = parseFloat(document.getElementById('meal-manual-carb').value) || 0;
+      if (kcal <= 0){ showToast('Укажите калорийность'); return; }
+      addMeal({ name: name, type: type, kcal: kcal, protein: protein, fat: fat, carb: carb });
+      document.getElementById('meal-manual-name').value = '';
+      document.getElementById('meal-manual-kcal').value = '';
+      document.getElementById('meal-manual-protein').value = '';
+      document.getElementById('meal-manual-fat').value = '';
+      document.getElementById('meal-manual-carb').value = '';
+      closeMealAdd();
+    });
+
+    document.getElementById('input-bio').addEventListener('input', function(){
+      lsSet('bio', this.value);
+    });
+
+    document.getElementById('input-weight').addEventListener('input', function(){
+      var v = parseFloat(this.value);
+      lsSet('weightKg', (v > 0) ? v : '');
+      syncBodyWeightToNative(v > 0 ? v : 0);
+      if (isNative) refreshHealthConnectMetrics();
+      renderBodyComposition();
+    });
+
+    document.getElementById('input-height').addEventListener('input', function(){
+      var v = parseFloat(this.value);
+      lsSet('heightCm', (v > 0) ? v : '');
+      renderBodyComposition();
+    });
+
+    document.getElementById('input-age').addEventListener('input', function(){
+      var v = parseFloat(this.value);
+      lsSet('ageYears', (v > 0) ? v : '');
+      renderBodyComposition();
+    });
+
+    document.getElementById('input-gender').addEventListener('change', function(){
+      lsSet('gender', this.value);
+      renderBodyComposition();
+    });
+
+    document.getElementById('input-bodyfat').addEventListener('input', function(){
+      var v = parseFloat(this.value);
+      lsSet('bodyFatPercent', (v > 0) ? v : '');
+      renderBodyComposition();
+    });
+
+    document.getElementById('btn-bio-toggle').addEventListener('click', function(){
+      var card = document.getElementById('bio-card');
+      card.classList.toggle('hidden');
+      if (!card.classList.contains('hidden')) document.getElementById('input-bio').focus();
+    });
+
+    document.getElementById('btn-create').addEventListener('click', function(){
+      var name = document.getElementById('input-name').value.trim();
+      if (!name){ showToast('Введите имя питомца'); return; }
+      createPet(name);
+      document.getElementById('input-bio').value = '';
+      showScreen('status');
+      renderStatus();
+      syncPetNameToNative(name);
+      var seenTour = false;
+      try { seenTour = localStorage.getItem(PTOUR_KEY) === '1'; } catch (e) {}
+      if (!seenTour) setTimeout(startPetTour, 500);
+    });
+
+    document.getElementById('btn-chat').addEventListener('click', openChat);
+    document.getElementById('btn-chat-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+    document.getElementById('btn-chat-send').addEventListener('click', sendChatMessage);
+    document.getElementById('chat-input').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') sendChatMessage();
+    });
+    document.getElementById('btn-chat-login').addEventListener('click', chatLogin);
+    document.getElementById('chat-login-password').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') chatLogin();
+    });
+
+    document.getElementById('btn-sensor').addEventListener('click', function(){
+      if (isNative){
+        if (lsGet('healthConnectEnabled', '') === '1'){ disableHealthConnect(); }
+        else { enableHealthConnect(); }
+      } else if (sensorActive){ stopSensor(); lsSet('sensorEnabled', '0'); updateSensorStatusUI(); }
+      else { enableSensor(); updateSensorStatusUI(); }
+    });
+
+    document.getElementById('btn-sprout').addEventListener('click', openSproutScreen);
+    document.getElementById('btn-sprout-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+
+    document.getElementById('btn-shop').addEventListener('click', function(){ showScreen('shop'); renderShop(); });
+    document.getElementById('btn-shop-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+    document.getElementById('btn-inventory').addEventListener('click', function(){ showScreen('inventory'); renderInventory(); });
+    document.getElementById('btn-inventory-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+
+    document.getElementById('btn-games').addEventListener('click', function(){ showScreen('games'); });
+    document.getElementById('btn-games-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+    document.getElementById('btn-setup-back').addEventListener('click', function(){ showScreen('games'); });
+    document.getElementById('btn-board-back').addEventListener('click', function(){
+      if (gameState) gameState.over = true;
+      showScreen('games');
+    });
+    document.getElementById('btn-game-rules').addEventListener('click', openRules);
+    document.getElementById('btn-rules-close').addEventListener('click', closeRules);
+    document.getElementById('rules-overlay').addEventListener('click', function(e){
+      if (e.target.id === 'rules-overlay') closeRules();
+    });
+    document.querySelector('.game-hub-grid').addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-game]'); if (!btn) return;
+      openGameSetup(btn.dataset.game);
+    });
+    document.getElementById('setup-difficulty').addEventListener('click', function(e){
+      var chip = e.target.closest('.chip'); if (!chip) return;
+      document.querySelectorAll('#setup-difficulty .chip').forEach(function(c){ c.classList.remove('selected'); });
+      chip.classList.add('selected');
+      curDiff = parseInt(chip.dataset.diff, 10);
+    });
+    document.getElementById('setup-color').addEventListener('click', function(e){
+      var chip = e.target.closest('.chip'); if (!chip) return;
+      document.querySelectorAll('#setup-color .chip').forEach(function(c){ c.classList.remove('selected'); });
+      chip.classList.add('selected');
+      curColor = chip.dataset.color;
+    });
+    document.getElementById('btn-game-start').addEventListener('click', startSelectedGame);
+    document.getElementById('btn-game-pass').addEventListener('click', function(){
+      var st = gameState;
+      if (st.type !== 'go' || st.over || !isGoPlayerTurn()) return;
+      st.game.pass({ render:false });
+      st.passCount++;
+      renderGoBoard();
+      updateGoStatus();
+      if (!st.over) scheduleAi(goAiMove, 400);
+    });
+    document.getElementById('btn-game-resign').addEventListener('click', function(){
+      var st = gameState;
+      if (!st || !st.type || st.over) return;
+      st.over = true;
+      setGameStatus('');
+      showGameResult('Вы сдались.');
+    });
+
+    document.getElementById('btn-pdd').addEventListener('click', openPddTickets);
+    document.getElementById('btn-pdd-back').addEventListener('click', function(){ showScreen('status'); renderStatus(); });
+    document.getElementById('btn-pdd-question-back').addEventListener('click', function(){ showScreen('pdd-tickets'); });
+    document.getElementById('btn-pdd-result-back').addEventListener('click', function(){ showScreen('pdd-tickets'); openPddTickets(); });
+    document.getElementById('pdd-ticket-grid').addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-ticket]'); if (!btn) return;
+      startPddTicket(parseInt(btn.dataset.ticket, 10));
+    });
+    document.getElementById('pdd-answers').addEventListener('click', function(e){
+      var btn = e.target.closest('.pdd-answer'); if (!btn) return;
+      onPddAnswerClick(parseInt(btn.dataset.idx, 10));
+    });
+    document.getElementById('btn-pdd-next').addEventListener('click', onPddNextClick);
+
+    document.getElementById('btn-reset').addEventListener('click', function(){
+      var btn = this;
+      if (!btn.dataset.confirming){
+        btn.dataset.confirming = '1';
+        btn.dataset.originalText = btn.textContent;
+        btn.textContent = 'Точно? Нажмите ещё раз';
+        clearTimeout(btn._resetTimer);
+        btn._resetTimer = setTimeout(function(){
+          btn.textContent = btn.dataset.originalText;
+          delete btn.dataset.confirming;
+        }, 4000);
+        return;
+      }
+      clearTimeout(btn._resetTimer);
+      btn.textContent = btn.dataset.originalText;
+      delete btn.dataset.confirming;
+      resetAll();
+      stopSensor();
+      document.getElementById('input-bio').value = '';
+      document.getElementById('input-weight').value = '';
+      document.getElementById('input-height').value = '';
+      document.getElementById('input-age').value = '';
+      document.getElementById('input-gender').value = '';
+      document.getElementById('input-bodyfat').value = '';
+      document.getElementById('bio-card').classList.add('hidden');
+      document.getElementById('bodycomp-card').classList.add('hidden');
+      document.getElementById('workouts-card').classList.add('hidden');
+      renderMeals();
+      showScreen('create');
+    });
+
+    updateSensorStatusUI();
+    setInterval(function(){ renderStatus(); renderBodyComposition(); if (isNative){ refreshHealthConnectSteps(); refreshHealthConnectMetrics(); refreshHealthConnectBodyMetrics(); refreshHealthConnectNutrition(); } }, 30000); // досчитывать голод/жир/состав тела, и (в нативном приложении) шаги+метрики+питание из Health Connect
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) return;
+      renderStatus();
+      if (isNative){ refreshHealthConnectSteps(); refreshHealthConnectMetrics(); refreshHealthConnectBodyMetrics(); refreshHealthConnectNutrition(); }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').then(function(reg){
+        // sw.js делает skipWaiting()+clients.claim(), поэтому новый SW захватывает
+        // уже открытую страницу почти сразу — но старый DOM/JS в памяти этим не обновляются.
+        // Без явной перезагрузки по controllerchange новые версии тамагочи не показываются,
+        // пока Android не убьёт и не перезапустит процесс приложения целиком.
+        document.addEventListener('visibilitychange', function(){
+          if (document.visibilityState === 'visible') reg.update().catch(function(){});
+        });
+      }).catch(function(){});
+      var reloadedForUpdate = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if (reloadedForUpdate) return;
+        reloadedForUpdate = true;
+        location.reload();
+      });
+    });
+  }
+})();
+
+// ─── PULL TO REFRESH (только на главном экране питомца) ───
+(function(){
+  var startY = 0, dy = 0, tracking = false;
+  var THRESH = 72;
+
+  var pill = document.createElement('div');
+  pill.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-56px);'
+    + 'width:40px;height:40px;border-radius:50%;background:#1b2128;border:1px solid #2a323b;'
+    + 'display:flex;align-items:center;justify-content:center;font-size:20px;z-index:900;'
+    + 'box-shadow:0 2px 8px rgba(0,0,0,.4);transition:transform .15s;pointer-events:none;color:#f0f0f0';
+  pill.textContent = '↓';
+  document.body.appendChild(pill);
+
+  function onStatusScreen(){
+    var el = document.getElementById('screen-status');
+    return el && !el.classList.contains('hidden');
+  }
+  function atTop(){
+    return (document.scrollingElement || document.documentElement).scrollTop <= 2;
+  }
+
+  document.addEventListener('touchstart', function(e){
+    if (!onStatusScreen() || !atTop()) return;
+    startY = e.touches[0].clientY; dy = 0; tracking = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e){
+    if (!tracking) return;
+    dy = Math.max(0, e.touches[0].clientY - startY);
+    var p = Math.min(dy / THRESH, 1);
+    pill.style.transform = 'translateX(-50%) translateY(' + Math.round((p - 1) * 56) + 'px)';
+    pill.textContent = dy >= THRESH ? '↺' : '↓';
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(){
+    if (!tracking) return;
+    tracking = false;
+    pill.style.transform = 'translateX(-50%) translateY(-56px)';
+    pill.textContent = '↓';
+    if (dy >= THRESH) window.location.reload();
+  });
+})();
+</script>
+<script id="pwd-reveal-js">
+// «Показать пароль»: глазок у каждого input[type=password] (в т.ч. появляющихся позже). Исключение — data-no-reveal.
+(function () {
+  var EYE = '<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+    + '<svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  function enhance(inp) {
+    if (inp.dataset.pwdReveal || inp.hasAttribute('data-no-reveal') || !inp.parentNode) return;
+    inp.dataset.pwdReveal = '1';
+    var cs = getComputedStyle(inp);
+    var wrap = document.createElement('div');
+    wrap.className = 'pwd-wrap';
+    wrap.style.margin = cs.margin;
+    if (cs.flexGrow !== '0' || cs.flexBasis !== 'auto') wrap.style.flex = cs.flex;
+    wrap.style.minWidth = '0';
+    inp.parentNode.insertBefore(wrap, inp);
+    wrap.appendChild(inp);
+    inp.style.margin = '0';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pwd-eye';
+    b.setAttribute('aria-label', 'Показать пароль');
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = EYE;
+    // mousedown/touchstart не отбирают фокус у поля — на iOS клавиатура не прячется
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    b.addEventListener('touchstart', function (e) { e.preventDefault(); b.click(); }, { passive: false });
+    b.addEventListener('click', function () {
+      var show = inp.type === 'password';
+      var s = inp.selectionStart, e2 = inp.selectionEnd;
+      inp.type = show ? 'text' : 'password';
+      b.setAttribute('aria-pressed', show ? 'true' : 'false');
+      b.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+      try { inp.focus({ preventScroll: true }); inp.setSelectionRange(s, e2); } catch (x) {}
+    });
+    wrap.appendChild(b);
+    // не оставляем пароль открытым при уходе со страницы/сворачивании приложения
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && inp.type === 'text') { inp.type = 'password'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Показать пароль'); }
+    });
+  }
+  function scan(root) {
+    (root.querySelectorAll ? root.querySelectorAll('input[type=password]') : []).forEach(enhance);
+  }
+  scan(document);
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) {
+      m.addedNodes.forEach(function (n) {
+        if (n.nodeType !== 1) return;
+        if (n.matches && n.matches('input[type=password]')) enhance(n); else scan(n);
+      });
+    });
+  }).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+</body>
+</html>
