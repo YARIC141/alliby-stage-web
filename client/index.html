@@ -414,6 +414,12 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .map-layout:not(.no-map) .sl-fbtns.search-open .sl-store-search input{display:block}
 .sl-fbtns.search-open .sl-search-icon{display:none}
 .sl-fbtns.search-open .sl-search-close{display:block}
+@media(max-width:600px){
+  .map-layout:not(.no-map) .sl-store-search{flex:1}
+  .map-layout:not(.no-map) .sl-store-search input{display:block}
+  .map-layout:not(.no-map) .sl-store-search .sl-search-toggle{display:none}
+  .map-layout:not(.no-map) .sl-fbtns.search-open>.sl-fb{display:inline-flex}
+}
 .map-tog-btn{position:absolute;bottom:16px;right:16px;z-index:20;width:72px;height:72px;border-radius:50%;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-2);padding:0;transition:background var(--t-fast);color:var(--fg)}
 .map-tog-btn{flex-direction:column;gap:1px}
 .map-tog-lbl{font:600 11px/1 var(--font-sans);color:var(--fg-2)}
@@ -432,6 +438,9 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .sl-search input{padding:7px 10px;border-radius:var(--r-2)}
 .sl-cats{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line-soft);flex-shrink:0}
 .sl-cats:empty{display:none}
+.map-layout #sl-filters .sl-cats{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.map-layout #sl-filters .sl-cats::-webkit-scrollbar{display:none}
+.map-layout #sl-filters .sl-cats .chip{flex-shrink:0;white-space:nowrap}
 .sl-cats .chip,.cat-bar .chip{}
 #sl-filters{display:flex;flex-direction:column;flex-shrink:0}
 .sl-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:none;touch-action:pan-y}
@@ -14408,7 +14417,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '187674696399602';
+  const APP_VER = '53413044449625';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
