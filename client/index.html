@@ -386,7 +386,7 @@ hr{border:none;border-top:1px solid var(--line-soft);margin:14px 0}
 .auth-box h1{font:400 34px/1 var(--font-display);letter-spacing:-0.01em;margin-bottom:22px;color:var(--brand-ember)}
 
 /* ── MAP ── */
-.map-layout{--sl-row-height:184px;display:flex;flex:1;min-height:0;overflow:hidden;position:relative}
+.map-layout{--sl-row-height:140px;display:flex;flex:1;min-height:0;overflow:hidden;position:relative}
 .map-addr-wrap{padding:8px 10px;border-bottom:1px solid var(--line-soft);flex-shrink:0;display:flex;gap:6px}
 .map-addr-bar{display:flex;align-items:center;gap:7px;padding:7px 10px;text-align:left;font-size:14px;font-family:var(--font-sans);background:var(--glass-sm);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r-2);cursor:pointer;color:var(--fg);transition:border-color var(--t-fast),box-shadow var(--t-fast);box-sizing:border-box;white-space:nowrap}
 .map-addr-bar:hover,.map-addr-bar:focus{border-color:var(--accent);box-shadow:0 0 0 3px oklch(from var(--accent) l c h / .18)}
@@ -626,7 +626,7 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
   .map-layout.no-map .sl-list .sl-item:not(.has-img) .sli-bg{display:none}
   .map-area .maplibregl-ctrl-top-right{top:calc(var(--ctl-top) + var(--exp-h,0px))}
   /* Подробный вид строки (.det): у выбранного заведения при открытой карте (.exp, ложится поверх карты) и у всех строк
-     при скрытой карте — информация в обоих состояниях одна и та же. Высота как у обычной строки (124px), фото занимает
+     при скрытой карте — информация в обоих состояниях одна и та же. Высота равна высоте обычной строки, фото занимает
      всю карточку, название, адрес с расстоянием, график, телефон, средний чек и плашки лежат прямо на нём.
      Нажатие на карточку открывает заведение. Ползунок списка (z-index 4) остаётся под раскрытой карточкой. */
   .sl-list .sl-item.det{height:var(--sl-row-height);padding:12px 26px;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-end;align-items:stretch;background:transparent}
@@ -681,8 +681,9 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
 
 /* Photo cards are shared by the full list and the selected map entry at every width. */
 .map-layout .sl-list .sl-item.det{position:relative;overflow:hidden;background:transparent;border-bottom-color:transparent;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:stretch;padding:12px 26px}
-.map-layout .sl-list .sl-item,.map-layout.no-map .sl-list .sl-item.det,.map-layout .sl-list .sl-item.exp.det{height:var(--sl-row-height);min-height:var(--sl-row-height);max-height:var(--sl-row-height);box-sizing:border-box;padding:12px 26px;overflow-anchor:none}
-.map-layout .sl-list .sl-item .sli-name{font-size:16px;line-height:1.3;margin-bottom:3px;white-space:nowrap}
+.map-layout .sl-list .sl-item,.map-layout.no-map .sl-list .sl-item.det,.map-layout .sl-list .sl-item.exp.det{height:var(--sl-row-height);min-height:var(--sl-row-height);max-height:var(--sl-row-height);box-sizing:border-box;padding:6px 26px;gap:4px;overflow-anchor:none}
+.map-layout .sl-list .sl-item .sli-name{font-size:16px;line-height:1.3;margin-bottom:1px;white-space:nowrap}
+.map-layout .sl-list .sl-item .academy-label{font-size:10px;line-height:1.2;padding:2px 5px;margin:0 0 0 4px;vertical-align:middle}
 .map-layout .sl-list .sl-item .sli-addr{font-size:13px;line-height:1.3;white-space:nowrap}
 .map-layout .sl-list .sl-item.det .sm-row span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .map-layout .sl-list .sl-item.exp.det{z-index:5}
@@ -695,7 +696,8 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
 .map-layout .sl-list .sl-item.det.has-img .sli-name{color:#fff;text-shadow:0 1px 3px #0009}
 .map-layout .sl-list .sl-item.det.has-img .sli-addr,.map-layout .sl-list .sl-item.det.has-img>.sli-more{color:rgba(255,255,255,.92);text-shadow:0 1px 3px #0009}
 .map-layout .sl-list .sl-item.det .sli-row,.map-layout .sl-list .sl-item.det>.sli-arr,.map-layout .sl-list .sl-item.det:not(.has-img) .sli-bg{display:none}
-.map-layout .sl-list .sl-item.det>.sli-more{display:block;position:relative;z-index:3;flex:none;margin-top:4px;font:400 12px/1.4 var(--font-sans)}
+.map-layout .sl-list .sl-item.det>.sli-more{display:block;position:relative;z-index:3;flex:none;margin-top:2px;font:400 12px/1.35 var(--font-sans)}
+.map-layout .sl-list .sl-item.det .sm-row{margin-top:0;gap:5px;min-height:16px}
 .map-layout .sl-list .sl-item.det .sli-badge{display:flex}
 .map-layout .sl-list .sl-item.det .sli-dist{display:inline}
 .map-layout .sl-list .sl-item.det.has-img .sm-dzb{border-color:rgba(255,255,255,.6);background:rgba(0,0,0,.2)}
@@ -14417,7 +14419,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '53413044449625';
+  const APP_VER = '31124427290699';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
