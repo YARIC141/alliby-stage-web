@@ -706,6 +706,10 @@ html.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1) hue-rota
 .map-layout:not(.no-map) .sl-list .sl-item .sm-chips{flex-wrap:nowrap;gap:3px}
 .map-layout:not(.no-map) .sl-list .sl-item .sm-chips>.sm-pill,.map-layout:not(.no-map) .sl-list .sl-item .sm-chips>.sm-dzb{width:20px;height:20px}
 .map-layout:not(.no-map) .sl-list .sl-item .sm-chips>.sli-delivery-badge{flex:none;margin:0!important}
+@media(max-width:600px){
+  .map-layout:not(.no-map) .sl-list .sl-item:not(.exp){padding-left:14px;padding-right:14px}
+  .map-layout:not(.no-map) .sl-list .sl-item:not(.exp) .sli-row{width:var(--lcol);margin-left:-14px;justify-content:center}
+}
 
 /* ── STORE ── */
 #svc-pane-services{display:flex;flex-direction:column;flex:1;min-height:0}
@@ -8402,11 +8406,9 @@ function renderStoreList(stores, keepOrder) {
     if (st.image_url) d.classList.add('has-img');
     d.dataset.sid = st.id;
     d._st = st;
-    const delInfo = getDeliveryInfo(st, true);
-    const delBadge = delInfo ? `<span class="sli-delivery-badge" title="${deliveryIndicatorTitle(delInfo)}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${delInfo.inZone?'#16a34a':'#ef4444'};color:#fff;vertical-align:middle;margin-left:4px">${svgIco('bicycle',11)}</span>` : '';
     d.innerHTML = `${bg}<div class="sli-badge"></div>
       <div class="sli-main" style="flex:1;min-width:0;position:relative;z-index:3">
-        <div class="sli-name">${esc(st.name)}${st.is_academy?'<span class="academy-label">Академия</span>':''}${storeStarsBadge(st.id)}${delBadge}</div>
+        <div class="sli-name">${esc(st.name)}${st.is_academy?'<span class="academy-label">Академия</span>':''}${storeStarsBadge(st.id)}</div>
         <div class="sli-addr"><span class="sli-atx">${esc(_addrNoCity(st.address, st.city))}</span><span class="sli-dist"></span></div>
         <div class="sli-row">${thumb}</div>
       </div>
@@ -8844,21 +8846,15 @@ function _applyExpanded(fromRender, keepPosition = false) {
 function _fillMore(it, st) {
   const more = it.querySelector('.sli-more');
   if (!more || !st) return;
-  const deliveryBadge = it.querySelector('.sli-delivery-badge');
+  const delivery = getDeliveryInfo(st, true);
+  const zoneTitle = delivery ? 'Зоны доставки. ' + deliveryIndicatorTitle(delivery) : 'Зоны доставки';
   let h = '';
   if (st.working_hours) h += `<div class="sm-row">${svgIco('clock', 13)}<span>${esc(st.working_hours)}</span></div>`;
   const pa = [st.phone && esc(st.phone), st.avg_order_amount && `Средний чек: ~${esc(st.avg_order_amount)} ₽`].filter(Boolean);
   if (pa.length) h += `<div class="sm-row"><span>${pa.join(' · ')}</span></div>`;
   const online = st.has_cart && storeCanOrder(st) && S.openNow?.[st.id] !== false;
-  h += `<div class="sm-chips">${online ? `<span class="sm-pill" title="Онлайн-функции доступны" aria-label="Онлайн-функции доступны">${svgIco('globe', 12)}<span class="sm-label">Онлайн-функции доступны</span></span>` : ''}${st.delivery_enabled ? `<button type="button" class="sm-dzb" title="Зоны доставки" aria-label="Зоны доставки" onclick="event.stopPropagation();_openItemDz(this)" style="pointer-events:auto">${svgIco('bicycle',12)}<span class="sm-label">Зоны доставки</span></button>` : ''}</div>`;
+  h += `<div class="sm-chips">${online ? `<span class="sm-pill" title="Онлайн-функции доступны" aria-label="Онлайн-функции доступны">${svgIco('globe', 12)}<span class="sm-label">Онлайн-функции доступны</span></span>` : ''}${st.delivery_enabled ? `<button type="button" class="sm-dzb${delivery?' sli-delivery-badge':''}" title="${esc(zoneTitle)}" aria-label="${esc(zoneTitle)}" onclick="event.stopPropagation();_openItemDz(this)" style="pointer-events:auto;${delivery?`background-color:${delivery.inZone?'#16a34a':'#ef4444'};border-color:transparent;color:#fff`:''}">${svgIco('bicycle',12)}<span class="sm-label">Зоны доставки</span></button>` : ''}</div>`;
   more.innerHTML = h;
-  // Keep delivery beside the other indicators while the map is visible.
-  if (deliveryBadge) {
-    const compact = !document.querySelector('.map-layout')?.classList.contains('no-map');
-    const chips = more.querySelector('.sm-chips');
-    if (compact) chips.insertBefore(deliveryBadge, chips.querySelector('.sm-dzb'));
-    else it.querySelector('.sli-name').append(deliveryBadge);
-  }
 }
 function _openItemDz(btn) {
   const sid = btn.closest('.sl-item')?.dataset.sid;
@@ -11638,7 +11634,9 @@ function refreshDeliveryIndicators(stores=S.allStores||[]) {
     const paint=()=>{
       const current=getDeliveryInfo(store,true);if(!current)return;
       document.querySelectorAll(`#sl-list [data-sid="${id}"] .sli-delivery-badge,.store-pin[data-store-id="${id}"] .p-del`).forEach(el=>{
-        el.style.backgroundColor=current.inZone?'#16a34a':'#ef4444';el.title=deliveryIndicatorTitle(current);
+        el.style.backgroundColor=current.inZone?'#16a34a':'#ef4444';
+        el.title=(el.classList.contains('sm-dzb')?'Зоны доставки. ':'')+deliveryIndicatorTitle(current);
+        if(el.classList.contains('sm-dzb'))el.setAttribute('aria-label',el.title);
       });
     };
     paint();
@@ -14419,7 +14417,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '31124427290699';
+  const APP_VER = '4940757202382';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
