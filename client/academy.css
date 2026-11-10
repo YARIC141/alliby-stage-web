@@ -15,6 +15,12 @@
 .academy-mode #app{height:calc(100% - var(--academy-guide-space,160px))}
 .academy-mode #bottom-nav{bottom:0}
 .academy-mode .overlay{bottom:calc(var(--academy-guide-space,160px) + var(--nav-h,0px));background:transparent;backdrop-filter:none;padding-top:12px}
+.academy-mode #m-addr-pick .modal{display:flex;flex-direction:column;min-height:0;max-height:100%}
+.academy-mode #m-addr-pick .modal-hd{flex-shrink:0;margin-bottom:0}
+.academy-mode #m-addr-pick .addr-pick-body{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto}
+.academy-mode #m-addr-pick .addr-pick-body>div:first-child{flex-shrink:0}
+.academy-mode #m-addr-pick .addr-pick-map-area{flex:1 0 120px;min-height:120px}
+.academy-mode #m-addr-pick .modal-ft{flex-shrink:0;margin-top:0;padding:12px 14px}
 .academy-mode #m-dz-viewer{bottom:calc(var(--academy-guide-space,160px) + var(--nav-h,0px))}
 .academy-mode #m-dz-viewer:not(.open){visibility:hidden;pointer-events:none}
 .academy-mode #pwa-install-banner,.academy-mode #m-bk-success{display:none!important}

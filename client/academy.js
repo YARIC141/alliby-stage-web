@@ -463,7 +463,7 @@ function academyPlaceGuide(target,title,message,action){
  const bounds=root.getBoundingClientRect(),sx=bounds.width/root.clientWidth||1,sy=bounds.height/root.clientHeight||1;
  // Reserve a separate bottom area; the explanation can never cover a form button.
  const space=Math.ceil(card.getBoundingClientRect().height/sy)+16;
- if(Math.abs((_academy.guideSpace||0)-space)>1){_academy.guideSpace=space;document.documentElement.style.setProperty('--academy-guide-space',space+'px');if(S.map)setTimeout(()=>S.map?.resize(),100);}
+ if(Math.abs((_academy.guideSpace||0)-space)>1){_academy.guideSpace=space;document.documentElement.style.setProperty('--academy-guide-space',space+'px');setTimeout(()=>{S.map?.resize();_addrPickMap?.resize();},100);}
  const key=target?(target.id||target.dataset.storeId||target.outerHTML.slice(0,110)):'waiting';
  if(target&&key!==_academyTargetKey){_academyTargetKey=key;if(target.id!=='map-gl'&&!target.closest('#map-gl'))target.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});}
  const r=target?.getBoundingClientRect(),spot=document.getElementById('academy-guide-spot');
