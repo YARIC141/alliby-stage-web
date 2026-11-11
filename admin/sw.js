@@ -1,6 +1,7 @@
 importScripts('map-cache.js');
-// v214698033270490
-const APP_CACHE  = 'aliby-admin-app-v214698033270490';
+// v264965623945404
+const APP_CACHE  = 'aliby-admin-app-v264965623945404';
+const ACADEMY_ASSETS = ['business-academy.js','business-academy.css'];
 const TILE_CACHE = 'aliby-admin-tiles-v2';
 const TILE_PATH  = '/functions/v1/vector-tiles/';
 const MAX_TILES  = 300;
@@ -50,9 +51,14 @@ self.addEventListener('install', e => {
 async function precacheShell() {
   const scope = self.registration.scope;
   const cache = await withTimeout(caches.open(APP_CACHE), 2000);
-  if (await withTimeout(cache.match(scope, { ignoreSearch: true }), 2000)) return;
-  const resp = await fetchTimeout(new Request(scope, { cache: 'no-cache' }));
-  if (resp.ok) await withTimeout(cache.put(scope, resp), 2000);
+  if (!await withTimeout(cache.match(scope, { ignoreSearch: true }), 2000)) {
+    const resp = await fetchTimeout(new Request(scope, { cache: 'no-cache' }));
+    if (resp.ok) await withTimeout(cache.put(scope, resp), 2000);
+  }
+  await Promise.all(ACADEMY_ASSETS.map(async file=>{
+    const url=new URL(file,scope).href,resp=await fetchTimeout(new Request(url,{cache:'no-cache'}));
+    if(resp.ok)await withTimeout(cache.put(url,resp),2000);
+  }));
 }
 
 // Любая сохранённая оболочка этого приложения — для открытия без сети
@@ -116,6 +122,13 @@ self.addEventListener('install', e => {
 
 // cache-first для файлов из списка; при любой проблеме с кэшем — обычная сеть
 self.addEventListener('fetch', e => {
+  if(ACADEMY_ASSETS.some(file=>new URL(file,self.registration.scope).href===e.request.url.split('?')[0])){
+    e.respondWith(fetchTimeout(e.request,5000).then(async response=>{
+      if(!response.ok)throw new Error('academy-asset-unavailable');
+      const cache=await withTimeout(caches.open(APP_CACHE));await withTimeout(cache.put(e.request,response.clone()));return response;
+    }).catch(async()=>await withTimeout(caches.match(e.request,{ignoreSearch:true})).catch(()=>null)||Response.error()));
+    return;
+  }
   const req = e.request;
   if (req.method !== 'GET' || !STATIC_SET.has(req.url)) return;
   const fallback = req.clone();
