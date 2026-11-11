@@ -16,8 +16,9 @@
 .ba-task small{font:400 12px/1.5 var(--font-sans);color:var(--fg-3);margin-top:5px}
 .ba-task .ba-task-condition{color:#f59b50;font-weight:600;margin:0 0 6px}
 html:not(.dark) .ba-task .ba-task-condition{color:#b84c11}
-.ba-number{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;border-radius:50%;background:var(--bg-2);color:var(--fg-2)}
+.ba-number{position:relative;display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex-shrink:0;border-radius:12px;background:var(--bg-2);color:var(--accent)}
 .ba-number.done{background:#258652;color:white}
+.ba-number.done::after{content:'✓';position:absolute;right:-4px;bottom:-4px;display:grid;place-items:center;width:17px;height:17px;border:1px solid var(--bg);border-radius:50%;background:white;color:#258652;font:700 12px/1 var(--font-sans)}
 .ba-offer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid #d6a436;background:var(--bg-2);flex-shrink:0}
 .ba-offer>div{flex:1;min-width:160px}.ba-offer strong{font-size:14px}.ba-offer p{margin:4px 0 0;font-size:13px;color:var(--fg-2)}
 #ba-guide{position:fixed;inset:0;z-index:11000;pointer-events:none}

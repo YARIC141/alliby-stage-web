@@ -1,15 +1,19 @@
 /* Guided setup of the owner's real business. No alternate records or write API. */
 const BUSINESS_ACADEMY_LESSONS=[
-  {id:'store',title:'Создай своё заведение',text:'Проверьте статус продавца, укажите название, направление и адрес своего заведения.'},
-  {id:'product',title:'Добавь первую позицию',text:'Создайте настоящий товар, услугу или аренду: выберите заведение, название, тип и цену.'},
-  {id:'information',title:'Заполни информацию о заведении',text:'Добавьте телефон и часы работы, чтобы клиентам было проще связаться с вами.'},
-  {id:'employee',title:'Добавь сотрудника',text:'Создайте доступ для реального сотрудника и посмотрите его логин.'},
-  {id:'service',title:'Добавь услугу для записи',text:'Укажите длительность услуги, цену и доступность для записи.',directions:['services','sport','education','entertainment']},
-  {id:'master_schedule',title:'Настрой расписание сотрудника',text:'Назначьте мастера, тренера или преподавателя, часы работы и услуги.',directions:['services','sport','education','entertainment']},
-  {id:'group',title:'Добавь групповое занятие',text:'Задайте длительность, число мест, дни недели и время начала.',directions:['sport','education','entertainment']},
-  {id:'personal',title:'Добавь персональное занятие',text:'Задайте длительность встречи и диапазоны времени для записи.',directions:['sport','education','entertainment']},
-  {id:'rental',title:'Добавь позицию для аренды',text:'Настройте количество, стоимость и шаг периода аренды.',directions:['goods','sport','entertainment']},
-  {id:'subscription',title:'Создай абонемент',text:'Выберите товар или услугу, срок действия, скидку и количество использований.'},
+  {id:'store',icon:'store',title:'Создай своё заведение',text:'Проверьте статус продавца, укажите название, направление и адрес своего заведения.'},
+  {id:'product',icon:'pkg',title:'Добавь первую позицию',text:'Создайте настоящий товар, услугу или аренду: выберите заведение, название, тип и цену.'},
+  {id:'information',icon:'edit',title:'Заполни информацию о заведении',text:'Добавьте телефон и часы работы, чтобы клиентам было проще связаться с вами.'},
+  {id:'employee',icon:'key',title:'Добавь сотрудника',text:'Создайте доступ для реального сотрудника и посмотрите его логин.'},
+  {id:'service',icon:'services',title:'Добавь услугу для записи',text:'Укажите длительность услуги, цену и доступность для записи.',directions:['services','sport','education','entertainment']},
+  {id:'master_schedule',icon:'calendar',title:'Настрой расписание сотрудника',text:'Назначьте мастера, тренера или преподавателя, часы работы и услуги.',directions:['services','sport','education','entertainment']},
+  {id:'group',icon:'users',title:'Добавь групповое занятие',text:'Задайте длительность, число мест, дни недели и время начала.',directions:['sport','education','entertainment']},
+  {id:'personal',icon:'ba-person',title:'Добавь персональное занятие',text:'Задайте длительность встречи и диапазоны времени для записи.',directions:['sport','education','entertainment']},
+  {id:'rental',icon:'refresh',title:'Добавь позицию для аренды',text:'Настройте количество, стоимость и шаг периода аренды.',directions:['goods','sport','entertainment']},
+  {id:'subscription',icon:'ba-ticket',title:'Создай абонемент',text:'Выберите товар или услугу, срок действия, скидку и количество использований.'},
+  {id:'category',icon:'ba-layers',title:'Создай категорию каталога',text:'Сгруппируйте товары и услуги своего заведения, чтобы клиентам было проще выбирать.'},
+  {id:'discount',icon:'ba-percent',title:'Настрой скидку на позицию',text:'Откройте существующую позицию и укажите прежнюю цену выше текущей.'},
+  {id:'price_rules',icon:'clock',title:'Настрой цены по дням и часам',text:'Создайте отдельную цену для выбранных дней или времени, например для утренних часов.'},
+  {id:'options',icon:'ba-sliders',title:'Добавь варианты и добавки',text:'Настройте размер, цвет или добавки: один либо несколько вариантов, обязательность выбора и надбавки.',directions:['food','goods']},
 ];
 let _baState={user:null,known:false,stores:[],items:{},employees:{},features:{},selected:'',error:''};
 let _baRun=null,_baCheck=null,_baTimer=null;
@@ -26,23 +30,24 @@ function baDone(id){
   return _baState.features?.[store.id]?.[id]===true;
 }
 const baItemLesson=id=>['product','service','group','personal','rental'].includes(id);
+const baEditItemLesson=id=>['discount','price_rules','options'].includes(id);
 function baBlocked(lesson){
   const store=baStore();if(!store&&lesson.id!=='store')return 'Сначала создайте заведение';
   if(store&&lesson.directions&&!lesson.directions.includes(store.direction)){
-    const names={services:'услуги',sport:'спорт',education:'образование',entertainment:'развлечения',goods:'товары'};
+    const names={food:'еда',services:'услуги',sport:'спорт',education:'образование',entertainment:'развлечения',goods:'товары'};
     return 'Выберите заведение направления: '+lesson.directions.map(id=>names[id]).join(', ')+'.';
   }
   if(lesson.id==='master_schedule'){
     if(_baState.employees[store.id]!==true)return 'Сначала добавьте сотрудника';
     if(!_baState.features?.[store.id]?.bookable)return 'Сначала добавьте услугу или занятие с длительностью';
   }
-  if(lesson.id==='subscription'&&_baState.items[store.id]!==true)return 'Сначала добавьте товар или услугу';
+  if((lesson.id==='subscription'||baEditItemLesson(lesson.id))&&_baState.items[store.id]!==true)return 'Сначала добавьте товар или услугу';
   return '';
 }
 async function baFeatures(storeId){
   const exists=async(table,filter)=>{const rows=await _reqNet(`/rest/v1/${table}?${filter}&limit=1`);if(!Array.isArray(rows))throw new Error('Не удалось проверить настройки');return rows.length>0;};
   const base=`store_id=eq.${storeId}`,select='&select=id';
-  const [service,bookable,group,personal,rental,subscription,employees]=await Promise.all([
+  const [service,bookable,group,personal,rental,subscription,employees,category,discountRows,ruleRows,options]=await Promise.all([
     exists('menu_items',base+'&item_type=eq.service&is_training=not.is.true&duration_minutes=gt.0'+select),
     exists('menu_items',base+'&item_type=eq.service&duration_minutes=gt.0'+select),
     exists('menu_items',base+'&is_training=eq.true&training_mode=eq.group&duration_minutes=gt.0&select=id,training_schedules!inner(menu_item_id)'),
@@ -50,6 +55,10 @@ async function baFeatures(storeId){
     exists('menu_items',base+'&item_type=eq.rental'+select),
     exists('subscriptions',base+select),
     _reqNet(`/rest/v1/profiles?role=eq.employee&employee_store_id=eq.${storeId}&select=id,is_master`),
+    exists('categories',base+select),
+    _reqNet(`/rest/v1/menu_items?${base}&old_price=gt.0&select=price,old_price`),
+    _reqNet(`/rest/v1/item_price_rules?menu_items.store_id=eq.${storeId}&price=gt.0&select=days,time_from,time_to,menu_items!inner(store_id)`),
+    exists('menu_item_option_groups',`menu_items.store_id=eq.${storeId}&select=id,menu_items!inner(store_id),menu_item_options!inner(id)`),
   ]);
   const ids=employees.filter(e=>e.is_master).map(e=>e.id);
   let master_schedule=false;
@@ -61,7 +70,8 @@ async function baFeatures(storeId){
     ]);
     master_schedule=schedules.some(s=>s.start_time&&s.end_time>s.start_time&&services.some(v=>v.master_id===s.master_id));
   }
-  return {service,bookable,group,personal,rental,subscription,master_schedule,hasEmployees:employees.length>0};
+  const price_rules=ruleRows.some(r=>(r.days?.length>0&&r.days.length<7)||(r.time_from&&r.time_to&&r.time_to>r.time_from));
+  return {service,bookable,group,personal,rental,subscription,master_schedule,category,discount:discountRows.some(row=>Number(row.old_price)>Number(row.price)),price_rules,options,hasEmployees:employees.length>0};
 }
 function businessAcademyReset(){
   businessAcademyStop();_baState={user:null,known:false,stores:[],items:{},employees:{},features:{},selected:'',error:''};_baCheck=null;
@@ -102,7 +112,7 @@ function businessAcademyRender(){
   if(!root.querySelector('.ba-tasks'))root.innerHTML=`<p class="ba-intro">Настройте своё заведение шаг за шагом. Действия выполняются в обычных формах Business и сохраняют реальные данные. Ничего не создаётся автоматически.</p>
     <p class="ba-note" id="ba-status"></p><button class="btn" id="ba-retry" onclick="loadBusinessAcademy()" hidden>Повторить проверку</button>
     <label class="ba-store-label" id="ba-store-label" for="ba-store-select">Заведение для уроков</label><select id="ba-store-select" onchange="businessAcademySelect(this.value)"></select>
-    <div class="ba-tasks">${BUSINESS_ACADEMY_LESSONS.map(l=>`<button type="button" class="ba-task" data-ba-lesson="${l.id}" onclick="businessAcademyStart(this.dataset.baLesson)"><span class="ba-number"></span><span><small class="ba-task-condition" hidden></small><strong>${esc(l.title)}</strong><small class="ba-task-description">${esc(l.text)}</small><small class="ba-task-status"></small></span></button>`).join('')}</div>
+    <div class="ba-tasks">${BUSINESS_ACADEMY_LESSONS.map(l=>`<button type="button" class="ba-task" data-ba-lesson="${l.id}" onclick="businessAcademyStart(this.dataset.baLesson)"><span class="ba-number" aria-hidden="true">${svgIco(l.icon,24)}</span><span><small class="ba-task-condition" hidden></small><strong>${esc(l.title)}</strong><small class="ba-task-description">${esc(l.text)}</small><small class="ba-task-status"></small></span></button>`).join('')}</div>
     <p class="ba-note">Можно остановить подсказки в любой момент. Уже сохранённые товары, сотрудники и сведения останутся в вашем аккаунте.</p>`;
   baEl('ba-status').textContent=S.profile?.role==='employee'?'Академия настройки доступна владельцу заведения.':_baState.error||(!known?'Проверяем заведения и каталог…':'Обязательные поля отмечены звёздочкой. Подсказки объяснят, что в них указать.');
   baEl('ba-retry').hidden=!_baState.error;
@@ -112,7 +122,7 @@ function businessAcademyRender(){
   BUSINESS_ACADEMY_LESSONS.forEach((lesson,i)=>{
     const button=root.querySelector(`[data-ba-lesson="${lesson.id}"]`),blocked=baBlocked(lesson),disabled=!known||!!blocked||(lesson.id==='store'&&!!baStore()),done=known&&baDone(lesson.id),badge=button.querySelector('.ba-number');
     button.hidden=false;
-    button.disabled=disabled;badge.textContent=done?'✓':i+1;badge.classList.toggle('done',!!done);
+    button.disabled=disabled;badge.classList.toggle('done',!!done);
     const condition=button.querySelector('.ba-task-condition'),status=button.querySelector('.ba-task-status');
     condition.textContent=known?blocked:'';condition.hidden=!condition.textContent;
     status.textContent=done?(lesson.id==='store'?'Заведение уже создано':'Уже настроено · можно посмотреть'):!known?'Проверяем данные…':blocked?'':'Начать с подсказками';
@@ -147,7 +157,7 @@ function businessAcademyOffer(screen){
 function businessAcademyLater(kind){try{sessionStorage.setItem('alliby_ba_later_'+S.session.user.id+'_'+kind,'1');}catch{}baEl('business-academy-offer')?.remove();}
 function baWrapModals(){
   const wrapped=[];
-  for(const id of ['m-store','m-mi','m-add-employee','m-seller-verify','m-addr-pick','m-master','m-sub']){
+  for(const id of ['m-store','m-mi','m-add-employee','m-seller-verify','m-addr-pick','m-master','m-sub','m-cat']){
     const modal=baEl(id)?.querySelector('.modal'),head=modal?.querySelector('.modal-hd'),foot=modal?.querySelector('.modal-ft');
     if(!head||!foot)continue;
     const body=document.createElement('div');body.className='ba-modal-body';head.after(body);
@@ -168,10 +178,11 @@ function businessAcademyStart(id){
   businessAcademyStop();closeTour();
   _baRun={id,user:S.session.user.id,storeId:store?.id||null,index:0,saved:false,wrapped:baWrapModals()};
   document.documentElement.classList.add('business-academy-mode');baEl('ba-guide').hidden=false;
-  if(baItemLesson(id)||id==='subscription'){
+  if(baItemLesson(id)||baEditItemLesson(id)||id==='subscription'){
     baEl('mi-store-filter').value=store.id;baEl('mi-cat-filter').value='';baEl('mi-search').value='';_adminMenuTab='items';goTo('menu');
     if(id==='subscription')setAdminMenuTab('subs');
-  }else if(['employee','master_schedule'].includes(id)){goTo('employees');if(baEl('emp-store-filter')){baEl('emp-store-filter').value=store.id;filterEmployees();}}else {goTo('stores');if(store){const full=S.stores.find(s=>s.id===store.id);if(full)openStoreModal(full);}}
+  }else if(id==='category'){baEl('cat-store-filter').value=store.id;goTo('categories');}
+  else if(['employee','master_schedule'].includes(id)){goTo('employees');if(baEl('emp-store-filter')){baEl('emp-store-filter').value=store.id;filterEmployees();}}else {goTo('stores');if(store){const full=S.stores.find(s=>s.id===store.id);if(full)openStoreModal(full);}}
   _baTimer=setInterval(businessAcademyTick,180);businessAcademyTick();
 }
 function businessAcademyStop(){
@@ -186,6 +197,28 @@ function businessAcademyExit(){const editing=!!document.querySelector('.overlay.
 function baField(id,text,valid=()=>!!baEl(id)?.value.trim(),required=true){return {selector:'#'+id,text,valid,required};}
 function baSteps(){
   const run=_baRun;if(!run)return [];
+  if(run.id==='category')return [
+    baField('mc-name','Обязательно: назовите категорию, например «Напитки», «Аксессуары» или «Уход за лицом».'),
+    baField('mc-store','Выберите заведение для этого урока. Категория будет принадлежать именно его каталогу.',()=>baEl('mc-store').value===run.storeId),
+  ];
+  if(baEditItemLesson(run.id)){
+    const steps=[{selector:'#mmi-name',text:'Проверьте, что открыли нужную существующую позицию своего заведения. Изменения будут видны клиентам.',valid:()=>!!baEl('mmi-id').value&&baEl('mmi-store').value===run.storeId,required:true}];
+    if(run.id==='discount')steps.push(
+      baField('mmi-price','Укажите текущую цену, по которой клиент купит позицию. Допустимо число от нуля.',()=>baEl('mmi-price').value.trim()!==''&&Number.isFinite(Number(baEl('mmi-price').value))&&Number(baEl('mmi-price').value)>=0),
+      baField('mmi-discount-toggle','Включите «Скидка», чтобы показать клиенту прежнюю цену.',()=>baEl('mmi-discount-toggle').checked),
+      baField('mmi-old-price','Укажите прежнюю цену: она должна быть строго больше текущей. Не завышайте её искусственно.',()=>Number.isFinite(Number(baEl('mmi-old-price').value))&&Number(baEl('mmi-old-price').value)>Number(baEl('mmi-price').value)),
+    );
+    if(run.id==='price_rules')steps.push(
+      baField('mmi-price-rules-toggle','Включите «Правила для цены». Обычная цена сохранится для времени вне условий правила.',()=>baEl('mmi-price-rules-toggle').checked),
+      {selector:'#mmi-price-rules-list',text:'При включении появилось первое правило; также можно изменить существующее. «+ Правило» добавляет ещё одно условие. Не оставляйте новые правила пустыми и не удаляйте действующие, если хотите их сохранить.',valid:()=>_editPriceRules.length>0,required:true},
+      {selector:'#mmi-price-rules-list',text:'Укажите положительную цену. Выберите дни недели или задайте оба времени — начало и конец. Вне выбранных условий действует обычная цена. Для этого урока нужно хотя бы одно ограничение по дням или времени.',valid:()=>baPriceRulesValid(),required:true},
+    );
+    if(run.id==='options')steps.push(
+      {selector:'button[onclick="addOptionGroup()"]',text:'Нажмите «+ Группа» или настройте существующую группу. Например: «Размер», «Цвет» или «Добавки».',valid:()=>_editOptGroups.length>0,required:true},
+      {selector:'#mmi-option-groups',text:'Назовите группу. «Радио» означает один вариант, «Чекбокс» — несколько. «Обяз.» требует выбора от клиента. Добавьте хотя бы одну опцию с названием, надбавкой от нуля и отметкой «В наличии». Заполните все добавленные группы.',valid:baOptionsValid,required:true},
+    );
+    return steps;
+  }
   if(run.id==='store')return [
     baField('ms-name','Обязательно: укажите настоящее название заведения. Оно будет отображаться у клиентов.'),
     baField('ms-dir','Обязательно: выберите направление вашего бизнеса. От него зависят доступные товары и услуги.'),
@@ -255,6 +288,12 @@ function baPersonalRangesValid(){
   const minutes=t=>Number(t.slice(0,2))*60+Number(t.slice(3,5));
   return duration>0&&_editTrainingSchedule.length>0&&_editTrainingSchedule.every(r=>r.start_time&&r.end_time&&minutes(r.end_time)-minutes(r.start_time)>=duration);
 }
+function baPriceRulesValid(){
+  return _editPriceRules.length>0&&!_getPriceRulesErrors()&&_editPriceRules.some(r=>(r.days?.length>0&&r.days.length<7)||(r.time_from&&r.time_to));
+}
+function baOptionsValid(){
+  return _editOptGroups.length>0&&_editOptGroups.every(g=>g.name.trim()&&['radio','checkbox'].includes(g.type)&&g.options.length>0&&g.options.some(o=>o.is_available!==false)&&g.options.every(o=>o.name.trim()&&Number.isFinite(Number(o.price_add))&&Number(o.price_add)>=0));
+}
 function baMasterTimesValid(){
   const days=[...document.querySelectorAll('#master-sched-grid input[type=checkbox]:checked')];
   return days.length>0&&days.every(el=>{const day=el.id.split('-').pop(),start=baEl('msched-start-'+day)?.value,end=baEl('msched-end-'+day)?.value;return start&&end&&end>start;});
@@ -274,12 +313,14 @@ function businessAcademyTick(){
   if(!_baRun)return;
   if(!businessAcademyActive()){businessAcademyStop();return;}
   const run=_baRun,visible=s=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0&&e.getBoundingClientRect().width>0);
-  const item=baItemLesson(run.id),staff=['employee','master_schedule'].includes(run.id),sub=run.id==='subscription';
-  const view={modal:item?'m-mi':sub?'m-sub':run.id==='master_schedule'?'m-master':staff?'m-add-employee':'m-store',list:item?'#mi-list':sub?'#sub-list':staff?'#emp-list':'#stores-list',save:item?'#mmi-save-btn':sub?'#msub-save-btn':run.id==='master_schedule'?'#master-save-btn':staff?'#m-add-employee button[onclick="saveEmployee()"]':'#ms-save-btn'};
+  const editing=baEditItemLesson(run.id),item=baItemLesson(run.id)||editing,category=run.id==='category',staff=['employee','master_schedule'].includes(run.id),sub=run.id==='subscription';
+  const view={modal:item?'m-mi':category?'m-cat':sub?'m-sub':run.id==='master_schedule'?'m-master':staff?'m-add-employee':'m-store',list:item?'#mi-list':category?'#cats-tbody':sub?'#sub-list':staff?'#emp-list':'#stores-list',save:item?'#mmi-save-btn':category?'#mc-save-btn':sub?'#msub-save-btn':run.id==='master_schedule'?'#master-save-btn':staff?'#m-add-employee button[onclick="saveEmployee()"]':'#ms-save-btn'};
   let target,message,next=false;
   if(run.saved){
     target=visible(view.list);
     message=run.id==='employee'?'Сотрудник создан в вашем заведении. Посмотрите его логин в списке и передайте сотруднику логин и заданный пароль.':run.id==='master_schedule'?'Расписание и услуги сотрудника сохранены. Клиенты смогут выбирать его при записи; для занятия также проверьте расписание самой позиции.':sub?'Абонемент сохранён. Проверьте цену, срок, скидку и ограничения перед публикацией.':['group','personal'].includes(run.id)?'Занятие и его расписание сохранены. Назначьте его тренеру или преподавателю в уроке «Настрой расписание сотрудника» и проверьте доступность позиции.':item?'Позиция сохранена в каталоге вашего заведения. Проверьте её название, цену и доступность.':'Сведения сохранены в вашем аккаунте. Проверьте карточку заведения.';next=true;
+    const learned={category:'Категория создана в вашем заведении. Теперь откройте товар или услугу и выберите её в поле «Категория», чтобы сгруппировать позиции.',discount:'Скидка сохранена. Проверьте текущую и перечёркнутую прежнюю цену в карточке позиции.',price_rules:'Правила цены сохранены. Проверьте дни и часы действия: вне условий используется обычная цена позиции.',options:'Варианты и добавки сохранены. При выборе позиции клиент сможет указать нужные опции, а надбавки войдут в итоговую стоимость.'};
+    if(learned[run.id])message=learned[run.id];
   }else if(visible('#m-seller-verify.open')){
     const verified=baEl('msv-btn').textContent.includes('Создать заведение');
     target=visible(verified?'#msv-btn':!validateInn(baEl('msv-inn').value)?'#msv-inn':visible('#msv-name-wrap')&&!baEl('msv-name').value.trim()?'#msv-name':'#msv-btn');
@@ -295,16 +336,19 @@ function businessAcademyTick(){
       const steps=baSteps(),step=steps[run.index];
       const emp=run.id==='master_schedule'?(S._cachedEmps||[]).find(e=>e.id===baEl('master-emp-id').value):null;
       if(run.id==='master_schedule'&&emp?.employee_store_id!==run.storeId){target=visible('#master-modal-title');message='Открыт сотрудник другого заведения. Закройте карточку и выберите сотрудника заведения для этого урока.';}
+      else if(editing&&(_miDetailsLoading||_miDetailsFailed)){target=visible('#mmi-title');message=_miDetailsFailed?'Не удалось загрузить настройки позиции. Закройте карточку и откройте её заново, чтобы не потерять существующие опции и правила.':'Загружаем действующие опции и правила цены позиции…';}
       else if(step){target=visible('#'+modal+' '+step.selector);message=step.text;next=!!target;}
       else {target=visible(view.save);message='Проверьте введённые данные и нажмите «Сохранить». Это реальное сохранение в вашем аккаунте. При ошибке исправьте отмеченные поля и повторите.';}
     }else{
-      if(item)target=visible('#menu-add-btn');
+      if(editing)target=visible(`#mi-list .card[data-store="${run.storeId}"] button[onclick*="openMenuItemModal("]`);
+      else if(item)target=visible('#menu-add-btn');
+      else if(category)target=visible('#screen-categories button[onclick="openCatModal()"]');
       else if(sub)target=visible('#menu-add-sub-btn');
       else if(run.id==='master_schedule')target=visible(`#emp-list .card[data-store="${run.storeId}"] button[onclick^="openMasterModal"]`);
       else if(run.id==='employee')target=visible('button[onclick="openAddEmployeeModal()"]');
       else if(run.id==='store'&&!_baState.stores.length)target=visible('#screen-stores button[onclick="openStoreModal()"]');
       else target=visible('#stores-list .card[onclick]');
-      message=item?'Нажмите «+ Добавить», чтобы создать позицию в каталоге своего заведения.':sub?'Во вкладке «Абонементы» нажмите «+ Добавить». Оплата при создании абонемента не выполняется.':run.id==='master_schedule'?'В списке сотрудников своего заведения нажмите кнопку «Мастер», «Тренер» или «Преподаватель» у нужного человека.':run.id==='employee'?'Нажмите «Добавить сотрудника». Будет создан настоящий доступ к вашему заведению.':run.id==='store'&&!_baState.stores.length?'Нажмите «+ Добавить». Сначала Business проверит статус продавца, затем откроет карточку заведения.':'Откройте карточку своего заведения для заполнения информации.';
+      message=editing?'Выберите существующую позицию своего заведения и нажмите «Ред.». Этот урок изменяет её настройки.':category?'Нажмите «+ Добавить», чтобы создать категорию для каталога своего заведения.':item?'Нажмите «+ Добавить», чтобы создать позицию в каталоге своего заведения.':sub?'Во вкладке «Абонементы» нажмите «+ Добавить». Оплата при создании абонемента не выполняется.':run.id==='master_schedule'?'В списке сотрудников своего заведения нажмите кнопку «Мастер», «Тренер» или «Преподаватель» у нужного человека.':run.id==='employee'?'Нажмите «Добавить сотрудника». Будет создан настоящий доступ к вашему заведению.':run.id==='store'&&!_baState.stores.length?'Нажмите «+ Добавить». Сначала Business проверит статус продавца, затем откроет карточку заведения.':'Откройте карточку своего заведения для заполнения информации.';
     }
   }
   const update=(id,text)=>{const el=baEl(id);if(el.textContent!==text)el.textContent=text;};
@@ -323,7 +367,7 @@ function businessAcademySaved(kind,storeId,details={},run=null){
   businessAcademyRefresh();
   if(!run||_baRun!==run||!businessAcademyActive())return;
   const lesson=run.id;
-  if(lesson!==kind&&!(kind==='product'&&baItemLesson(lesson)))return;
+  if(lesson!==kind&&!(kind==='product'&&(baItemLesson(lesson)||baEditItemLesson(lesson))))return;
   if(!storeId)return;
   if(kind!=='store'&&storeId!==_baRun.storeId)return;
   _baRun.saved=true;
@@ -338,7 +382,8 @@ function businessAcademySaved(kind,storeId,details={},run=null){
   businessAcademyTick();
 }
 function businessAcademyValidate(kind){
-  if(businessAcademyActive()&&((kind==='product'&&baItemLesson(_baRun.id))||kind===_baRun.id)){
+  if(businessAcademyActive()&&((kind==='product'&&(baItemLesson(_baRun.id)||baEditItemLesson(_baRun.id)))||kind===_baRun.id)){
+    if(kind==='category'&&baEl('mc-id').value){showAdminToast('Для этого урока создайте новую категорию кнопкой «+ Добавить»');return false;}
     if(kind==='master_schedule'){
       const emp=(S._cachedEmps||[]).find(e=>e.id===baEl('master-emp-id').value);
       if(emp?.employee_store_id!==_baRun.storeId){showAdminToast('Выберите сотрудника своего заведения для этого урока');return false;}
