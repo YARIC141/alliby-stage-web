@@ -102,7 +102,7 @@ function businessAcademyRender(){
   if(!root.querySelector('.ba-tasks'))root.innerHTML=`<p class="ba-intro">Настройте своё заведение шаг за шагом. Действия выполняются в обычных формах Business и сохраняют реальные данные. Ничего не создаётся автоматически.</p>
     <p class="ba-note" id="ba-status"></p><button class="btn" id="ba-retry" onclick="loadBusinessAcademy()" hidden>Повторить проверку</button>
     <label class="ba-store-label" id="ba-store-label" for="ba-store-select">Заведение для уроков</label><select id="ba-store-select" onchange="businessAcademySelect(this.value)"></select>
-    <div class="ba-tasks">${BUSINESS_ACADEMY_LESSONS.map(l=>`<button type="button" class="ba-task" data-ba-lesson="${l.id}" onclick="businessAcademyStart(this.dataset.baLesson)"><span class="ba-number"></span><span><strong>${esc(l.title)}</strong><small>${esc(l.text)}</small><small class="ba-task-status"></small></span></button>`).join('')}</div>
+    <div class="ba-tasks">${BUSINESS_ACADEMY_LESSONS.map(l=>`<button type="button" class="ba-task" data-ba-lesson="${l.id}" onclick="businessAcademyStart(this.dataset.baLesson)"><span class="ba-number"></span><span><small class="ba-task-condition" hidden></small><strong>${esc(l.title)}</strong><small class="ba-task-description">${esc(l.text)}</small><small class="ba-task-status"></small></span></button>`).join('')}</div>
     <p class="ba-note">Можно остановить подсказки в любой момент. Уже сохранённые товары, сотрудники и сведения останутся в вашем аккаунте.</p>`;
   baEl('ba-status').textContent=S.profile?.role==='employee'?'Академия настройки доступна владельцу заведения.':_baState.error||(!known?'Проверяем заведения и каталог…':'Обязательные поля отмечены звёздочкой. Подсказки объяснят, что в них указать.');
   baEl('ba-retry').hidden=!_baState.error;
@@ -113,7 +113,10 @@ function businessAcademyRender(){
     const button=root.querySelector(`[data-ba-lesson="${lesson.id}"]`),blocked=baBlocked(lesson),disabled=!known||!!blocked||(lesson.id==='store'&&!!baStore()),done=known&&baDone(lesson.id),badge=button.querySelector('.ba-number');
     button.hidden=false;
     button.disabled=disabled;badge.textContent=done?'✓':i+1;badge.classList.toggle('done',!!done);
-    button.querySelector('.ba-task-status').textContent=done?(lesson.id==='store'?'Заведение уже создано':'Уже настроено · можно посмотреть'):blocked||(!known?'Проверяем данные…':'Начать с подсказками');
+    const condition=button.querySelector('.ba-task-condition'),status=button.querySelector('.ba-task-status');
+    condition.textContent=known?blocked:'';condition.hidden=!condition.textContent;
+    status.textContent=done?(lesson.id==='store'?'Заведение уже создано':'Уже настроено · можно посмотреть'):!known?'Проверяем данные…':blocked?'':'Начать с подсказками';
+    status.hidden=!status.textContent;
   });
 }
 async function loadBusinessAcademy(){

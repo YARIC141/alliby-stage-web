@@ -6,12 +6,16 @@
 .ba-store-label{display:block;margin:16px 0 6px;font-size:13px;color:var(--fg-2)}
 .ba-tasks{display:grid;gap:12px;margin:20px 0}
 .ba-task{display:flex;align-items:center;gap:14px;padding:16px;text-align:left;width:100%;border:1px solid var(--line-soft);border-radius:var(--r-3);background:var(--glass);color:var(--fg);font:inherit;cursor:pointer;touch-action:manipulation}
-.ba-task:disabled{opacity:.5;cursor:default}
+.ba-task:disabled{opacity:1;cursor:default}
+.ba-task:disabled .ba-number,.ba-task:disabled strong,.ba-task:disabled .ba-task-description,.ba-task:disabled .ba-task-status{opacity:.5}
 .ba-task[hidden]{display:none}
+.ba-task [hidden]{display:none}
 .ba-task>span:last-child{flex:1;min-width:0}
 .ba-task strong,.ba-task small{display:block}
 .ba-task strong{font:600 15px/1.4 var(--font-sans)}
 .ba-task small{font:400 12px/1.5 var(--font-sans);color:var(--fg-3);margin-top:5px}
+.ba-task .ba-task-condition{color:#f59b50;font-weight:600;margin:0 0 6px}
+html:not(.dark) .ba-task .ba-task-condition{color:#b84c11}
 .ba-number{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;border-radius:50%;background:var(--bg-2);color:var(--fg-2)}
 .ba-number.done{background:#258652;color:white}
 .ba-offer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid #d6a436;background:var(--bg-2);flex-shrink:0}
