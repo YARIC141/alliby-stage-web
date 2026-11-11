@@ -1,6 +1,9 @@
 #main>.screen>.ph{padding-right:188px;min-height:64px;flex-wrap:wrap}
 #main>.screen>.ph h2{min-width:0;overflow-wrap:anywhere}
 #business-academy-btn{color:#eab54a}
+#screen-menu>.pb>.tab-nav{overflow-x:auto;overscroll-behavior-x:contain}
+#screen-menu>.pb>.tab-nav>.tab-btn{white-space:nowrap;flex-shrink:0}
+.whole-rubles-invalid{border-color:var(--err)!important}
 .ba-intro{max-width:760px;font-size:15px;line-height:1.6;color:var(--fg-2)}
 .ba-note{font-size:13px;line-height:1.5;color:var(--fg-3);margin:12px 0}
 .ba-store-label{display:block;margin:16px 0 6px;font-size:13px;color:var(--fg-2)}

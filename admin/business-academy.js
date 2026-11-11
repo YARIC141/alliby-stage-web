@@ -13,13 +13,16 @@ const BUSINESS_ACADEMY_LESSONS=[
   {id:'category',icon:'ba-layers',title:'Создай категорию каталога',text:'Сгруппируйте товары и услуги своего заведения, чтобы клиентам было проще выбирать.'},
   {id:'discount',icon:'ba-percent',title:'Настрой скидку на позицию',text:'Откройте существующую позицию и укажите прежнюю цену выше текущей.'},
   {id:'price_rules',icon:'clock',title:'Настрой цены по дням и часам',text:'Создайте отдельную цену для выбранных дней или времени, например для утренних часов.'},
-  {id:'options',icon:'ba-sliders',title:'Добавь варианты и добавки',text:'Настройте размер, цвет или добавки: один либо несколько вариантов, обязательность выбора и надбавки.',directions:['food','goods']},
+  {id:'options',icon:'ba-sliders',title:'Настрой группы опций',text:'Настройте ингредиенты или дополнительные опции: один либо несколько вариантов, обязательность выбора и доплату.'},
 ];
 let _baState={user:null,known:false,stores:[],items:{},employees:{},features:{},selected:'',error:''};
 let _baRun=null,_baCheck=null,_baTimer=null;
 const businessAcademyActive=()=>!!_baRun&&_baRun.user===S.session?.user?.id;
 const baEl=id=>document.getElementById(id);
 const baStore=()=>_baState.stores.find(s=>s.id===_baState.selected);
+function baOptionExample(){
+  return ({food:'«Ингредиенты»: сыр, соусы; «Молоко»: обычное или растительное.',goods:'«Дополнительно»: подарочная упаковка или сборка.',services:'«Дополнительные услуги»: уходовая маска или выезд специалиста.',sport:'«Инвентарь»: коврик, ракетка или полотенце.',entertainment:'«Дополнительно»: контроллер или набор для праздника.',education:'«Материалы»: рабочая тетрадь или запись занятия.'})[baStore()?.direction]||'Ингредиенты для еды, упаковка для товаров, дополнительные услуги или материалы.';
+}
 function baProgress(){try{return JSON.parse(localStorage.getItem('alliby_business_academy_v1_'+S.session?.user?.id)||'{}');}catch{return {};}}
 function baDone(id){
   const store=baStore();if(id==='store')return !!store;
@@ -122,6 +125,7 @@ function businessAcademyRender(){
   BUSINESS_ACADEMY_LESSONS.forEach((lesson,i)=>{
     const button=root.querySelector(`[data-ba-lesson="${lesson.id}"]`),blocked=baBlocked(lesson),disabled=!known||!!blocked||(lesson.id==='store'&&!!baStore()),done=known&&baDone(lesson.id),badge=button.querySelector('.ba-number');
     button.hidden=false;
+    button.querySelector('.ba-task-description').textContent=lesson.id==='options'?lesson.text+' Например: '+baOptionExample():lesson.text;
     button.disabled=disabled;badge.classList.toggle('done',!!done);
     const condition=button.querySelector('.ba-task-condition'),status=button.querySelector('.ba-task-status');
     condition.textContent=known?blocked:'';condition.hidden=!condition.textContent;
@@ -181,7 +185,7 @@ function businessAcademyStart(id){
   if(baItemLesson(id)||baEditItemLesson(id)||id==='subscription'){
     baEl('mi-store-filter').value=store.id;baEl('mi-cat-filter').value='';baEl('mi-search').value='';_adminMenuTab='items';goTo('menu');
     if(id==='subscription')setAdminMenuTab('subs');
-  }else if(id==='category'){baEl('cat-store-filter').value=store.id;goTo('categories');}
+  }else if(id==='category'){baEl('cat-store-filter').value=store.id;_adminMenuTab='categories';goTo('menu');}
   else if(['employee','master_schedule'].includes(id)){goTo('employees');if(baEl('emp-store-filter')){baEl('emp-store-filter').value=store.id;filterEmployees();}}else {goTo('stores');if(store){const full=S.stores.find(s=>s.id===store.id);if(full)openStoreModal(full);}}
   _baTimer=setInterval(businessAcademyTick,180);businessAcademyTick();
 }
@@ -204,9 +208,9 @@ function baSteps(){
   if(baEditItemLesson(run.id)){
     const steps=[{selector:'#mmi-name',text:'Проверьте, что открыли нужную существующую позицию своего заведения. Изменения будут видны клиентам.',valid:()=>!!baEl('mmi-id').value&&baEl('mmi-store').value===run.storeId,required:true}];
     if(run.id==='discount')steps.push(
-      baField('mmi-price','Укажите текущую цену, по которой клиент купит позицию. Допустимо число от нуля.',()=>baEl('mmi-price').value.trim()!==''&&Number.isFinite(Number(baEl('mmi-price').value))&&Number(baEl('mmi-price').value)>=0),
+      baField('mmi-price','Укажите текущую цену в целых рублях, по которой клиент купит позицию. Допустимо число от нуля.',()=>isWholeRublePrice(baEl('mmi-price').value)),
       baField('mmi-discount-toggle','Включите «Скидка», чтобы показать клиенту прежнюю цену.',()=>baEl('mmi-discount-toggle').checked),
-      baField('mmi-old-price','Укажите прежнюю цену: она должна быть строго больше текущей. Не завышайте её искусственно.',()=>Number.isFinite(Number(baEl('mmi-old-price').value))&&Number(baEl('mmi-old-price').value)>Number(baEl('mmi-price').value)),
+      baField('mmi-old-price','Укажите прежнюю цену в целых рублях: она должна быть строго больше текущей. Не завышайте её искусственно.',()=>isWholeRublePrice(baEl('mmi-old-price').value)&&Number(baEl('mmi-old-price').value)>Number(baEl('mmi-price').value)),
     );
     if(run.id==='price_rules')steps.push(
       baField('mmi-price-rules-toggle','Включите «Правила для цены». Обычная цена сохранится для времени вне условий правила.',()=>baEl('mmi-price-rules-toggle').checked),
@@ -214,7 +218,7 @@ function baSteps(){
       {selector:'#mmi-price-rules-list',text:'Укажите положительную цену. Выберите дни недели или задайте оба времени — начало и конец. Вне выбранных условий действует обычная цена. Для этого урока нужно хотя бы одно ограничение по дням или времени.',valid:()=>baPriceRulesValid(),required:true},
     );
     if(run.id==='options')steps.push(
-      {selector:'button[onclick="addOptionGroup()"]',text:'Нажмите «+ Группа» или настройте существующую группу. Например: «Размер», «Цвет» или «Добавки».',valid:()=>_editOptGroups.length>0,required:true},
+      {selector:'button[onclick="addOptionGroup()"]',text:'Нажмите «+ Группа» или настройте существующую группу. Например: '+baOptionExample(),valid:()=>_editOptGroups.length>0,required:true},
       {selector:'#mmi-option-groups',text:'Назовите группу. «Радио» означает один вариант, «Чекбокс» — несколько. «Обяз.» требует выбора от клиента. Добавьте хотя бы одну опцию с названием, надбавкой от нуля и отметкой «В наличии». Заполните все добавленные группы.',valid:baOptionsValid,required:true},
     );
     return steps;
@@ -231,7 +235,7 @@ function baSteps(){
       baField('mmi-store','Обязательно: выберите своё заведение. Позиция попадёт именно в его каталог.'),
       baField('mmi-name','Обязательно: напишите понятное название товара или услуги.'),
       baField('mmi-item-type',special?`Обязательно: выберите тип «${run.id==='rental'?'Аренда':'Услуга'}». Поля ниже изменятся в зависимости от типа.`:'Обязательно: выберите тип — товар, услуга или аренда. Поля ниже изменятся в зависимости от типа.',()=>!!baEl('mmi-item-type').value&&(!special||baEl('mmi-item-type').value===(run.id==='rental'?'rental':'service'))),
-      baField('mmi-price','Обязательно: укажите цену в рублях — число от нуля. Нулевая цена допустима.',()=>baEl('mmi-price').value.trim()!==''&&Number.isFinite(Number(baEl('mmi-price').value))&&Number(baEl('mmi-price').value)>=0),
+      baField('mmi-price','Обязательно: укажите цену в целых рублях — число от нуля. Нулевая цена допустима.',()=>isWholeRublePrice(baEl('mmi-price').value)),
     ];
     if(baEl('mmi-item-type').value==='service')steps.push(baField('mmi-duration','Укажите длительность в минутах: по ней рассчитывается конец записи. Для записи нужно целое число больше нуля.',()=>Number.isInteger(Number(baEl('mmi-duration').value))&&Number(baEl('mmi-duration').value)>0,special));
     if(baEl('mmi-item-type').value==='rental'){
@@ -264,10 +268,10 @@ function baSteps(){
     baField('msub-store','Выберите своё заведение. Абонемент действует в нём.',()=>baEl('msub-store').value===run.storeId),
     baField('msub-name','Обязательно: укажите понятное название абонемента, например «10 посещений».'),
     baField('msub-item','Обязательно: выберите товар или услугу, на которые действует абонемент.'),
-    baField('msub-price','Укажите стоимость абонемента в рублях — больше нуля.',()=>Number(baEl('msub-price').value)>0),
+    baField('msub-price','Укажите стоимость абонемента в целых рублях — больше нуля.',()=>isWholeRublePrice(baEl('msub-price').value)&&Number(baEl('msub-price').value)>0),
     baField('msub-days','Укажите срок действия в днях — целое число от одного.',()=>Number.isInteger(Number(baEl('msub-days').value))&&Number(baEl('msub-days').value)>0),
     baField('msub-disc-type','Выберите скидку в процентах или рублях. Далее укажите её размер.'),
-    baField('msub-disc-value','Укажите скидку больше нуля; процентная скидка не может превышать 100%.',()=>Number(baEl('msub-disc-value').value)>0&&(baEl('msub-disc-type').value!=='percent'||Number(baEl('msub-disc-value').value)<=100)),
+    baField('msub-disc-value','Укажите скидку больше нуля: в рублях — целую сумму, в процентах — не больше 100%.',()=>Number(baEl('msub-disc-value').value)>0&&(baEl('msub-disc-type').value==='percent'?Number(baEl('msub-disc-value').value)<=100:isWholeRublePrice(baEl('msub-disc-value').value))),
     baField('msub-uses','Укажите количество использований. Ноль означает безлимит; дни, часы и другие ограничения можно настроить ниже.',()=>Number.isInteger(Number(baEl('msub-uses').value))&&Number(baEl('msub-uses').value)>=0),
   ];
   if(run.id==='information')return [
@@ -292,7 +296,7 @@ function baPriceRulesValid(){
   return _editPriceRules.length>0&&!_getPriceRulesErrors()&&_editPriceRules.some(r=>(r.days?.length>0&&r.days.length<7)||(r.time_from&&r.time_to));
 }
 function baOptionsValid(){
-  return _editOptGroups.length>0&&_editOptGroups.every(g=>g.name.trim()&&['radio','checkbox'].includes(g.type)&&g.options.length>0&&g.options.some(o=>o.is_available!==false)&&g.options.every(o=>o.name.trim()&&Number.isFinite(Number(o.price_add))&&Number(o.price_add)>=0));
+  return _editOptGroups.length>0&&_editOptGroups.every(g=>g.name.trim()&&['radio','checkbox'].includes(g.type)&&g.options.length>0&&g.options.some(o=>o.is_available!==false)&&g.options.every(o=>o.name.trim()&&isWholeRublePrice(o.price_add)));
 }
 function baMasterTimesValid(){
   const days=[...document.querySelectorAll('#master-sched-grid input[type=checkbox]:checked')];
@@ -300,7 +304,7 @@ function baMasterTimesValid(){
 }
 function baMasterServicesValid(){
   return !!_masterData?.items?.some(item=>item.item_type==='service'&&item.duration_minutes>0&&baEl('msvc-on-'+item.id)?.checked)&&
-    _masterData.items.filter(item=>baEl('msvc-on-'+item.id)?.checked).every(item=>{const value=baEl('msvc-price-'+item.id)?.value;return value!==''&&Number.isFinite(Number(value))&&Number(value)>=0;});
+    _masterData.items.filter(item=>baEl('msvc-on-'+item.id)?.checked).every(item=>isWholeRublePrice(baEl('msvc-price-'+item.id)?.value));
 }
 function businessAcademyNext(){
   if(!businessAcademyActive())return;
@@ -319,7 +323,7 @@ function businessAcademyTick(){
   if(run.saved){
     target=visible(view.list);
     message=run.id==='employee'?'Сотрудник создан в вашем заведении. Посмотрите его логин в списке и передайте сотруднику логин и заданный пароль.':run.id==='master_schedule'?'Расписание и услуги сотрудника сохранены. Клиенты смогут выбирать его при записи; для занятия также проверьте расписание самой позиции.':sub?'Абонемент сохранён. Проверьте цену, срок, скидку и ограничения перед публикацией.':['group','personal'].includes(run.id)?'Занятие и его расписание сохранены. Назначьте его тренеру или преподавателю в уроке «Настрой расписание сотрудника» и проверьте доступность позиции.':item?'Позиция сохранена в каталоге вашего заведения. Проверьте её название, цену и доступность.':'Сведения сохранены в вашем аккаунте. Проверьте карточку заведения.';next=true;
-    const learned={category:'Категория создана в вашем заведении. Теперь откройте товар или услугу и выберите её в поле «Категория», чтобы сгруппировать позиции.',discount:'Скидка сохранена. Проверьте текущую и перечёркнутую прежнюю цену в карточке позиции.',price_rules:'Правила цены сохранены. Проверьте дни и часы действия: вне условий используется обычная цена позиции.',options:'Варианты и добавки сохранены. При выборе позиции клиент сможет указать нужные опции, а надбавки войдут в итоговую стоимость.'};
+    const learned={category:'Категория создана в вашем заведении. Теперь откройте товар или услугу и выберите её в поле «Категория», чтобы сгруппировать позиции.',discount:'Скидка сохранена. Проверьте текущую и перечёркнутую прежнюю цену в карточке позиции.',price_rules:'Правила цены сохранены. Проверьте дни и часы действия: вне условий используется обычная цена позиции.',options:'Группы опций сохранены. При выборе позиции клиент сможет указать ингредиенты или дополнительные опции, а доплаты войдут в итоговую стоимость.'};
     if(learned[run.id])message=learned[run.id];
   }else if(visible('#m-seller-verify.open')){
     const verified=baEl('msv-btn').textContent.includes('Создать заведение');
@@ -342,13 +346,13 @@ function businessAcademyTick(){
     }else{
       if(editing)target=visible(`#mi-list .card[data-store="${run.storeId}"] button[onclick*="openMenuItemModal("]`);
       else if(item)target=visible('#menu-add-btn');
-      else if(category)target=visible('#screen-categories button[onclick="openCatModal()"]');
+      else if(category)target=visible('#menu-add-cat-btn');
       else if(sub)target=visible('#menu-add-sub-btn');
       else if(run.id==='master_schedule')target=visible(`#emp-list .card[data-store="${run.storeId}"] button[onclick^="openMasterModal"]`);
       else if(run.id==='employee')target=visible('button[onclick="openAddEmployeeModal()"]');
       else if(run.id==='store'&&!_baState.stores.length)target=visible('#screen-stores button[onclick="openStoreModal()"]');
       else target=visible('#stores-list .card[onclick]');
-      message=editing?'Выберите существующую позицию своего заведения и нажмите «Ред.». Этот урок изменяет её настройки.':category?'Нажмите «+ Добавить», чтобы создать категорию для каталога своего заведения.':item?'Нажмите «+ Добавить», чтобы создать позицию в каталоге своего заведения.':sub?'Во вкладке «Абонементы» нажмите «+ Добавить». Оплата при создании абонемента не выполняется.':run.id==='master_schedule'?'В списке сотрудников своего заведения нажмите кнопку «Мастер», «Тренер» или «Преподаватель» у нужного человека.':run.id==='employee'?'Нажмите «Добавить сотрудника». Будет создан настоящий доступ к вашему заведению.':run.id==='store'&&!_baState.stores.length?'Нажмите «+ Добавить». Сначала Business проверит статус продавца, затем откроет карточку заведения.':'Откройте карточку своего заведения для заполнения информации.';
+      message=editing?'Выберите существующую позицию своего заведения и нажмите «Ред.». Этот урок изменяет её настройки.':category?'Во вкладке «Категории» экрана «Товары и услуги» нажмите «+ Добавить». Категория объединит позиции вашего заведения.':item?'Нажмите «+ Добавить», чтобы создать позицию в каталоге своего заведения.':sub?'Во вкладке «Абонементы» нажмите «+ Добавить». Оплата при создании абонемента не выполняется.':run.id==='master_schedule'?'В списке сотрудников своего заведения нажмите кнопку «Мастер», «Тренер» или «Преподаватель» у нужного человека.':run.id==='employee'?'Нажмите «Добавить сотрудника». Будет создан настоящий доступ к вашему заведению.':run.id==='store'&&!_baState.stores.length?'Нажмите «+ Добавить». Сначала Business проверит статус продавца, затем откроет карточку заведения.':'Откройте карточку своего заведения для заполнения информации.';
     }
   }
   const update=(id,text)=>{const el=baEl(id);if(el.textContent!==text)el.textContent=text;};
@@ -399,7 +403,7 @@ function businessAcademyValidate(kind){
   ]:kind==='product'?[
     ['mmi-store',()=>!!baEl('mmi-store').value,'Выберите заведение'],
     ['mmi-name',()=>!!baEl('mmi-name').value.trim(),'Укажите название позиции'],
-    ['mmi-price',()=>baEl('mmi-price').value.trim()!==''&&Number.isFinite(Number(baEl('mmi-price').value))&&Number(baEl('mmi-price').value)>=0,'Укажите цену от нуля'],
+    ['mmi-price',()=>isWholeRublePrice(baEl('mmi-price').value),'Укажите цену в целых рублях от нуля'],
   ]:[];
   for(const [id,valid,message] of checks)if(!valid()){showAdminToast(message);baEl(id).focus();return false;}
   return true;

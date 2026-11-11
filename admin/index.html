@@ -597,7 +597,7 @@ ol.hlp-steps>li ul{margin:6px 0 0}
 @keyframes tourIn{from{opacity:0;transform:translateX(var(--tour-dx,16px))}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#tour,.tour-card,.tour-dot,#tour-spot{transition:none}.tour-body.anim{animation:none}}
 </style>
-<link rel="stylesheet" href="business-academy.css?v=28340395073402">
+<link rel="stylesheet" href="business-academy.css?v=268038963168968">
 <script>try{document.documentElement.classList.toggle('dark',localStorage.getItem('alliby_theme')!=='light');(function(){var bg=localStorage.getItem('alliby_bg')||'fluid';if(bg==='fluid')document.documentElement.classList.add('bg-fluid');if(bg==='custom'){var i=localStorage.getItem('alliby_bg_img');if(i){document.documentElement.classList.add('bg-custom');document.documentElement.style.setProperty('--bg-custom-img','url("'+i+'")')}}if(localStorage.getItem('alliby_ornament')!=='1')document.documentElement.classList.add('no-ornament')})();}catch(e){}</script>
 <style id="pwd-reveal-css">
 .pwd-wrap{position:relative;display:block}
@@ -807,36 +807,15 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
   </div>
 </div>
 
-<!-- ════════════════ CATEGORIES ════════════════ -->
-<div id="screen-categories" class="screen">
-  <div class="ph">
-    <h2>Категории меню<span class="screen-help" data-info="Категории для группировки товаров и услуг. Используются при настройке правил абонементов.">?</span></h2>
-    <button class="btn btn-p btn-sm" onclick="openCatModal()">+ Добавить</button>
-  </div>
-  <div class="pb">
-    <div class="toolbar">
-      <select id="cat-store-filter" onchange="loadCategories()">
-        <option value="">Все заведения</option>
-      </select>
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Название</th><th>Заведение</th><th>Действия</th></tr></thead>
-        <tbody id="cats-tbody"><tr><td colspan="3" class="loading">Загрузка…</td></tr></tbody>
-      </table>
-    </div>
-    <div class="txt-muted" style="margin-top:8px">GET /rest/v1/categories</div>
-  </div>
-</div>
-
 <!-- ════════════════ MENU ITEMS / SUBSCRIPTIONS ════════════════ -->
 <div id="screen-menu" class="screen">
   <div class="ph">
-    <h2>Товары и Услуги<span class="screen-help" data-info="Каталог товаров, услуг и абонементов заведения.">?</span></h2>
+    <h2>Товары и услуги<span class="screen-help" data-info="Каталог товаров, услуг, категорий и абонементов заведения.">?</span></h2>
   </div>
   <div class="pb">
     <div class="tab-nav">
       <button class="tab-btn active" data-menu-tab="items" onclick="setAdminMenuTab('items')">Товары и услуги</button>
+      <button class="tab-btn" data-menu-tab="categories" onclick="setAdminMenuTab('categories')">Категории</button>
       <button class="tab-btn" data-menu-tab="subs" onclick="setAdminMenuTab('subs')">Абонементы</button>
     </div>
     <div id="menu-tab-items" class="tab-pane active">
@@ -852,6 +831,17 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
       </div>
       <div id="mi-list"><div class="txt-muted" style="padding:16px 0">Загрузка…</div></div>
       <div class="txt-muted" style="margin-top:8px">GET /rest/v1/menu_items</div>
+    </div>
+    <div id="menu-tab-categories" class="tab-pane">
+      <h3>Категории<span class="screen-help" data-info="Категории группируют товары и услуги выбранного заведения.">?</span></h3>
+      <div class="toolbar">
+        <select id="cat-store-filter" onchange="loadCategories()"><option value="">Все заведения</option></select>
+        <button class="btn btn-p btn-sm" id="menu-add-cat-btn" onclick="openCatModal()">+ Добавить</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Название</th><th>Заведение</th><th>Действия</th></tr></thead>
+        <tbody id="cats-tbody"><tr><td colspan="3" class="loading">Загрузка…</td></tr></tbody>
+      </table></div>
     </div>
     <div id="menu-tab-subs" class="tab-pane">
       <div class="toolbar">
@@ -1445,7 +1435,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
           <li><a onclick="helpJump('h5')">Интернет-эквайринг</a></li>
           <li><a onclick="helpJump('h6')">Создание заведения</a></li>
           <li><a onclick="helpJump('h7')">Доставка и зоны доставки</a></li>
-          <li><a onclick="helpJump('h8')">Категории меню</a></li>
+          <li><a onclick="helpJump('h8')">Категории</a></li>
           <li><a onclick="helpJump('h9')">Товары, услуги и аренда</a></li>
           <li><a onclick="helpJump('h10')">Абонементы</a></li>
           <li><a onclick="helpJump('h11')">Расписание и запись на услуги</a></li>
@@ -1488,7 +1478,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
     ▼
 Создание заведения  ──────────►  Подписка оформляется
     │                             на каждое заведение отдельно
-    ├──► Категории меню
+    ├──► Категории
     ├──► Товары и услуги
     ├──► Доставка и зоны (если нужна)
     ├──► Расписание и мастера (для услуг)
@@ -1841,10 +1831,10 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 
       <!-- ─────────── 8 ─────────── -->
       <section class="hlp-sec" id="h8">
-        <h3><span class="n">8</span> Категории меню</h3>
+        <h3><span class="n">8</span> Категории</h3>
         <p>Категории группируют позиции внутри витрины: «Кофе», «Бургеры», «Стрижки», «Инвентарь». Они же используются в правилах абонементов и в фильтрах каталога.</p>
         <ol class="hlp-steps">
-          <li>Откройте экран категорий и нажмите <b class="k">+ Добавить</b>.</li>
+          <li>Откройте <b>Товары и услуги → Категории</b> и нажмите <b class="k">+ Добавить</b>.</li>
           <li>Введите <b>Название</b>.</li>
           <li>Выберите <b>Заведение</b>. Если оставить поле пустым, категория станет глобальной и будет доступна во всех ваших заведениях.</li>
           <li>Нажмите <b class="k">Сохранить</b>.</li>
@@ -3206,7 +3196,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
       </div>
       <div class="fg">
         <label>Цена (₽) * <span class="hint" data-tip="Цена за одну единицу товара или услуги в рублях">?</span></label>
-        <input type="number" step="0.01" id="mmi-price" placeholder="Цена за одну единицу в рублях">
+        <input type="number" step="1" min="0" data-rubles="required" inputmode="numeric" id="mmi-price" placeholder="Цена за единицу в целых рублях">
       </div>
       <div class="fg">
         <label id="mmi-prep-label">Время приготовления (мин) <span class="hint" data-tip="Сколько времени занимает приготовление / подготовка / оказание услуги">?</span></label>
@@ -3242,7 +3232,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
       </div>
       <div class="fg" id="mmi-old-price-field" style="display:none">
         <label>Цена до скидки (₽) <span class="hint" data-tip="Прежняя цена — будет показана зачёркнутой рядом с текущей ценой">?</span></label>
-        <input type="number" step="0.01" min="0" id="mmi-old-price" placeholder="Прежняя цена">
+        <input type="number" step="1" min="0" data-rubles="optional" inputmode="numeric" id="mmi-old-price" placeholder="Прежняя цена в целых рублях">
       </div>
       <div id="mmi-nutrition-fields" style="grid-column:1/-1;border:1px solid var(--line);border-radius:var(--r-2);padding:12px">
         <div style="font:600 13px/1 var(--font-sans);margin-bottom:10px">
@@ -3383,7 +3373,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
       <div class="fg"><label>Заведение *</label><select id="msub-store" onchange="onSubStoreChange()"></select></div>
       <div class="fg"><label>Название *</label><textarea id="msub-name" rows="2" style="resize:none" placeholder="Название абонемента, которое увидят клиенты"></textarea></div>
       <div class="fg"><label>Товар / услуга *</label><select id="msub-item"><option value="">— сначала выберите заведение —</option></select></div>
-      <div class="fg"><label>Цена абонемента (₽) *</label><input type="number" step="0.01" id="msub-price" placeholder="Стоимость покупки в рублях"></div>
+      <div class="fg"><label>Цена абонемента (₽) *</label><input type="number" step="1" min="1" data-rubles="required" inputmode="numeric" id="msub-price" placeholder="Стоимость в целых рублях"></div>
       <div class="fg"><label>Тип скидки *</label><select id="msub-disc-type">
         <option value="percent">% от цены товара</option>
         <option value="fixed">Фиксированная скидка (₽)</option>
@@ -3487,7 +3477,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 </div>
 
 <div id="ba-guide" hidden><section id="ba-guide-card" aria-label="Подсказка Академии Business"><header><h3 id="ba-guide-title"></h3><button id="ba-guide-exit" onclick="businessAcademyExit()">Остановить</button></header><p id="ba-guide-text" aria-live="polite"></p><button class="btn btn-p" id="ba-guide-next" onclick="businessAcademyNext()">Далее</button></section></div>
-<script src="business-academy.js?v=28340395073402"></script>
+<script src="business-academy.js?v=268038963168968"></script>
 <script>
 // ─── FATAL ERROR BANNER ───
 // На iPhone нет доступа к консоли без Mac — единственный способ узнать,
@@ -3527,6 +3517,38 @@ function svgIco(key, sz) {
   sz = sz || 16;
   return `<svg class="ico" width="${sz}" height="${sz}"><use href="#i-${key}"/></svg>`;
 }
+function isWholeRublePrice(value,signed=false){
+  return value!==null&&String(value).trim()!==''&&Number.isSafeInteger(Number(value))&&(signed||Number(value)>=0);
+}
+function checkWholeRubleInput(input){
+  const empty=input.value.trim()==='',optional=input.dataset.rubles!=='required';
+  const valid=!input.validity.badInput&&((empty&&optional)||isWholeRublePrice(input.value,input.dataset.rublesSigned==='true'));
+  input.setCustomValidity(valid?'':'Введите сумму в целых рублях');
+  input.classList.toggle('whole-rubles-invalid',!valid);input.setAttribute('aria-invalid',String(!valid));
+  return valid;
+}
+function validateWholeRubles(selector){
+  for(const input of document.querySelector(selector)?.querySelectorAll('input[data-rubles]')||[]){
+    if(input.disabled||!input.getClientRects().length)continue;
+    if(!checkWholeRubleInput(input)){showAdminToast('Цены и суммы указываются в целых рублях');input.focus();input.scrollIntoView({block:'center'});input.reportValidity();return false;}
+  }
+  return true;
+}
+function syncSubscriptionMoneyFields(){
+  const field=document.getElementById('msub-disc-value'),fixed=document.getElementById('msub-disc-type')?.value==='fixed';
+  if(!field)return;
+  field.step=fixed?'1':'0.01';field.inputMode=fixed?'numeric':'decimal';
+  if(fixed)field.dataset.rubles='required';else {delete field.dataset.rubles;field.setCustomValidity('');field.classList.remove('whole-rubles-invalid');field.removeAttribute('aria-invalid');}
+}
+document.addEventListener('input',event=>{if(event.target.matches('input[data-rubles]'))checkWholeRubleInput(event.target);},true);
+document.addEventListener('DOMContentLoaded',()=>{
+  const required=new Set(['mmi-price','msub-price']);
+  for(const id of ['mmi-price','mmi-old-price','msub-price','msub-minamount','ms-avg','cp-fee-fixed','cp-fee-min','cp-reg-fixed','cp-reg-min','cp-ip-fee']){
+    const input=document.getElementById(id);if(input){input.dataset.rubles=required.has(id)?'required':'optional';input.step='1';input.inputMode='numeric';}
+  }
+  document.getElementById('msub-disc-type')?.addEventListener('change',syncSubscriptionMoneyFields);
+  syncSubscriptionMoneyFields();
+});
 
 // ─── CITIES ───
 let _adminCitiesCache = null;
@@ -4083,6 +4105,7 @@ function _resetScreenStyle(el) {
 }
 
 function goTo(id, opts = {}) {
+  if(id==='categories'){_adminMenuTab='categories';id='menu';}
   if(businessAcademyActive()&&!['stores','categories','menu','employees','map'].includes(id))businessAcademyStop();
   if (id !== 'auth' && !S.session) { goTo('auth'); return; }
   // Track the current screen explicitly rather than querying '.screen.active' — during/after an
@@ -6435,7 +6458,7 @@ function renderMsDeliveryZones(zones) {
   el.innerHTML = list.map((z, i) =>
     `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
       <input type="number" class="ms-dz-r" value="${z.radius}" min="100" step="100" style="flex:1;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-1);background:var(--bg-input);font-size:13px;color:var(--fg)">
-      <input type="number" class="ms-dz-p" value="${z.price}" min="0" step="10" style="flex:1;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-1);background:var(--bg-input);font-size:13px;color:var(--fg)">
+      <input type="number" class="ms-dz-p" data-rubles="optional" inputmode="numeric" value="${z.price}" min="0" step="1" style="flex:1;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-1);background:var(--bg-input);font-size:13px;color:var(--fg)">
       ${i > 0 ? `<button class="btn btn-sm btn-d" style="padding:5px 8px;flex-shrink:0" onclick="removeMsDeliveryZone(${i})">✕</button>` : '<div style="width:30px;flex-shrink:0"></div>'}
     </div>`
   ).join('');
@@ -6444,7 +6467,7 @@ function renderMsDeliveryZones(zones) {
 function getMsDeliveryZones() {
   const rs = [...document.querySelectorAll('#ms-dz-list .ms-dz-r')];
   const ps = [...document.querySelectorAll('#ms-dz-list .ms-dz-p')];
-  return rs.map((r, i) => ({ radius: Math.max(100, parseInt(r.value) || 1000), price: Math.max(0, parseInt(ps[i]?.value) || 0) }));
+  return rs.map((r, i) => ({ radius: Math.max(100, parseInt(r.value) || 1000), price: Math.max(0, Number(ps[i]?.value) || 0) }));
 }
 
 const _PAY_META = {
@@ -6472,6 +6495,7 @@ function removeMsDeliveryZone(idx) {
 }
 
 async function saveStore() {
+  if(!validateWholeRubles('#m-store'))return;
   const academyRun=businessAcademyActive()?_baRun:null;
   if(!businessAcademyValidate('store'))return;
   const btn  = document.getElementById('ms-save-btn');
@@ -6785,13 +6809,14 @@ async function _msCatCreate(storeId) {
 let _adminMenuTab = 'items';
 const _MI_LIMIT = 50;
 let _miState = { offset: 0, baseUrl: '', loading: false };
+let _miCatFilterSeq=0;
 
 function loadMenuScreen() {
-  _fillMiCatFilter();
   setAdminMenuTab(_adminMenuTab);
 }
 
 async function _fillMiCatFilter() {
+  const seq=++_miCatFilterSeq;
   const storeId = document.getElementById('mi-store-filter')?.value;
   const sel = document.getElementById('mi-cat-filter');
   if (!sel) return;
@@ -6800,6 +6825,7 @@ async function _fillMiCatFilter() {
   if (!storeId) return;
   try {
     const cats = await req(`/rest/v1/categories?store_id=eq.${storeId}&order=name.asc`);
+    if(seq!==_miCatFilterSeq||document.getElementById('mi-store-filter')?.value!==storeId)return;
     cats.forEach(c => {
       const o = document.createElement('option');
       o.value = c.id;
@@ -6810,12 +6836,21 @@ async function _fillMiCatFilter() {
   } catch {}
 }
 
-function setAdminMenuTab(tab) {
+async function setAdminMenuTab(tab) {
+  if(!['items','categories','subs'].includes(tab))return;
+  const filters={items:'mi-store-filter',categories:'cat-store-filter',subs:'sub-store-filter'};
+  if(tab!==_adminMenuTab){
+    const value=document.getElementById(filters[_adminMenuTab])?.value||'';
+    const filter=document.getElementById(filters[tab]);
+    if([...filter.options].some(option=>option.value===value))filter.value=value;
+  }
   _adminMenuTab = tab;
   document.querySelectorAll('[data-menu-tab]').forEach(b => b.classList.toggle('active', b.dataset.menuTab === tab));
   document.getElementById('menu-tab-items')?.classList.toggle('active', tab === 'items');
   document.getElementById('menu-tab-subs')?.classList.toggle('active', tab === 'subs');
-  if (tab === 'items') loadMenuItems();
+  document.getElementById('menu-tab-categories')?.classList.toggle('active', tab === 'categories');
+  if (tab === 'items') {await _fillMiCatFilter();if(_adminMenuTab===tab)loadMenuItems();}
+  else if(tab==='categories')loadCategories();
   else loadSubscriptions();
 }
 
@@ -7098,7 +7133,7 @@ function _renderPriceRules() {
   if (!el) return;
   if (!_editPriceRules.length) { el.innerHTML = ''; return; }
   el.innerHTML = _editPriceRules.map((r, i) => {
-    const priceErr = !r.price || r.price <= 0;
+    const priceErr = !Number.isSafeInteger(r.price) || r.price <= 0;
     const dayChecks = [1,2,3,4,5,6,0].map(d => {
       const ch = (!r.days || r.days.includes(d)) ? 'checked' : '';
       return `<label style="display:flex;align-items:center;gap:2px;font-size:12px;cursor:pointer">
@@ -7108,10 +7143,10 @@ function _renderPriceRules() {
     return `<div style="border:1px solid var(--line);border-radius:var(--r-2);padding:10px;display:flex;flex-direction:column;gap:8px" id="prl-row-${i}">
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <div style="flex-shrink:0">
-          <input type="number" step="0.01" min="0.01" value="${r.price > 0 ? r.price : ''}" placeholder="Цена ₽ *"
+          <input type="number" step="1" min="1" data-rubles="required" inputmode="numeric" value="${r.price > 0 ? r.price : ''}" placeholder="Цена ₽ *"
             id="prl-price-${i}" style="width:88px;${priceErr ? 'border-color:var(--err)' : ''}"
             oninput="_editPriceRules[${i}].price=parseFloat(this.value)||0;_validatePriceRulePrice(${i})">
-          <div id="prl-price-err-${i}" style="font-size:10px;color:var(--err);margin-top:2px;${priceErr ? '' : 'display:none'}">Укажите цену</div>
+          <div id="prl-price-err-${i}" style="font-size:10px;color:var(--err);margin-top:2px;${priceErr ? '' : 'display:none'}">Укажите целую цену больше нуля</div>
         </div>
         <input type="text" value="${esc(r.label||'')}" placeholder="Название (необяз.)"
           style="flex:1;min-width:100px" oninput="_editPriceRules[${i}].label=this.value||null">
@@ -7139,7 +7174,7 @@ function _validatePriceRulePrice(i) {
   const inp = document.getElementById(`prl-price-${i}`);
   const err = document.getElementById(`prl-price-err-${i}`);
   if (!inp || !err) return;
-  const bad = !_editPriceRules[i]?.price || _editPriceRules[i].price <= 0;
+  const bad = !Number.isSafeInteger(_editPriceRules[i]?.price) || _editPriceRules[i].price <= 0;
   inp.style.borderColor = bad ? 'var(--err)' : '';
   err.style.display = bad ? '' : 'none';
 }
@@ -7164,8 +7199,8 @@ function _getPriceRulesErrors() {
   for (let i = 0; i < _editPriceRules.length; i++) {
     const r = _editPriceRules[i];
     const n = i + 1;
-    if (!r.price || r.price <= 0)
-      return `Правило ${n}: укажите цену больше 0`;
+    if (!Number.isSafeInteger(r.price) || r.price <= 0)
+      return `Правило ${n}: укажите целую цену больше 0`;
     if ((r.time_from && !r.time_to) || (!r.time_from && r.time_to))
       return `Правило ${n}: укажите оба времени или ни одного`;
     if (r.time_from && r.time_to && r.time_from >= r.time_to)
@@ -7466,7 +7501,7 @@ function _renderMmiOptGroups() {
             <input type="text" value="${esc(o.name)}" placeholder="Название опции (пр. Маленькая)"
               style="flex:1;min-width:110px;padding:5px 8px;border-radius:var(--r-2);border:1px solid var(--border);background:var(--bg-input);color:var(--fg);font-size:13px"
               oninput="_optField(${gi},${oi},'name',this.value)">
-            <input type="number" step="0.01" value="${o.price_add}" placeholder="Надбавка ₽"
+            <input type="number" step="1" data-rubles="optional" data-rubles-signed="true" inputmode="numeric" value="${o.price_add}" placeholder="Доплата ₽"
               style="width:90px;padding:5px 8px;border-radius:var(--r-2);border:1px solid var(--border);background:var(--bg-input);color:var(--fg);font-size:13px"
               oninput="_optField(${gi},${oi},'price_add',parseFloat(this.value)||0)">
             <label style="display:flex;align-items:center;gap:3px;font-size:12px;white-space:nowrap;cursor:pointer;flex-shrink:0" title="Снимите, если этой опции сейчас нет в наличии">
@@ -8014,6 +8049,8 @@ async function deleteStorePhoto() {
 }
 
 async function saveMenuItem() {
+  if(!validateWholeRubles('#m-mi'))return;
+  if(_editOptGroups.some(group=>group.options.some(option=>!isWholeRublePrice(option.price_add,true)))){showAdminToast('Доплаты в опциях указываются в целых рублях');return;}
   if(_miDetailsLoading||_miDetailsFailed){showAdminToast(_miDetailsLoading?'Дождитесь загрузки настроек позиции':'Настройки не загружены. Закройте карточку и откройте снова.');return;}
   const academyRun=businessAcademyActive()?_baRun:null;
   if(!businessAcademyValidate('product'))return;
@@ -9422,6 +9459,7 @@ function openSubModal(sub) {
   document.getElementById('msub-autorenew').checked = !!sub?.allow_auto_renew;
   _msubOrigPrice = sub ? Number(sub.price) : null;
   document.getElementById('msub-disc-type').value   = sub?.discount_type  || 'percent';
+  syncSubscriptionMoneyFields();
   document.getElementById('msub-disc-value').value  = sub?.discount_value ?? '';
 
   // Time rules
@@ -9461,6 +9499,7 @@ async function loadSubModalItems(storeId, selectedId) {
 
 let _msubOrigPrice = null;
 async function saveSubscription() {
+  if(!validateWholeRubles('#m-sub'))return;
   const academyRun=businessAcademyActive()?_baRun:null;
   if(!businessAcademyValidate('subscription'))return;
   const id       = document.getElementById('msub-id').value;
@@ -10100,7 +10139,7 @@ function _renderMasterServicesList(items, masterSvcs) {
         <div style="font-size:13px;font-weight:600;line-height:1.2">${esc(item.name)}</div>
         ${durHint}
       </div>
-      <input type="number" id="msvc-price-${item.id}" step="1" min="0" value="${price}"
+      <input type="number" id="msvc-price-${item.id}" step="1" min="0" data-rubles="required" inputmode="numeric" value="${price}"
         placeholder="₽" ${!checked ? 'disabled' : ''}
         style="width:74px;padding:4px 6px;border:1px solid var(--border);border-radius:var(--r-2);background:var(--bg-input);color:var(--fg);font-size:13px;text-align:right">
     </div>`;
@@ -10157,6 +10196,7 @@ async function deleteMasterPhoto() {
 }
 
 async function saveMaster() {
+  if(!validateWholeRubles('#m-master'))return;
   const academyRun=businessAcademyActive()?_baRun:null;
   if(!businessAcademyValidate('master_schedule'))return;
   const btn = document.getElementById('master-save-btn');
@@ -11751,7 +11791,7 @@ function dzeRenderList() {
         <input type="color" value="${z.color}" oninput="dzeSetColor(${realIdx},this.value)" onclick="event.stopPropagation()">
       </div>
       <span style="font:700 12px/1 var(--font-sans);color:var(--fg-3);min-width:18px;text-align:center;flex-shrink:0">${vi + 1}</span>
-      <input class="dze-zone-price" type="number" min="0" value="${z.price}" placeholder="₽" oninput="_dze.zones[${realIdx}].price=+this.value" onclick="event.stopPropagation()"> <span style="font:400 11px/1 var(--font-sans);color:var(--fg-3)">₽</span>
+          <input class="dze-zone-price" type="number" min="0" step="1" data-rubles="optional" inputmode="numeric" value="${z.price}" placeholder="₽" oninput="_dze.zones[${realIdx}].price=+this.value" onclick="event.stopPropagation()"> <span style="font:400 11px/1 var(--font-sans);color:var(--fg-3)">₽</span>
       <button class="dze-type-btn" onclick="event.stopPropagation();dzeToggleType(${realIdx})">${z.type === 'radius' ? '◎ Радиус' : '⬡ Полигон'}</button>
       <div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0">
         <button class="dze-arrow-btn" ${vi === 0 ? 'disabled' : ''} onclick="event.stopPropagation();dzeMove(${realIdx},-1)" title="Выше">▲</button>
@@ -12054,6 +12094,7 @@ function dzeDrop(targetIdx) {
 // ── save / cancel ─────────────────────────────────────────────────────────────
 
 async function dzeSave() {
+  if(_dze.zones.some(zone=>!zone._deleted&&!isWholeRublePrice(zone.price))){showAdminToast('Стоимость доставки указывается в целых рублях');return;}
   try {
     for (const z of _dze.zones) {
       if (z._deleted && z.id) {
