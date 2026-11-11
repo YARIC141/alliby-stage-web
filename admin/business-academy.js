@@ -218,6 +218,8 @@ function businessAcademyTick(){
   if(run.space!==space){run.space=space;document.documentElement.style.setProperty('--ba-guide-space',space+'px');setTimeout(()=>_addrPickMap?.resize(),100);}
 }
 function businessAcademySaved(kind,storeId,details={},run=null){
+  // Ordinary saves also refresh the setup offer, even when guidance is stopped.
+  businessAcademyRefresh();
   if(!run||_baRun!==run||!businessAcademyActive()||_baRun.id!==kind)return;
   if(!storeId)return;
   if(kind!=='store'&&storeId!==_baRun.storeId)return;
@@ -227,7 +229,7 @@ function businessAcademySaved(kind,storeId,details={},run=null){
   if(kind==='product')_baState.items[storeId]=true;
   if(kind==='employee')_baState.employees[storeId]=true;
   try{const rows=baProgress();rows[kind+':'+storeId]=new Date().toISOString();localStorage.setItem('alliby_business_academy_v1_'+_baRun.user,JSON.stringify(rows));}catch{}
-  businessAcademyTick();businessAcademyRefresh();
+  businessAcademyTick();
 }
 function businessAcademyValidate(kind){
   const checks=kind==='store'?[
