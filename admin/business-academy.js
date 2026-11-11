@@ -8,7 +8,7 @@ const BUSINESS_ACADEMY_LESSONS=[
   {id:'master_schedule',icon:'calendar',title:'Настрой расписание сотрудника',text:'Назначьте мастера, тренера или преподавателя, часы работы и услуги.',directions:['services','sport','education','entertainment']},
   {id:'group',icon:'users',title:'Добавь групповое занятие',text:'Задайте длительность, число мест, дни недели и время начала.',directions:['sport','education','entertainment']},
   {id:'personal',icon:'ba-person',title:'Добавь персональное занятие',text:'Задайте длительность встречи и диапазоны времени для записи.',directions:['sport','education','entertainment']},
-  {id:'rental',icon:'refresh',title:'Добавь позицию для аренды',text:'Настройте количество, стоимость и шаг периода аренды.',directions:['goods','sport','entertainment']},
+  {id:'rental',icon:'refresh',title:'Добавь позицию для аренды',text:'Настройте количество, стоимость и шаг периода аренды.'},
   {id:'subscription',icon:'ba-ticket',title:'Создай абонемент',text:'Выберите товар или услугу, срок действия, скидку и количество использований.'},
   {id:'category',icon:'ba-layers',title:'Создай категорию каталога',text:'Сгруппируйте товары и услуги своего заведения, чтобы клиентам было проще выбирать.'},
   {id:'discount',icon:'ba-percent',title:'Настрой скидку на позицию',text:'Откройте существующую позицию и укажите прежнюю цену выше текущей.'},
@@ -20,6 +20,9 @@ let _baRun=null,_baCheck=null,_baTimer=null;
 const businessAcademyActive=()=>!!_baRun&&_baRun.user===S.session?.user?.id;
 const baEl=id=>document.getElementById(id);
 const baStore=()=>_baState.stores.find(s=>s.id===_baState.selected);
+function baRentalExample(){
+  return ({food:'«Столик на 4 гостей» с оплатой за час. Количество — число столиков, а число мест укажите в названии и описании.',goods:'«Проектор» с оплатой за день. Количество — число доступных проекторов.',services:'«Кабинет специалиста» с оплатой за час. Отдельный кабинет — одна единица аренды.',sport:'«Теннисный корт» с оплатой за час. Количество — число одинаковых кортов.',entertainment:'«VR-комната» с оплатой за час. Отдельная комната — одна единица аренды.',education:'«Аудитория на 10 человек» с оплатой за час. Количество — число аудиторий, а не учеников.'})[baStore()?.direction]||'Столик, оборудование, кабинет, корт или аудитория с оплатой за выбранный период.';
+}
 function baOptionExample(){
   return ({food:'«Ингредиенты»: сыр, соусы; «Молоко»: обычное или растительное.',goods:'«Дополнительно»: подарочная упаковка или сборка.',services:'«Дополнительные услуги»: уходовая маска или выезд специалиста.',sport:'«Инвентарь»: коврик, ракетка или полотенце.',entertainment:'«Дополнительно»: контроллер или набор для праздника.',education:'«Материалы»: рабочая тетрадь или запись занятия.'})[baStore()?.direction]||'Ингредиенты для еды, упаковка для товаров, дополнительные услуги или материалы.';
 }
@@ -125,7 +128,7 @@ function businessAcademyRender(){
   BUSINESS_ACADEMY_LESSONS.forEach((lesson,i)=>{
     const button=root.querySelector(`[data-ba-lesson="${lesson.id}"]`),blocked=baBlocked(lesson),disabled=!known||!!blocked||(lesson.id==='store'&&!!baStore()),done=known&&baDone(lesson.id),badge=button.querySelector('.ba-number');
     button.hidden=false;
-    button.querySelector('.ba-task-description').textContent=lesson.id==='options'?lesson.text+' Например: '+baOptionExample():lesson.text;
+    button.querySelector('.ba-task-description').textContent=lesson.text+(lesson.id==='options'?' Например: '+baOptionExample():lesson.id==='rental'?' Например: '+baRentalExample():'');
     button.disabled=disabled;badge.classList.toggle('done',!!done);
     const condition=button.querySelector('.ba-task-condition'),status=button.querySelector('.ba-task-status');
     condition.textContent=known?blocked:'';condition.hidden=!condition.textContent;
@@ -233,13 +236,13 @@ function baSteps(){
     const training=['group','personal'].includes(run.id),special=run.id!=='product';
     const steps=[
       baField('mmi-store','Обязательно: выберите своё заведение. Позиция попадёт именно в его каталог.'),
-      baField('mmi-name','Обязательно: напишите понятное название товара или услуги.'),
+      baField('mmi-name',run.id==='rental'?'Укажите понятное название позиции аренды. Например: '+baRentalExample():'Обязательно: напишите понятное название товара или услуги.'),
       baField('mmi-item-type',special?`Обязательно: выберите тип «${run.id==='rental'?'Аренда':'Услуга'}». Поля ниже изменятся в зависимости от типа.`:'Обязательно: выберите тип — товар, услуга или аренда. Поля ниже изменятся в зависимости от типа.',()=>!!baEl('mmi-item-type').value&&(!special||baEl('mmi-item-type').value===(run.id==='rental'?'rental':'service'))),
       baField('mmi-price','Обязательно: укажите цену в целых рублях — число от нуля. Нулевая цена допустима.',()=>isWholeRublePrice(baEl('mmi-price').value)),
     ];
     if(baEl('mmi-item-type').value==='service')steps.push(baField('mmi-duration','Укажите длительность в минутах: по ней рассчитывается конец записи. Для записи нужно целое число больше нуля.',()=>Number.isInteger(Number(baEl('mmi-duration').value))&&Number(baEl('mmi-duration').value)>0,special));
     if(baEl('mmi-item-type').value==='rental'){
-      steps.push(baField('mmi-total-qty','Укажите общее количество единиц аренды: целое число от одного.',()=>Number.isInteger(Number(baEl('mmi-total-qty').value))&&Number(baEl('mmi-total-qty').value)>=1,special));
+      steps.push(baField('mmi-total-qty','Укажите общее количество единиц аренды: целое число от одного. Для одного столика, кабинета или корта укажите 1; это не число гостей или участников.',()=>Number.isInteger(Number(baEl('mmi-total-qty').value))&&Number(baEl('mmi-total-qty').value)>=1,special));
       if(run.id==='rental')steps.push(
         baField('mmi-avail-qty','Укажите доступный остаток от нуля до общего количества. Пустое поле при создании означает весь остаток.',()=>baEl('mmi-avail-qty').value===''||(Number.isInteger(Number(baEl('mmi-avail-qty').value))&&Number(baEl('mmi-avail-qty').value)>=0&&Number(baEl('mmi-avail-qty').value)<=Number(baEl('mmi-total-qty').value))),
         baField('mmi-rent-step','Задайте минимальный шаг периода аренды: целое число от одного.',()=>Number.isInteger(Number(baEl('mmi-rent-step').value))&&Number(baEl('mmi-rent-step').value)>=1),
