@@ -28,7 +28,10 @@ function baDone(id){
 const baItemLesson=id=>['product','service','group','personal','rental'].includes(id);
 function baBlocked(lesson){
   const store=baStore();if(!store&&lesson.id!=='store')return 'Сначала создайте заведение';
-  if(store&&lesson.directions&&!lesson.directions.includes(store.direction))return 'Урок недоступен для этого направления';
+  if(store&&lesson.directions&&!lesson.directions.includes(store.direction)){
+    const names={services:'услуги',sport:'спорт',education:'образование',entertainment:'развлечения',goods:'товары'};
+    return 'Выберите заведение направления: '+lesson.directions.map(id=>names[id]).join(', ')+'.';
+  }
   if(lesson.id==='master_schedule'){
     if(_baState.employees[store.id]!==true)return 'Сначала добавьте сотрудника';
     if(!_baState.features?.[store.id]?.bookable)return 'Сначала добавьте услугу или занятие с длительностью';
@@ -108,7 +111,7 @@ function businessAcademyRender(){
   select.value=_baState.selected;select.hidden=!known||!_baState.stores.length;baEl('ba-store-label').hidden=select.hidden;
   BUSINESS_ACADEMY_LESSONS.forEach((lesson,i)=>{
     const button=root.querySelector(`[data-ba-lesson="${lesson.id}"]`),blocked=baBlocked(lesson),disabled=!known||!!blocked||(lesson.id==='store'&&!!baStore()),done=known&&baDone(lesson.id),badge=button.querySelector('.ba-number');
-    button.hidden=!!(baStore()&&lesson.directions&&!lesson.directions.includes(baStore().direction));
+    button.hidden=false;
     button.disabled=disabled;badge.textContent=done?'✓':i+1;badge.classList.toggle('done',!!done);
     button.querySelector('.ba-task-status').textContent=done?(lesson.id==='store'?'Заведение уже создано':'Уже настроено · можно посмотреть'):blocked||(!known?'Проверяем данные…':'Начать с подсказками');
   });
