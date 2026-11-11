@@ -597,7 +597,7 @@ ol.hlp-steps>li ul{margin:6px 0 0}
 @keyframes tourIn{from{opacity:0;transform:translateX(var(--tour-dx,16px))}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#tour,.tour-card,.tour-dot,#tour-spot{transition:none}.tour-body.anim{animation:none}}
 </style>
-<link rel="stylesheet" href="business-academy.css?v=129526011704129">
+<link rel="stylesheet" href="business-academy.css?v=259606200114482">
 <script>try{document.documentElement.classList.toggle('dark',localStorage.getItem('alliby_theme')!=='light');(function(){var bg=localStorage.getItem('alliby_bg')||'fluid';if(bg==='fluid')document.documentElement.classList.add('bg-fluid');if(bg==='custom'){var i=localStorage.getItem('alliby_bg_img');if(i){document.documentElement.classList.add('bg-custom');document.documentElement.style.setProperty('--bg-custom-img','url("'+i+'")')}}if(localStorage.getItem('alliby_ornament')!=='1')document.documentElement.classList.add('no-ornament')})();}catch(e){}</script>
 <style id="pwd-reveal-css">
 .pwd-wrap{position:relative;display:block}
@@ -3482,7 +3482,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 </div>
 
 <div id="ba-guide" hidden><section id="ba-guide-card" aria-label="Подсказка Академии Business"><header><h3 id="ba-guide-title"></h3><button id="ba-guide-exit" onclick="businessAcademyExit()">Остановить</button></header><p id="ba-guide-text" aria-live="polite"></p><button class="btn btn-p" id="ba-guide-next" onclick="businessAcademyNext()">Далее</button></section></div>
-<script src="business-academy.js?v=129526011704129"></script>
+<script src="business-academy.js?v=259606200114482"></script>
 <script>
 // ─── FATAL ERROR BANNER ───
 // На iPhone нет доступа к консоли без Mac — единственный способ узнать,
@@ -7351,7 +7351,7 @@ function openMenuItemModal(item) {
   document.getElementById('mmi-carbs').value      = item?.carbs     ?? '';
   document.getElementById('mmi-item-type').value  = item?.item_type || 'product';
   document.getElementById('mmi-store').value    = item?.store_id    || '';
-  if(!item&&businessAcademyActive()&&_baRun.id==='product')document.getElementById('mmi-store').value=_baRun.storeId;
+  if(!item&&businessAcademyActive()&&baItemLesson(_baRun.id))document.getElementById('mmi-store').value=_baRun.storeId;
   onMmiItemTypeChange();
   document.getElementById('mmi-rent-unit').value   = item?.rent_period_unit  || 'hour';
   document.getElementById('mmi-rent-step').value   = item?.rent_period_step  || '';
@@ -8070,7 +8070,7 @@ async function saveMenuItem() {
     }
     clearTimeout(timer);
     closeModal('m-mi'); restore(); loadMenuItems();
-    businessAcademySaved('product',body.store_id,{},academyRun);
+    businessAcademySaved('product',body.store_id,body,academyRun);
   } catch(e) { clearTimeout(timer); restore(); if (e.name !== 'AbortError') alert('Ошибка: ' + (e.message || JSON.stringify(e))); }
 }
 
@@ -9392,6 +9392,7 @@ function openSubModal(sub) {
   document.getElementById('msub-title').textContent = sub ? 'Редактировать абонемент' : 'Новый абонемент';
   document.getElementById('msub-id').value          = sub?.id            || '';
   document.getElementById('msub-store').value       = sub?.store_id      || '';
+  if(!sub&&businessAcademyActive()&&_baRun.id==='subscription')document.getElementById('msub-store').value=_baRun.storeId;
   document.getElementById('msub-name').value        = sub?.name          || '';
   document.getElementById('msub-price').value       = sub?.price         || '';
   document.getElementById('msub-days').value        = sub?.duration_days || '';
@@ -9419,7 +9420,7 @@ function openSubModal(sub) {
 
   const preselectedItem = sub?.coverage_rules?.item_ids?.[0] || '';
   openModal('m-sub');
-  loadSubModalItems(sub?.store_id || '', preselectedItem);
+  loadSubModalItems(document.getElementById('msub-store').value, preselectedItem);
 }
 
 async function onSubStoreChange() {
@@ -9439,6 +9440,8 @@ async function loadSubModalItems(storeId, selectedId) {
 
 let _msubOrigPrice = null;
 async function saveSubscription() {
+  const academyRun=businessAcademyActive()?_baRun:null;
+  if(!businessAcademyValidate('subscription'))return;
   const id       = document.getElementById('msub-id').value;
   const storeId  = document.getElementById('msub-store').value;
   const name     = document.getElementById('msub-name').value.trim();
@@ -9504,6 +9507,7 @@ async function saveSubscription() {
       await req('/rest/v1/subscriptions', { method:'POST', body: JSON.stringify(body) });
     }
     restore(); closeModal('m-sub'); loadSubscriptions();
+    businessAcademySaved('subscription',storeId,body,academyRun);
   } catch(e) { restore(); alert('Ошибка: ' + (e.message || JSON.stringify(e))); }
 }
 
@@ -9982,6 +9986,7 @@ function onMasterToggle(checked) {
 }
 
 async function openMasterModal(empId) {
+  _masterData={empId,items:[]};
   const emp = (S._cachedEmps || []).find(e => e.id === empId) || {};
   const storeDir = (S.stores || []).find(s => s.id === emp.employee_store_id)?.direction;
   const { nom: roleNom, gen: roleGen, soj: roleSoj } = _roleWords(storeDir);
@@ -10011,7 +10016,7 @@ async function openMasterModal(empId) {
     const profile = profiles?.[0];
     const storeId = profile?.employee_store_id;
     const menuItems = storeId
-      ? await req(`/rest/v1/menu_items?store_id=eq.${storeId}&order=name.asc&select=id,name,duration_minutes,price`)
+      ? await req(`/rest/v1/menu_items?store_id=eq.${storeId}&order=name.asc&select=id,name,item_type,duration_minutes,price`)
       : [];
     _masterData = { empId, items: menuItems };
 
@@ -10131,6 +10136,8 @@ async function deleteMasterPhoto() {
 }
 
 async function saveMaster() {
+  const academyRun=businessAcademyActive()?_baRun:null;
+  if(!businessAcademyValidate('master_schedule'))return;
   const btn = document.getElementById('master-save-btn');
   const restore = btnLoad(btn);
   const errEl = document.getElementById('master-err');
@@ -10180,6 +10187,8 @@ async function saveMaster() {
     closeModal('m-master');
     showAdminToast(isMaster ? 'Настройки мастера сохранены' : 'Роль мастера снята');
     await loadEmployees();
+    const storeId=(S._cachedEmps||[]).find(e=>e.id===empId)?.employee_store_id;
+    businessAcademySaved('master_schedule',storeId,{},academyRun);
   } catch(e) {
     restore();
     errEl.textContent = e.error || e.message || 'Ошибка сохранения';
@@ -12432,7 +12441,7 @@ window._pwaOnReady = _pwaSchedule;
     <input type="hidden" id="master-emp-id">
 
     <!-- Toggle is_master -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line-soft);margin-bottom:14px">
+    <div id="master-role-setting" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line-soft);margin-bottom:14px">
       <label id="master-toggle-label" for="master-toggle" style="font:600 14px/1 var(--font-sans);cursor:pointer">Является мастером</label>
       <label class="tog">
         <input type="checkbox" id="master-toggle" onchange="onMasterToggle(this.checked)">

@@ -7,6 +7,7 @@
 .ba-tasks{display:grid;gap:12px;margin:20px 0}
 .ba-task{display:flex;align-items:center;gap:14px;padding:16px;text-align:left;width:100%;border:1px solid var(--line-soft);border-radius:var(--r-3);background:var(--glass);color:var(--fg);font:inherit;cursor:pointer;touch-action:manipulation}
 .ba-task:disabled{opacity:.5;cursor:default}
+.ba-task[hidden]{display:none}
 .ba-task>span:last-child{flex:1;min-width:0}
 .ba-task strong,.ba-task small{display:block}
 .ba-task strong{font:600 15px/1.4 var(--font-sans)}
