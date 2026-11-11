@@ -1,6 +1,6 @@
 importScripts('map-cache.js');
-// v192863081725262
-const APP_CACHE  = 'aliby-admin-app-v192863081725262';
+// v129526011704129
+const APP_CACHE  = 'aliby-admin-app-v129526011704129';
 const ACADEMY_ASSETS = ['business-academy.js','business-academy.css'];
 const TILE_CACHE = 'aliby-admin-tiles-v2';
 const TILE_PATH  = '/functions/v1/vector-tiles/';
@@ -123,7 +123,7 @@ self.addEventListener('install', e => {
 // cache-first для файлов из списка; при любой проблеме с кэшем — обычная сеть
 self.addEventListener('fetch', e => {
   if(ACADEMY_ASSETS.some(file=>new URL(file,self.registration.scope).href===e.request.url.split('?')[0])){
-    e.respondWith(fetchTimeout(e.request,5000).then(async response=>{
+    e.respondWith(fetchTimeout(new Request(e.request,{cache:'no-cache'}),5000).then(async response=>{
       if(!response.ok)throw new Error('academy-asset-unavailable');
       const cache=await withTimeout(caches.open(APP_CACHE));await withTimeout(cache.put(e.request,response.clone()));return response;
     }).catch(async()=>await withTimeout(caches.match(e.request,{ignoreSearch:true})).catch(()=>null)||Response.error()));
