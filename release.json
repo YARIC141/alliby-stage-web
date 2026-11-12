@@ -1,8 +1,8 @@
 {
-  "source_commit": "f0bca644f03bf007ecb4934afd783136a0de3883",
+  "source_commit": "56f466bf79c9d03b1c1fa153ffad5057346c9f43",
   "apps": {
     "client": "75797875484128",
-    "admin": "184301973034800",
+    "admin": "220554299381729",
     "carry": "143293120655415",
     "tamagotchi": "228070407469103",
     "site": "151244858033746"

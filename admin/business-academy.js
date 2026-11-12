@@ -1,4 +1,4 @@
-/* Guided setup of the owner's real business. No alternate records or write API. */
+/* Guided setup of the owner's real business; Academy bonuses are verified by the server. */
 const BUSINESS_ACADEMY_LESSONS=[
   {id:'store',icon:'store',title:'Создай своё заведение',text:'Проверьте статус продавца, укажите название, направление и адрес своего заведения.'},
   {id:'product',icon:'pkg',title:'Добавь первую позицию',text:'Создайте настоящий товар, услугу или аренду: выберите заведение, название, тип и цену.'},
@@ -16,7 +16,7 @@ const BUSINESS_ACADEMY_LESSONS=[
   {id:'options',icon:'ba-sliders',title:'Настрой группы опций',text:'Настройте ингредиенты или дополнительные опции: один либо несколько вариантов, обязательность выбора и доплату.'},
 ];
 let _baState={user:null,known:false,stores:[],items:{},employees:{},features:{},selected:'',error:''};
-let _baRun=null,_baCheck=null,_baTimer=null;
+let _baRun=null,_baCheck=null,_baTimer=null,_baReward=null,_baRewardBusy=false;
 const businessAcademyActive=()=>!!_baRun&&_baRun.user===S.session?.user?.id;
 const baEl=id=>document.getElementById(id);
 const baStore=()=>_baState.stores.find(s=>s.id===_baState.selected);
@@ -32,7 +32,7 @@ function baDone(id){
   if(!store)return false;
   if(id==='product')return _baState.items[store.id]===true;
   if(id==='employee')return _baState.employees[store.id]===true;
-  if(id==='information')return !!(store.phone&&store.working_hours)||!!baProgress()['information:'+store.id];
+  if(id==='information')return !!(store.phone?.trim()&&store.working_hours?.trim());
   return _baState.features?.[store.id]?.[id]===true;
 }
 const baItemLesson=id=>['product','service','group','personal','rental'].includes(id);
@@ -80,6 +80,7 @@ async function baFeatures(storeId){
   return {service,bookable,group,personal,rental,subscription,master_schedule,category,discount:discountRows.some(row=>Number(row.old_price)>Number(row.price)),price_rules,options,hasEmployees:employees.length>0};
 }
 function businessAcademyReset(){
+  _baReward=null;_baRewardBusy=false;
   businessAcademyStop();_baState={user:null,known:false,stores:[],items:{},employees:{},features:{},selected:'',error:''};_baCheck=null;
   baEl('business-academy-offer')?.remove();
 }
@@ -105,6 +106,10 @@ async function businessAcademyRefresh(){
         const features=await baFeatures(selected);
         if(S.session?.user?.id===user&&_baCheck===request){_baState.features[selected]=features;_baState.employees[selected]=features.hasEmployees;}
       }catch{if(S.session?.user?.id===user&&_baCheck===request)_baState.error='Не удалось проверить настройки уроков. Повторите проверку перед началом.';}
+      try{
+        const reward=await _reqNet('/rest/v1/rpc/business_academy_reward_status',{method:'POST',body:JSON.stringify({p_store_id:selected||null})});
+        if(S.session?.user?.id===user&&_baCheck===request)_baReward={user,store:selected,data:reward};
+      }catch{if(S.session?.user?.id===user&&_baCheck===request)_baReward={user,store:selected,error:true};}
     }catch(e){if(S.session?.user?.id===user&&_baCheck===request)_baState.error='Не удалось проверить данные. Проверьте соединение с сервером и повторите.';}
     finally{
       if(_baCheck===request){_baCheck=null;businessAcademyRender();businessAcademyOffer(_curScreen);if(request.storeId&&request.storeId!==_baState.selected)setTimeout(businessAcademyRefresh,0);}
@@ -116,12 +121,19 @@ function businessAcademyRender(){
   const owner=S.session?.user?.id&&S.profile&&S.profile.role!=='employee',known=owner&&_baState.user===S.session.user.id&&_baState.known;
   // Keep buttons attached while a background check completes during a finger press.
   if(!root.querySelector('.ba-tasks'))root.innerHTML=`<p class="ba-intro">Настройте своё заведение шаг за шагом. Действия выполняются в обычных формах Business и сохраняют реальные данные. Ничего не создаётся автоматически.</p>
+    <section class="ba-reward" id="ba-reward"><strong>Месяц подписки за ключевые уроки</strong><p id="ba-reward-text">Проверяем условия…</p><div id="ba-reward-progress"></div><button type="button" class="btn btn-p" id="ba-reward-claim" onclick="businessAcademyClaimReward()" disabled>Получить бесплатный месяц</button><small>Для одного заведения · один раз на аккаунт · без карты и нового автосписания</small></section>
     <p class="ba-note" id="ba-status"></p><button class="btn" id="ba-retry" onclick="loadBusinessAcademy()" hidden>Повторить проверку</button>
     <label class="ba-store-label" id="ba-store-label" for="ba-store-select">Заведение для уроков</label><select id="ba-store-select" onchange="businessAcademySelect(this.value)"></select>
     <div class="ba-tasks">${BUSINESS_ACADEMY_LESSONS.map(l=>`<button type="button" class="ba-task" data-ba-lesson="${l.id}" onclick="businessAcademyStart(this.dataset.baLesson)"><span class="ba-number" aria-hidden="true">${svgIco(l.icon,24)}</span><span><small class="ba-task-condition" hidden></small><strong>${esc(l.title)}</strong><small class="ba-task-description">${esc(l.text)}</small><small class="ba-task-status"></small></span></button>`).join('')}</div>
     <p class="ba-note">Можно остановить подсказки в любой момент. Уже сохранённые товары, сотрудники и сведения останутся в вашем аккаунте.</p>`;
   baEl('ba-status').textContent=S.profile?.role==='employee'?'Академия настройки доступна владельцу заведения.':_baState.error||(!known?'Проверяем заведения и каталог…':'Обязательные поля отмечены звёздочкой. Подсказки объяснят, что в них указать.');
   baEl('ba-retry').hidden=!_baState.error;
+  const reward=_baReward?.user===S.session?.user?.id&&_baReward.store===_baState.selected?_baReward.data:null;
+  baEl('ba-reward').hidden=!owner;
+  const keys=[['store','Заведение'],['information','Телефон и часы работы'],['product','Первая позиция']];
+  baEl('ba-reward-progress').textContent=keys.map(([id,title])=>(reward?.lessons?.[id]?'✓ ':'○ ')+title).join(' · ');
+  baEl('ba-reward-text').textContent=reward?.claimed?`Бонус получен. Подписка до ${new Date(reward.end_date+'T12:00:00').toLocaleDateString('ru-RU')}.`:_baReward?.error?'Не удалось проверить бонус. Повторите загрузку Академии.':reward?.eligible?'Ключевые уроки выполнены. Можно получить 30 дней подписки для выбранного заведения.':'Создайте заведение, заполните телефон и часы работы, добавьте первую позицию. Уже настроенные данные тоже учитываются.';
+  const claim=baEl('ba-reward-claim');claim.disabled=_baRewardBusy||!reward?.eligible;claim.textContent=_baRewardBusy?'Получаем бонус…':reward?.claimed?'Бонус уже получен':'Получить бесплатный месяц';
   const select=baEl('ba-store-select'),options=_baState.stores.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
   if(select.innerHTML!==options)select.innerHTML=options;
   select.value=_baState.selected;select.hidden=!known||!_baState.stores.length;baEl('ba-store-label').hidden=select.hidden;
@@ -135,6 +147,17 @@ function businessAcademyRender(){
     status.textContent=done?(lesson.id==='store'?'Заведение уже создано':'Уже настроено · можно посмотреть'):!known?'Проверяем данные…':blocked?'':'Начать с подсказками';
     status.hidden=!status.textContent;
   });
+}
+async function businessAcademyClaimReward(){
+  const user=S.session?.user?.id,store=baStore();if(!user||!store||_baRewardBusy)return;
+  _baRewardBusy=true;businessAcademyRender();
+  try{
+    const reward=await _reqNet('/rest/v1/rpc/claim_business_academy_reward',{method:'POST',body:JSON.stringify({p_store_id:store.id})});
+    if(S.session?.user?.id!==user)return;
+    _baReward={user,store:store.id,data:reward};await _refreshPaidStores();
+    showAdminToast('Бонус получен. Теперь можно включить онлайн-оплату в настройках заведения.');
+  }catch(e){if(S.session?.user?.id===user)showAdminToast(e.message||'Не удалось получить бонус. Проверьте соединение.');}
+  finally{if(S.session?.user?.id===user){_baRewardBusy=false;businessAcademyRender();}}
 }
 async function loadBusinessAcademy(){
   businessAcademyRender();const user=S.session?.user?.id;if(!user)return;
@@ -279,8 +302,8 @@ function baSteps(){
   ];
   if(run.id==='information')return [
     baField('ms-name','Проверьте обязательное название заведения. Остальные сведения ниже помогают клиентам.'),
-    baField('ms-phone','Добавьте рабочий номер заведения, по которому клиент сможет связаться с вами. Это поле не обязательно для сохранения.',()=>true,false),
-    baField('ms-hours','Укажите действительные часы работы, например «Пн–Пт 09:00–20:00». Это справочная информация; расписание записей настраивается отдельно.',()=>true,false),
+    baField('ms-phone','Для ключевого урока укажите рабочий телефон заведения.',()=>!!baEl('ms-phone').value.trim()),
+    baField('ms-hours','Для ключевого урока укажите часы работы, например «Пн–Пт 09:00–20:00».',()=>!!baEl('ms-hours').value.trim()),
     {selector:'button[onclick="openStoreAddrPicker()"]',text:'Проверьте адрес и точку на карте. Фото, соцсети и другие сведения можно заполнить в этой же форме.',valid:()=>true,required:false},
   ];
   return [
