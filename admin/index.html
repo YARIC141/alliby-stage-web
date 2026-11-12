@@ -597,7 +597,7 @@ ol.hlp-steps>li ul{margin:6px 0 0}
 @keyframes tourIn{from{opacity:0;transform:translateX(var(--tour-dx,16px))}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#tour,.tour-card,.tour-dot,#tour-spot{transition:none}.tour-body.anim{animation:none}}
 </style>
-<link rel="stylesheet" href="business-academy.css?v=220554299381729">
+<link rel="stylesheet" href="business-academy.css?v=38835380594354">
 <script>try{document.documentElement.classList.toggle('dark',localStorage.getItem('alliby_theme')!=='light');(function(){var bg=localStorage.getItem('alliby_bg')||'fluid';if(bg==='fluid')document.documentElement.classList.add('bg-fluid');if(bg==='custom'){var i=localStorage.getItem('alliby_bg_img');if(i){document.documentElement.classList.add('bg-custom');document.documentElement.style.setProperty('--bg-custom-img','url("'+i+'")')}}if(localStorage.getItem('alliby_ornament')!=='1')document.documentElement.classList.add('no-ornament')})();}catch(e){}</script>
 <style id="pwd-reveal-css">
 .pwd-wrap{position:relative;display:block}
@@ -1265,6 +1265,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
         <select id="bk-store-filter" onchange="onBkTabStoreChange()">
           <option value="">Выберите заведение</option>
         </select>
+        <button class="btn btn-p" id="business-guest-booking-btn" onclick="openGuestBooking()">Записать клиента</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;margin-bottom:12px">
         <button class="btn btn-sm" onclick="bkTabPrevMonth()">←</button>
@@ -1616,7 +1617,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
           <li>Вы перейдёте на защищённую страницу оплаты Т-Банка.</li>
         </ol>
         <div class="hlp-note"><b>Списание 1&nbsp;₽</b>При активации пробного периода списывается 1&nbsp;₽ для проверки карты — сумма возвращается автоматически. Первый месяц бесплатный, далее подписка продлевается автоматически.</div>
-        <div class="hlp-note"><b>Месяц за Академию Alliby</b>Создайте заведение, заполните телефон и часы работы, добавьте первую позицию. В Академии появится кнопка получения 30 дней подписки для этого заведения — один раз на аккаунт, без привязки карты и нового автоплатежа. Действующая подписка продлевается на 30 дней.</div>
+        <div class="hlp-note"><b>Месяц за Академию Alliby</b>Подтвердите ИНН продавца, создайте заведение, заполните телефон и часы работы, добавьте первую позицию. В Академии появится кнопка получения 30 дней подписки для этого заведения — один раз на ИНН, без привязки карты и нового автоплатежа. Действующая подписка продлевается на 30 дней.</div>
 
         <div class="hlp-sub">4.3. Платные тарифы</div>
         <p>Если пробный период уже использован, нажмите <b class="k">Выбрать тариф →</b>. Доступны периоды: месяц, 3 месяца, 6 месяцев и год. Базовая стоимость — <b>1&nbsp;600&nbsp;₽ в месяц</b> за каждое заведение. Если у вас есть промокод, введите его и нажмите <b class="k">Применить</b> — скидка в рублях вычтется из суммы. Отметьте согласие с условиями и нажмите кнопку оплаты.</p>
@@ -3479,7 +3480,26 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 </div>
 
 <div id="ba-guide" hidden><section id="ba-guide-card" aria-label="Подсказка Академии Business"><header><h3 id="ba-guide-title"></h3><button id="ba-guide-exit" onclick="businessAcademyExit()">Остановить</button></header><p id="ba-guide-text" aria-live="polite"></p><button class="btn btn-p" id="ba-guide-next" onclick="businessAcademyNext()">Далее</button></section></div>
-<script src="business-academy.js?v=220554299381729"></script>
+<div class="overlay" id="m-guest-booking">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hd"><h3>Записать клиента</h3><button class="modal-x" onclick="closeModal('m-guest-booking')">✕</button></div>
+    <form id="guest-booking-form" onsubmit="saveGuestBooking(event)">
+      <div style="display:grid;gap:12px">
+        <p class="txt-muted" style="font-size:13px;margin:0">Для клиента без аккаунта Alliby. Запись сразу подтверждается, оплата — отдельно. Уведомления в приложении ему не отправляются.</p>
+        <label class="lbl">Услуга или тренировка *<select id="gb-item" required onchange="guestBookingItemChanged()"></select></label>
+        <label class="lbl">Сотрудник<select id="gb-master" onchange="guestBookingLoadSlots()"></select></label>
+        <label class="lbl">Дата *<input id="gb-date" type="date" required onchange="guestBookingLoadSlots()"></label>
+        <label class="lbl">Свободное время *<select id="gb-slot" required></select></label>
+        <label class="lbl">Имя клиента *<input id="gb-name" required maxlength="120" autocomplete="name"></label>
+        <label class="lbl">Телефон *<input id="gb-phone" type="tel" required maxlength="24" autocomplete="tel" placeholder="+7 900 000-00-00"></label>
+        <div id="gb-error" role="alert" style="font-size:13px;color:var(--err)"></div>
+      </div>
+      <div class="modal-ft"><button type="button" class="btn" onclick="closeModal('m-guest-booking')">Отмена</button><button id="gb-save" class="btn btn-p" type="submit" disabled>Записать</button></div>
+    </form>
+  </div>
+</div>
+<script src="business-academy.js?v=38835380594354"></script>
+<script src="guest-bookings.js?v=38835380594354"></script>
 <script>
 // ─── FATAL ERROR BANNER ───
 // На iPhone нет доступа к консоли без Mac — единственный способ узнать,
@@ -9178,7 +9198,7 @@ async function renderBkTabDayView(dateStr) {
     // «подобрать и подтвердить время» и «в группу» для донабора.
     const pendingInFiltered = filtered.filter(b => b.status === 'pending_approval');
     const flatList = filtered.filter(b => b.status !== 'pending_approval');
-    pendingInFiltered.forEach(b => { _bkCache[b.id] = { b, p: pm[b.user_id] || null, m: null }; });
+    pendingInFiltered.forEach(b => { _bkCache[b.id] = { b, p: bookingClient(b,pm), m: null }; });
     const pendingHtml = pendingInFiltered.length
       ? _renderPendingTrainingGroups(pendingInFiltered, bks.filter(x => x.status === 'booked'), pm, dateStr)
       : '';
@@ -9194,7 +9214,7 @@ async function renderBkTabDayView(dateStr) {
       const isPending = b.status === 'pending_approval';
       const ts = isPending ? (b.preferred_start||'').slice(0,5) : (b.slot_start||'').slice(0,5);
       const te = isPending ? (b.preferred_end||'').slice(0,5)   : (b.slot_end||'').slice(0,5);
-      const p = pm[b.user_id] || null;
+      const p = bookingClient(b,pm);
       const m = b.master_id ? (pm[b.master_id] || null) : null;
       _bkCache[b.id] = { b, p, m };
       const st   = ST[b.status]          || { lbl: b.status,         cls: 'b-pending' };
@@ -11302,7 +11322,7 @@ function openBookingDetail(bookingId) {
       ${p ? `
         ${p.full_name ? `<div style="font:600 14px/1.3 var(--font-sans);margin-bottom:5px">${esc(p.full_name)}</div>` : ''}
         ${p.phone ? `<div style="font:600 16px/1 var(--font-sans);margin-bottom:4px">${esc(p.phone)}</div>` : ''}
-        <div style="font-size:11px;color:var(--fg-4);font-family:var(--font-sans)">${esc(b.user_id||'')}</div>
+        <div style="font-size:11px;color:var(--fg-4);font-family:var(--font-sans)">${b.user_id?esc(b.user_id):'Без аккаунта Alliby'}</div>
       ` : '<div style="color:var(--fg-4);font-size:13px">Нет данных о клиенте</div>'}
     </div>
     <div style="padding-top:10px;border-top:1px solid var(--line-soft)">
@@ -11354,7 +11374,7 @@ async function renderDayBookings(dateStr) {
     // Заявки на персональную тренировку без подтверждённого времени группируем
     // по (тренер, позиция) — тренер подбирает и подтверждает общее время сразу
     // для всех, кто откликнулся на этот слот в этот день.
-    pendingBks.forEach(b => { _bkCache[b.id] = { b, p: profilesMap[b.user_id] || null, m: null }; });
+    pendingBks.forEach(b => { _bkCache[b.id] = { b, p: bookingClient(b,profilesMap), m: null }; });
     const bookedBks = regularBks.filter(b => b.status === 'booked');
     const pendingHtml = _renderPendingTrainingGroups(pendingBks, bookedBks, profilesMap, dateStr);
 
@@ -11366,7 +11386,7 @@ async function renderDayBookings(dateStr) {
       if (group.length > 1) return _renderTrainingGroupCard(group, dateStr, profilesMap, roleNom);
       const b = group[0];
       const ts = (b.slot_start||'').slice(0,5), te = (b.slot_end||'').slice(0,5);
-      const p = profilesMap[b.user_id] || null;
+      const p = bookingClient(b,profilesMap);
       const m = b.master_id ? (profilesMap[b.master_id] || null) : null;
       _bkCache[b.id] = { b, p, m };
       const st  = ST[b.status]          || { lbl: b.status,         cls: 'b-pending' };
@@ -11420,7 +11440,7 @@ function _renderTrainingGroupCard(group, dateStr, profilesMap, roleNom) {
   const key = `${b0.master_id}|${b0.menu_item_id}|${b0.slot_date}|${b0.slot_start}`;
   _bkGroupCache[key] = group.map(b => b.id);
   group.forEach(b => {
-    _bkCache[b.id] = { b, p: profilesMap[b.user_id] || null, m: b.master_id ? (profilesMap[b.master_id] || null) : null };
+    _bkCache[b.id] = { b, p: bookingClient(b,profilesMap), m: b.master_id ? (profilesMap[b.master_id] || null) : null };
   });
   const ts = (b0.slot_start||'').slice(0,5), te = (b0.slot_end||'').slice(0,5);
   const m = b0.master_id ? (profilesMap[b0.master_id] || null) : null;
@@ -11553,7 +11573,7 @@ function _renderPendingTrainingGroups(pendingBks, bookedBks, profilesMap, dateSt
     const itemName = group[0].menu_items?.name || '—';
     const maxGroup = group[0].menu_items?.max_group_size || 1;
     const rows = group.map(b => {
-      const p = profilesMap[b.user_id] || null;
+      const p = bookingClient(b,profilesMap);
       const ps = (b.preferred_start || '').slice(0,5), pe = (b.preferred_end || '').slice(0,5);
       const match = bookedBks.find(x => x.master_id === b.master_id && x.menu_item_id === b.menu_item_id
         && x.slot_start >= b.preferred_start && x.slot_end <= b.preferred_end);
