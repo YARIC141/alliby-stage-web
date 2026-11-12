@@ -7,6 +7,9 @@
 .ba-intro{max-width:760px;font-size:15px;line-height:1.6;color:var(--fg-2)}
 .ba-note{font-size:13px;line-height:1.5;color:var(--fg-3);margin:12px 0}
 .ba-reward{border:1px solid var(--accent);border-radius:var(--r-3);padding:16px;margin:16px 0;max-width:760px;background:var(--glass)}
+#business-academy-content [hidden]{display:none!important}
+#ba-reward-claim:disabled{opacity:.5;cursor:default;pointer-events:none}
+#ba-reward-claim{max-width:100%;white-space:normal}
 .ba-reward strong{display:block;font-size:16px}.ba-reward p,.ba-reward small{display:block;font-size:13px;line-height:1.5;color:var(--fg-2)}
 #ba-reward-progress{font-size:13px;line-height:1.7;margin:10px 0;overflow-wrap:anywhere}.ba-reward small{margin-top:10px;color:var(--fg-3)}
 .ba-store-label{display:block;margin:16px 0 6px;font-size:13px;color:var(--fg-2)}

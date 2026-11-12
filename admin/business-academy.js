@@ -132,8 +132,9 @@ function businessAcademyRender(){
   baEl('ba-reward').hidden=!owner;
   const keys=[['store','Заведение'],['information','Телефон и часы работы'],['product','Первая позиция']];
   baEl('ba-reward-progress').textContent=keys.map(([id,title])=>(reward?.lessons?.[id]?'✓ ':'○ ')+title).join(' · ');
-  baEl('ba-reward-text').textContent=reward?.claimed_elsewhere?'Бесплатный месяц на этот ИНН уже получен в другом аккаунте.':reward?.claimed?`Бонус получен. Подписка до ${new Date(reward.end_date+'T12:00:00').toLocaleDateString('ru-RU')}.`:_baReward?.error?'Не удалось проверить бонус. Повторите загрузку Академии.':reward&& !reward.inn_verified?'Подтвердите ИНН в профиле продавца, затем выполните ключевые уроки.':reward?.eligible?'Ключевые уроки выполнены. Можно получить 30 дней подписки для выбранного заведения.':'Создайте заведение, заполните телефон и часы работы, добавьте первую позицию. Уже настроенные данные тоже учитываются.';
-  const claim=baEl('ba-reward-claim');claim.disabled=_baRewardBusy||!reward?.eligible;claim.textContent=_baRewardBusy?'Получаем бонус…':reward?.claimed?'Бонус уже получен':'Получить бесплатный месяц';
+  baEl('ba-reward-text').textContent=reward?.claimed_elsewhere?'Бесплатный месяц на этот ИНН уже получен в другом аккаунте.':reward?.claimed?`Бонус получен. Подписка до ${new Date(reward.end_date+'T12:00:00').toLocaleDateString('ru-RU')}.`:_baReward?.error?'Не удалось проверить бонус. Нажмите кнопку ниже для повторной проверки.':reward&& !reward.inn_verified?(keys.every(([id])=>reward.lessons?.[id])?'Ключевые уроки выполнены. Для получения бонуса осталось подтвердить ИНН продавца.':'Подтвердите ИНН продавца и выполните ключевые уроки. Кнопка ниже поможет продолжить.') :reward?.eligible?'Ключевые уроки выполнены. Можно получить 30 дней подписки для выбранного заведения.':'Создайте заведение, заполните телефон и часы работы, добавьте первую позицию. Уже настроенные данные тоже учитываются.';
+  const claim=baEl('ba-reward-claim');claim.disabled=_baRewardBusy||!!_baCheck||!known||!!reward?.claimed;
+  claim.textContent=_baRewardBusy||_baCheck?'Проверяем бонус…':reward?.claimed?'Бонус уже получен':_baReward?.error?'Повторить проверку':reward&&!reward.inn_verified?'Подтвердить ИНН и получить месяц':reward&&!reward.eligible?'Пройти ключевые уроки':'Получить бесплатный месяц';
   const select=baEl('ba-store-select'),options=_baState.stores.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
   if(select.innerHTML!==options)select.innerHTML=options;
   select.value=_baState.selected;select.hidden=!known||!_baState.stores.length;baEl('ba-store-label').hidden=select.hidden;
@@ -149,13 +150,30 @@ function businessAcademyRender(){
   });
 }
 async function businessAcademyClaimReward(){
-  const user=S.session?.user?.id,store=baStore();if(!user||!store||_baRewardBusy)return;
+  const user=S.session?.user?.id,store=baStore(),storeId=store?.id||'';if(!user||_baRewardBusy)return;
   _baRewardBusy=true;businessAcademyRender();
   try{
-    const reward=await _reqNet('/rest/v1/rpc/claim_business_academy_reward',{method:'POST',body:JSON.stringify({p_store_id:store.id})});
+    const state=await _reqNet('/rest/v1/rpc/business_academy_reward_status',{method:'POST',body:JSON.stringify({p_store_id:storeId||null})});
+    if(S.session?.user?.id!==user||_baState.selected!==storeId)return;
+    _baReward={user,store:storeId,data:state};
+    if(state.claimed){showAdminToast(state.claimed_elsewhere?'Бесплатный месяц на этот ИНН уже получен.':'Бонус уже получен.');return;}
+    if(!state.inn_verified){
+      const rows=await _reqNet(`/rest/v1/profiles?id=eq.${user}&select=*&limit=1`);
+      if(S.session?.user?.id!==user)return;
+      if(rows?.[0])S.profile=rows[0];
+      openSellerVerify(async()=>{if(S.session?.user?.id!==user)return;goTo('businessacademy');await businessAcademyRefresh();},
+        {nextLabel:'Вернуться в Академию →',pendingText:'ИНН проверяется вручную. Бесплатный месяц станет доступен после подтверждения.'});
+      return;
+    }
+    if(!state.eligible){
+      const next=['store','information','product'].find(id=>!state.lessons?.[id]);
+      if(next)businessAcademyStart(next);else showAdminToast('Повторите проверку условий бонуса.');
+      return;
+    }
+    const reward=await _reqNet('/rest/v1/rpc/claim_business_academy_reward',{method:'POST',body:JSON.stringify({p_store_id:storeId})});
     if(S.session?.user?.id!==user)return;
     _baReward={user,store:store.id,data:reward};await _refreshPaidStores();
-    showAdminToast('Бонус получен. Теперь можно включить онлайн-оплату в настройках заведения.');
+    showAdminToast(reward.claimed_elsewhere?'Бесплатный месяц на этот ИНН уже получен в другом аккаунте.':reward.claimed?'Бонус получен. Теперь можно включить онлайн-оплату в настройках заведения.':'Условия бонуса изменились. Повторите проверку.');
   }catch(e){if(S.session?.user?.id===user)showAdminToast(e.message||'Не удалось получить бонус. Проверьте соединение.');}
   finally{if(S.session?.user?.id===user){_baRewardBusy=false;businessAcademyRender();}}
 }

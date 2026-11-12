@@ -1,6 +1,6 @@
 importScripts('map-cache.js');
-// v30613716829300
-const APP_CACHE  = 'aliby-admin-app-v30613716829300';
+// v89433791166094
+const APP_CACHE  = 'aliby-admin-app-v89433791166094';
 const ACADEMY_ASSETS = ['business-academy.js','business-academy.css','guest-bookings.js'];
 const TILE_CACHE = 'aliby-admin-tiles-v2';
 const TILE_PATH  = '/functions/v1/vector-tiles/';
