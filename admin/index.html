@@ -7,7 +7,7 @@
   var H = location.hostname;
   if (!/(^|\.)alliby\.ru$/.test(H) || /test/.test(H)) return;
   var APP = H.indexOf('admin.') === 0 ? 'admin' : H.indexOf('carry.') === 0 ? 'carry' : 'client';
-  var K = 'sb-errlog-q', KEY = 'sb_publishable_HILQWfLrBvlWcUPz6Atam__5M5vw3nq';
+  var K = 'sb-errlog-q', KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzk0MzkxNjQ1LCJleHAiOjIxMDk3NTE2NDV9.osMCgXpRZ-BxcWSdt5UvwdLzJAMGl9TrJ27G1WMDqHk';
   var BASES = ['https://alliby.ru', 'https://edge.alliby.ru'];
   var origFetch = window.fetch ? window.fetch.bind(window) : null;
   if (!origFetch) return;
@@ -597,7 +597,7 @@ ol.hlp-steps>li ul{margin:6px 0 0}
 @keyframes tourIn{from{opacity:0;transform:translateX(var(--tour-dx,16px))}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#tour,.tour-card,.tour-dot,#tour-spot{transition:none}.tour-body.anim{animation:none}}
 </style>
-<link rel="stylesheet" href="business-academy.css?v=211978281886172">
+<link rel="stylesheet" href="business-academy.css?v=156899424237737">
 <script>try{document.documentElement.classList.toggle('dark',localStorage.getItem('alliby_theme')!=='light');(function(){var bg=localStorage.getItem('alliby_bg')||'fluid';if(bg==='fluid')document.documentElement.classList.add('bg-fluid');if(bg==='custom'){var i=localStorage.getItem('alliby_bg_img');if(i){document.documentElement.classList.add('bg-custom');document.documentElement.style.setProperty('--bg-custom-img','url("'+i+'")')}}if(localStorage.getItem('alliby_ornament')!=='1')document.documentElement.classList.add('no-ornament')})();}catch(e){}</script>
 <style id="pwd-reveal-css">
 .pwd-wrap{position:relative;display:block}
@@ -3477,7 +3477,7 @@ a[style*="color:var(--accent)"]{color:var(--link-c)!important;text-decoration:un
 </div>
 
 <div id="ba-guide" hidden><section id="ba-guide-card" aria-label="Подсказка Академии Business"><header><h3 id="ba-guide-title"></h3><button id="ba-guide-exit" onclick="businessAcademyExit()">Остановить</button></header><p id="ba-guide-text" aria-live="polite"></p><button class="btn btn-p" id="ba-guide-next" onclick="businessAcademyNext()">Далее</button></section></div>
-<script src="business-academy.js?v=211978281886172"></script>
+<script src="business-academy.js?v=156899424237737"></script>
 <script>
 // ─── FATAL ERROR BANNER ───
 // На iPhone нет доступа к консоли без Mac — единственный способ узнать,
@@ -3506,7 +3506,7 @@ const OSM_TILE_URL = _LOCAL ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' :
 const _TEST_TUNNEL = location.hostname === 'test.alliby.ru' || location.hostname === 'app-test.alliby.ru';
 const _APP_ORIGIN = _TEST_TUNNEL ? 'https://app-test.alliby.ru/client/' : 'https://app.alliby.ru/';
 const SB_URL  = _TEST_TUNNEL ? 'https://test.alliby.ru' : (_LOCAL ? 'http://127.0.0.1:54321' : 'https://alliby.ru');
-const SB_ANON = _TEST_TUNNEL ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkxMTIyNTc0LCJleHAiOjIxMDY0ODI1NzR9.X1S7SEEcXmvbiveUycmSJSvwx9JDkrZh379f1vdO-jo' : (_LOCAL ? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' : 'sb_publishable_HILQWfLrBvlWcUPz6Atam__5M5vw3nq');
+const SB_ANON = _TEST_TUNNEL ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzk0MzkxNjQ1LCJleHAiOjIxMDk3NTE2NDV9.wncP9J3hoxFEp5h54Ft8DkAwl2thgWjhBC-EvoSYFs0' : (_LOCAL ? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzk0MzkxNjQ1LCJleHAiOjIxMDk3NTE2NDV9.osMCgXpRZ-BxcWSdt5UvwdLzJAMGl9TrJ27G1WMDqHk');
 // Резервный домен на том же сервере — на случай если провайдер рвёт именно
 // соединение до alliby.ru (см. client/index.html). req() один раз переключится
 // на него при сетевой ошибке и дальше уже сразу ходит туда.

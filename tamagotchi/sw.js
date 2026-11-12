@@ -1,5 +1,5 @@
-// v153776075308882
-const CACHE = 'tamagotchi-v153776075308882';
+// v228070407469103
+const CACHE = 'tamagotchi-v228070407469103';
 const SHELL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png',
   './fonts/fonts.css', './fonts/07-cyrillic.woff2', './fonts/08-latin.woff2',
   './assets/raccoon.svg',
