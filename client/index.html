@@ -7839,7 +7839,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ─── WEB PUSH (PWA) ──────────────────────────────────────────────────────────
-const VAPID_PUBLIC_KEY = 'BFXKlSja26SPz9wPeyK-8T5X3X5tw7YpD9cnWIFcSV3BAoiTPrFJUugSRzqO2jViNetqU-eOBybtuh02I8Cru24';
+const VAPID_PUBLIC_KEY = 'BNnooB6uF7j6UCsLio6H06y4arAFpepiBrrWdB2PcYPDwUrkvVK-Aun7JpizxzDHlS9j3Looa86KqpUMjUa1U68';
 
 let _promoSyncCancelledAt = 0;
 
@@ -14422,7 +14422,7 @@ if ('serviceWorker' in navigator) {
   // ── Проверка версии при каждом запуске/возврате в приложение ──
   // APP_VER подставляется deploy-воркфлоу (метка времени деплоя); тот же номер лежит в version.json.
   // Несовпадение = на устройстве старая версия → обновляем оболочку и перезагружаем.
-  const APP_VER = '145930249601953';
+  const APP_VER = '75797875484128';
   let _pageStart = Date.now();
   let _hiddenAt = 0, _verMismatch = false;
   async function _checkVersion() {
